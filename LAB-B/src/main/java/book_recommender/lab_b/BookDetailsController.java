@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,16 +62,24 @@ public class BookDetailsController implements Initializable {
     @FXML private Text totalStar1, totalStar2, totalStar3, totalStar4, totalStar5;
 
     // Mappa dei colori assegnati a ciascun utente
-    private Map<String, String> userColors = new HashMap<>();
-    private String[] colorPalette = {
+    private final Map<String, String> userColors = new HashMap<>();
+    private final String[] colorPalette = {
             "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c", "#d35400",
             "#27ae60", "#2980b9", "#8e44ad", "#f1c40f", "#16a085", "#2c3e50", "#f39c12",
             "#e67e22", "#95a5a6", "#bdc3c7", "#7f8c8d", "#34495e", "#d5dbdb", "#9a59b6",
             "#f5b041", "#58d68d", "#5dade2", "#f1948a", "#d6eaf8", "#f7b7a3", "#e8daef", "#c39bd3"
     };
 
+    public Button getBackButton() {
+        return backButton;
+    }
+
+    public void setBackButton(Button backButton) {
+        this.backButton = backButton;
+    }
+
     // Struttura per memorizzare recensioni
-    private class Review {
+    private static class Review {
         public String userId;
         public int rating;
         public String comment;
@@ -85,7 +92,7 @@ public class BookDetailsController implements Initializable {
     }
 
     // Struttura per memorizzare i commenti generali
-    private class Comment {
+    private static class Comment {
         public String userId;
         public String text;
 
@@ -96,7 +103,7 @@ public class BookDetailsController implements Initializable {
     }
 
     // Struttura per memorizzare i libri consigliati
-    private class RecommendedBook {
+    private static class RecommendedBook {
         public String userId;
         public String bookTitle;
 
@@ -107,18 +114,18 @@ public class BookDetailsController implements Initializable {
     }
 
     // Liste per memorizzare le recensioni per ogni caratteristica
-    private List<Review> styleReviews = new ArrayList<>();
-    private List<Review> contentReviews = new ArrayList<>();
-    private List<Review> pleasantnessReviews = new ArrayList<>();
-    private List<Review> originalityReviews = new ArrayList<>();
-    private List<Review> editionReviews = new ArrayList<>();
+    private final List<Review> styleReviews = new ArrayList<>();
+    private final List<Review> contentReviews = new ArrayList<>();
+    private final List<Review> pleasantnessReviews = new ArrayList<>();
+    private final List<Review> originalityReviews = new ArrayList<>();
+    private final List<Review> editionReviews = new ArrayList<>();
 
     // Dati del libro corrente
     private Book currentBook;
     private int currentBookId;
 
     // Mappa per memorizzare le valutazioni del libro
-    private Map<String, Double> ratings = new HashMap<>();
+    private final Map<String, Double> ratings = new HashMap<>();
 
     // Numero di utenti che hanno valutato il libro
     private int numRaters = 0;
@@ -289,23 +296,6 @@ public class BookDetailsController implements Initializable {
                         contentReviews.add(new Review(userId, content, generalComment));
                     }
 
-                    if (pleasantnessComment != null && !pleasantnessComment.isEmpty()) {
-                        pleasantnessReviews.add(new Review(userId, pleasantness, pleasantnessComment));
-                    } else if (generalComment != null && !generalComment.isEmpty()) {
-                        pleasantnessReviews.add(new Review(userId, pleasantness, generalComment));
-                    }
-
-                    if (originalityComment != null && !originalityComment.isEmpty()) {
-                        originalityReviews.add(new Review(userId, originality, originalityComment));
-                    } else if (generalComment != null && !generalComment.isEmpty()) {
-                        originalityReviews.add(new Review(userId, originality, generalComment));
-                    }
-
-                    if (editionComment != null && !editionComment.isEmpty()) {
-                        editionReviews.add(new Review(userId, edition, editionComment));
-                    } else if (generalComment != null && !generalComment.isEmpty()) {
-                        editionReviews.add(new Review(userId, edition, generalComment));
-                    }
                 }
 
                 // Se ci sono valutazioni, calcola la media
@@ -374,23 +364,23 @@ public class BookDetailsController implements Initializable {
         // Pulisci i container
         styleReviewsBox.getChildren().clear();
         styleReviewsBox.getChildren().add(new Label("Recensioni sullo Stile"));
-        ((Label) styleReviewsBox.getChildren().get(0)).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        styleReviewsBox.getChildren().getFirst().setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         contentReviewsBox.getChildren().clear();
         contentReviewsBox.getChildren().add(new Label("Recensioni sul Contenuto"));
-        ((Label) contentReviewsBox.getChildren().get(0)).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        contentReviewsBox.getChildren().getFirst().setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         pleasantnessReviewsBox.getChildren().clear();
         pleasantnessReviewsBox.getChildren().add(new Label("Recensioni sulla Gradevolezza"));
-        ((Label) pleasantnessReviewsBox.getChildren().get(0)).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        pleasantnessReviewsBox.getChildren().getFirst().setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         originalityReviewsBox.getChildren().clear();
         originalityReviewsBox.getChildren().add(new Label("Recensioni sull'Originalità"));
-        ((Label) originalityReviewsBox.getChildren().get(0)).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        originalityReviewsBox.getChildren().getFirst().setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         editionReviewsBox.getChildren().clear();
         editionReviewsBox.getChildren().add(new Label("Recensioni sull'Edizione"));
-        ((Label) editionReviewsBox.getChildren().get(0)).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        editionReviewsBox.getChildren().getFirst().setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         // Aggiungi le recensioni per ogni categoria
         addReviewsToContainer(styleReviews, styleReviewsBox);
@@ -625,8 +615,7 @@ public class BookDetailsController implements Initializable {
             }
 
             // Sostituisci l'etichetta delle raccomandazioni con il container
-            if (recommendedBooksLabel.getParent() instanceof VBox) {
-                VBox parent = (VBox) recommendedBooksLabel.getParent();
+            if (recommendedBooksLabel.getParent() instanceof VBox parent) {
                 int index = parent.getChildren().indexOf(recommendedBooksLabel);
                 if (index >= 0) {
                     parent.getChildren().set(index, recommendationsContainer);
@@ -692,8 +681,7 @@ public class BookDetailsController implements Initializable {
             }
 
             // Sostituisci l'etichetta delle raccomandazioni con il container
-            if (recommendedBooksLabel.getParent() instanceof VBox) {
-                VBox parent = (VBox) recommendedBooksLabel.getParent();
+            if (recommendedBooksLabel.getParent() instanceof VBox parent) {
                 int index = parent.getChildren().indexOf(recommendedBooksLabel);
                 if (index >= 0) {
                     parent.getChildren().set(index, similarBooksContainer);

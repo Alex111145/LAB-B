@@ -13,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -68,14 +67,9 @@ public class HomepageController implements Initializable {
 
         // Configura gli handler per l'evento keypress sui campi di ricerca
         setupEnterKeyHandlers();
-
         // Carica i 3 libri più votati nella homepage
-        try {
             loadTopRatedBooks();
-        } catch (Exception e) {
-            System.err.println("Errore durante il caricamento dei libri più votati: " + e.getMessage());
-            e.printStackTrace();
-        }
+
     }
 
     /**
@@ -184,7 +178,7 @@ public class HomepageController implements Initializable {
             }
         } catch (Exception e) {
             System.err.println("Errore nel caricamento dei libri più votati: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -309,7 +303,7 @@ public class HomepageController implements Initializable {
 
         } catch (Exception e) {
             System.err.println("Errore nell'aggiunta del libro al contenitore: " + e.getMessage());
-            e.printStackTrace();
+
 
             // In caso di errore, crea un elemento semplificato
             Label errorLabel = new Label("Errore nel caricamento del libro: " + book.getTitle());
@@ -339,7 +333,7 @@ public class HomepageController implements Initializable {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di login: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -364,7 +358,7 @@ public class HomepageController implements Initializable {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di registrazione: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -373,7 +367,7 @@ public class HomepageController implements Initializable {
      */
     @FXML
     public void onTitleTabClicked(ActionEvent event) {
-        try {
+
             titlePage.setVisible(true);
             authorPage.setVisible(false);
             authorYearPage.setVisible(false);
@@ -383,14 +377,12 @@ public class HomepageController implements Initializable {
             authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
             authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     @FXML
     public void onAuthorTabClicked(ActionEvent event) {
-        try {
+
             titlePage.setVisible(false);
             authorPage.setVisible(true);
             authorYearPage.setVisible(false);
@@ -400,14 +392,12 @@ public class HomepageController implements Initializable {
             authorTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
             authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     @FXML
     public void onAuthorYearTabClicked(ActionEvent event) {
-        try {
+
             titlePage.setVisible(false);
             authorPage.setVisible(false);
             authorYearPage.setVisible(true);
@@ -417,10 +407,7 @@ public class HomepageController implements Initializable {
             authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
             authorYearTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
 
-        } catch (Exception e) {
-            System.err.println("Errore durante il cambio tab: " + e.getMessage());
-            e.printStackTrace();
-        }
+
     }
 
     /**
@@ -428,7 +415,7 @@ public class HomepageController implements Initializable {
      */
     @FXML
     public void cercalibro(ActionEvent event) {
-        try {
+
             // Determina quale tab è attualmente visibile
             if (titlePage != null && titlePage.isVisible()) {
                 // Ricerca per titolo
@@ -465,10 +452,7 @@ public class HomepageController implements Initializable {
                     loadTopRatedBooks();
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Errore durante la ricerca: " + e.getMessage());
-            e.printStackTrace();
-        }
+
     }
 
     /**
@@ -477,7 +461,7 @@ public class HomepageController implements Initializable {
     private void displaySearchResults(List<Book> books, VBox container) {
         if (container == null) return;
 
-        try {
+
             // Pulisci il contenitore
             container.getChildren().clear();
 
@@ -497,32 +481,7 @@ public class HomepageController implements Initializable {
                     addBookToContainer(book, container);
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Errore nella visualizzazione dei risultati: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
-    /**
-     * Gestisce la visualizzazione dei dettagli del libro
-     */
-    @FXML
-    public void visualizzalibro(ActionEvent event) {
-        Button sourceButton = (Button) event.getSource();
-
-        Node parent = sourceButton.getParent();
-        while (parent != null && !(parent instanceof VBox)) {
-            parent = parent.getParent();
-        }
-
-        if (parent != null) {
-            VBox bookCard = (VBox) parent;
-            // La prima label nel bookCard è il titolo del libro
-            Label titleLabel = (Label) ((HBox) bookCard.getChildren().get(0)).getChildren().get(0);
-            String bookTitle = titleLabel.getText();
-
-            navigateToBookDetails(event, bookTitle);
-        }
     }
 
     /**
@@ -550,7 +509,7 @@ public class HomepageController implements Initializable {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di dettaglio del libro: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 }

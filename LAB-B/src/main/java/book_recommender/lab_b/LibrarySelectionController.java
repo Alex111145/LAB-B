@@ -25,11 +25,10 @@ public class LibrarySelectionController {
     @FXML private Label noLibrariesLabel;
     @FXML private Label errorLabel;
     @FXML private Button selectButton;
-    @FXML private Button backButton;
-    @FXML private Button cancelButton;
+
 
     private String userId;
-    private List<String> libraries = new ArrayList<>();
+    private final List<String> libraries = new ArrayList<>();
     private String operationType = "select";
     private DatabaseManager dbManager;
 
@@ -126,14 +125,11 @@ public class LibrarySelectionController {
 
         errorLabel.setVisible(false);
 
-        if ("rate".equals(operationType)) {
-            navigateToBookSelection(event, selectedLibrary, "rate");
-        } else if ("recommend".equals(operationType)) {
-            navigateToBookSelection(event, selectedLibrary, "recommend");
-        } else if ("add".equals(operationType)) {
-            navigateToAddBooks(event, selectedLibrary);
-        } else {
-            navigateToBookSelection(event, selectedLibrary);
+        switch (operationType) {
+            case "rate" -> navigateToBookSelection(event, selectedLibrary, "rate");
+            case "recommend" -> navigateToBookSelection(event, selectedLibrary, "recommend");
+            case "add" -> navigateToAddBooks(event, selectedLibrary);
+            case null, default -> navigateToBookSelection(event, selectedLibrary);
         }
     }
 
@@ -160,7 +156,7 @@ public class LibrarySelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di selezione libro: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -181,7 +177,7 @@ public class LibrarySelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di aggiunta libri: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -212,7 +208,7 @@ public class LibrarySelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }

@@ -38,10 +38,9 @@ public class RecommendBookController {
 
     // Pulsanti
     @FXML private Button saveButton;
-    @FXML private Button removeSelectedButton;
+
     @FXML private Button clearAllButton;
-    @FXML private Button backButton;
-    @FXML private Button cancelButton;
+
 
     // Campi di ricerca
     @FXML private TextField titleSearchField;
@@ -50,9 +49,7 @@ public class RecommendBookController {
     @FXML private TextField yearSearchField;
 
     // Pulsanti di ricerca
-    @FXML private Button titleSearchButton;
-    @FXML private Button authorSearchButton;
-    @FXML private Button authorYearSearchButton;
+
 
     // Contenitori per i risultati della ricerca
     @FXML private VBox titleResultsContainer;
@@ -64,7 +61,7 @@ public class RecommendBookController {
     private String selectedBook;
     private String libraryName;
     private int selectedBookId;
-    private List<String> recommendedBooks = new ArrayList<>();
+    private final List<String> recommendedBooks = new ArrayList<>();
     private List<Book> searchResults = new ArrayList<>();
 
     private DatabaseManager dbManager;
@@ -150,10 +147,10 @@ public class RecommendBookController {
         });
 
         // Modifica la visualizzazione delle celle per mostrare meglio i titoli dei libri
-        recommendedBooksListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+        recommendedBooksListView.setCellFactory(new Callback<>() {
             @Override
             public ListCell<String> call(ListView<String> param) {
-                ListCell<String> cell = new ListCell<String>() {
+                ListCell<String> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -419,7 +416,7 @@ public class RecommendBookController {
         // Aggiungi le etichette al contenitore delle informazioni
         infoBox.getChildren().addAll(titleLabel, authorLabel, detailsLabel);
 
-        // Pulsante per aggiungere o rimuovere il libro
+
         Button actionButton = new Button();
         actionButton.setPrefHeight(40);  // Aumentata l'altezza del pulsante
         actionButton.setPrefWidth(100);  // Impostata una larghezza fissa per il pulsante
@@ -741,7 +738,7 @@ public class RecommendBookController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -770,7 +767,7 @@ public class RecommendBookController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }

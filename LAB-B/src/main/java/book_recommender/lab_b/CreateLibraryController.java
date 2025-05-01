@@ -7,7 +7,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -24,11 +23,8 @@ public class CreateLibraryController implements Initializable {
 
     @FXML private Label userIdLabel;
     @FXML private TextField libraryNameField;
-    @FXML private Label infoLabel;
     @FXML private Label errorLabel;
-    @FXML private Button createButton;
-    @FXML private Button cancelButton;
-    @FXML private Button backButton;
+
 
     private String userId;
     private DatabaseManager dbManager;

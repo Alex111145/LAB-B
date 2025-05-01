@@ -26,12 +26,10 @@ public class BookSelectionController {
     @FXML private Label noBooksLabel;
     @FXML private Label errorLabel;
     @FXML private Button selectButton;
-    @FXML private Button backButton;
-    @FXML private Button cancelButton;
 
     private String userId;
     private String libraryName;
-    private List<String> books = new ArrayList<>();
+    private final List<String> books = new ArrayList<>();
     private String operationType;
     private DatabaseManager dbManager;
 
@@ -159,7 +157,7 @@ public class BookSelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di consiglio libro: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -180,7 +178,7 @@ public class BookSelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della pagina di valutazione libro: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -217,7 +215,7 @@ public class BookSelectionController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }

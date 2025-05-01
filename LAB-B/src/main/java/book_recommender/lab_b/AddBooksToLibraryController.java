@@ -22,7 +22,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 /**
- * Controller per la gestione dell'aggiunta di libri ad una libreria.
+ * Controller per la gestione dell'aggiunta di libri a una libreria.
  * Permette di cercare libri per titolo, autore o autore+anno e aggiungerli alla libreria selezionata.
  */
 public class AddBooksToLibraryController implements Initializable {
@@ -40,13 +40,9 @@ public class AddBooksToLibraryController implements Initializable {
     @FXML private TextField yearSearchField;
 
     // Pulsanti
-    @FXML private Button titleSearchButton;
-    @FXML private Button authorSearchButton;
-    @FXML private Button authorYearSearchButton;
+
     @FXML private Button clearAllButton;
     @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-    @FXML private Button backButton;
 
     // Contenitori per i risultati della ricerca
     @FXML private VBox titleResultsContainer;
@@ -103,10 +99,10 @@ public class AddBooksToLibraryController implements Initializable {
             updateClearAllButtonState();
         });
 
-        selectedBooksListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+        selectedBooksListView.setCellFactory(new Callback<>() { // usiamo <> invece che <String> perche esplicito
             @Override
             public ListCell<String> call(ListView<String> param) {
-                ListCell<String> cell = new ListCell<String>() {
+                ListCell<String> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -469,7 +465,7 @@ public class AddBooksToLibraryController implements Initializable {
     }
 
     private int getOrCreateLibrary(Connection conn, String userId, String libraryName) throws SQLException {
-        // Check if library exists
+        // Check if a library exists
         String selectSql = "SELECT id FROM libraries WHERE user_id = ? AND library_name = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(selectSql)) {
             pstmt.setString(1, userId);
@@ -481,7 +477,7 @@ public class AddBooksToLibraryController implements Initializable {
             }
         }
 
-        // Create new library
+        // Create a new library
         String insertSql = "INSERT INTO libraries (user_id, library_name) VALUES (?, ?) RETURNING id";
         try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
             pstmt.setString(1, userId);

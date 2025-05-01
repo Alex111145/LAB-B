@@ -188,7 +188,7 @@ public class RateBookController implements Initializable {
             }
         } catch (SQLException e) {
             System.err.println("Error checking existing rating: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -259,7 +259,7 @@ public class RateBookController implements Initializable {
             }
         } catch (SQLException e) {
             System.err.println("Error saving rating: " + e.getMessage());
-            e.printStackTrace();
+
             return false;
         }
     }
@@ -279,7 +279,7 @@ public class RateBookController implements Initializable {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
-            e.printStackTrace();
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -436,15 +436,12 @@ public class RateBookController implements Initializable {
                 count++;
             }
 
-            if (count > 0) {
+
                 double average = (double) sum / count;
                 DecimalFormat df = new DecimalFormat("#.#");
                 averageRatingLabel.setText(df.format(average));
 
                 int roundedAverage = (int) Math.round(average);
                 updateStars(averageStar1, averageStar2, averageStar3, averageStar4, averageStar5, roundedAverage);
-            } else {
-                averageRatingLabel.setText("0.0");
-                updateStars(averageStar1, averageStar2, averageStar3, averageStar4, averageStar5, 0);
-            }
+
         }}}

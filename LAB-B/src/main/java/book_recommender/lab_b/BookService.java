@@ -15,31 +15,7 @@ public class BookService {
         }
     }
 
-    public static List<Book> getAllBooks() {
-        List<Book> books = new ArrayList<>();
-        String sql = "SELECT id, title, authors, category, publisher, publish_year FROM books";
 
-        try (Connection conn = dbManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Book book = new Book(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("authors"),
-                        rs.getString("category"),
-                        rs.getString("publisher"),
-                        rs.getInt("publish_year")
-                );
-                books.add(book);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving books: " + e.getMessage());
-        }
-
-        return books;
-    }
 
     public static List<Book> searchBooksByTitle(String title) {
         List<Book> books = new ArrayList<>();
@@ -163,36 +139,5 @@ public class BookService {
         return books;
     }
 
-    public static List<Book> getRandomBooks(int count) {
-        List<Book> books = new ArrayList<>();
-        String sql = "SELECT id, title, authors, category, publisher, publish_year FROM books ORDER BY RANDOM() LIMIT ?";
 
-        try (Connection conn = dbManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, count);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                Book book = new Book(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("authors"),
-                        rs.getString("category"),
-                        rs.getString("publisher"),
-                        rs.getInt("publish_year")
-                );
-                books.add(book);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting random books: " + e.getMessage());
-        }
-
-        return books;
-    }
-
-    public static void loadBooks() {
-        // This method is now empty since books are loaded from database
-        // Kept for compatibility with existing code
-    }
 }

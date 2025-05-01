@@ -6,7 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -30,9 +29,7 @@ public class RegistrationController {
     @FXML private Label emailError;
     @FXML private Label passwordError;
     @FXML private Label successMessage;
-    @FXML private Label welcomeLabel;
-    @FXML private Button registerButton;
-    @FXML private Button backButton;
+
 
     private final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
     private final Pattern CF_PATTERN = Pattern.compile("^[A-Z]{6}\\d{2}[A-Z]\\d{2}[A-Z]\\d{3}[A-Z]$");
@@ -140,7 +137,7 @@ public class RegistrationController {
             stage.show();
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -160,7 +157,7 @@ public class RegistrationController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
-            e.printStackTrace();
+
             successMessage.setText("Errore: " + e.getMessage());
             successMessage.setVisible(true);
         }

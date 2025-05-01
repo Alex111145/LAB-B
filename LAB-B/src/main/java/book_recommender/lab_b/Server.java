@@ -5,16 +5,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.File;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.sql.*;
 
 public class Server extends Application {
 
     private ServerInterfaceController controller;
+    private NgrokManager ngrokManager;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -25,11 +25,19 @@ public class Server extends Application {
         // Get controller reference
         controller = loader.getController();
 
-        // Add shutdown hook for clean server shutdown
+        // Inizializza NgrokManager
+        ngrokManager = new NgrokManager();
+
+        // Aggiungi un hook di shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (controller != null) {
                 controller.cleanupDatabaseAndShutdown();
                 deleteDownloadedFiles();
+
+                // Assicurati di arrestare il tunnel ngrok quando l'applicazione si chiude
+                if (ngrokManager != null) {
+                    ngrokManager.stopTunnel();
+                }
             }
         }));
 
@@ -46,6 +54,11 @@ public class Server extends Application {
             if (controller != null) {
                 controller.cleanupDatabaseAndShutdown();
                 deleteDownloadedFiles();
+
+                // Arresta il tunnel ngrok quando l'utente chiude la finestra
+                if (ngrokManager != null) {
+                    ngrokManager.stopTunnel();
+                }
             }
         });
 
@@ -60,31 +73,26 @@ public class Server extends Application {
      * Delete all downloaded files from temp directory when server shuts down
      */
     private void deleteDownloadedFiles() {
-        try {
-            File tempDir = new File("temp_data");
-            if (tempDir.exists() && tempDir.isDirectory()) {
-                File[] files = tempDir.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        if (file.isFile()) {
-                            boolean deleted = file.delete();
-                            if (!deleted) {
-                                System.err.println("Failed to delete file: " + file.getName());
-                                // Try force delete on exit
-                                file.deleteOnExit();
-                            }
+        File tempDir = new File("temp_data");
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            File[] files = tempDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        boolean deleted = file.delete();
+                        if (!deleted) {
+                            // Try to force to delete it on exit
+                            file.deleteOnExit();
                         }
                     }
                 }
-                // Try to delete the directory itself
-                boolean dirDeleted = tempDir.delete();
-                if (!dirDeleted) {
-                    // If not empty or in use, mark for deletion on exit
-                    tempDir.deleteOnExit();
-                }
             }
-        } catch (Exception e) {
-            System.err.println("Error deleting temp files: " + e.getMessage());
+            // Try to delete the directory itself
+            boolean dirDeleted = tempDir.delete();
+            if (!dirDeleted) {
+                // If not empty or in use, mark for deletion on exit
+                tempDir.deleteOnExit();
+            }
         }
     }
 
@@ -112,7 +120,7 @@ public class Server extends Application {
             boolean reachable = address.isReachable(1000); // 1 second timeout
 
             if (reachable) {
-                try (Connection conn = DriverManager.getConnection(dbUrl, "book_admin", "BookRec2024!")) {
+                try (Connection conn = DriverManager.getConnection(dbUrl, "book_admin_8530", "CPuc#@r-zbKY")) {
                     // Successfully connected, check if tables exist
                     DatabaseMetaData meta = conn.getMetaData();
                     ResultSet tables = meta.getTables(null, null, "users", null);
@@ -129,4 +137,5 @@ public class Server extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }}
+    }
+}

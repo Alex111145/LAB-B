@@ -20,10 +20,8 @@ public class LoginController {
 
     @FXML
     private TextField userIdField;
-
     @FXML
     private PasswordField passwordField;
-
     @FXML
     private Label errorMessage;
 
@@ -90,7 +88,7 @@ public class LoginController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
-            e.printStackTrace();
+
             errorMessage.setText("Errore: " + e.getMessage());
             errorMessage.setVisible(true);
         }
@@ -109,7 +107,7 @@ public class LoginController {
 
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
-            e.printStackTrace();
+
             errorMessage.setText("Errore: " + e.getMessage());
             errorMessage.setVisible(true);
         }

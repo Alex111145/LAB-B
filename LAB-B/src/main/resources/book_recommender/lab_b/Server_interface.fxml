@@ -4,13 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+
 
 <AnchorPane fx:controller="book_recommender.lab_b.ServerInterfaceController" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/17.0.6" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -29,13 +28,13 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                     </padding>
                     <children>
-                        <!-- Database connection settings -->
+                        <!-- Ngrok Settings -->
                         <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 5;">
                             <padding>
                                 <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                             </padding>
                             <children>
-                                <Label text="Database Connection Settings" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                                <Label text="Ngrok Remote Access" style="-fx-font-size: 16px; -fx-font-weight: bold;">
                                     <VBox.margin>
                                         <Insets bottom="5.0" />
                                     </VBox.margin>
@@ -44,31 +43,33 @@
 
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <Label text="Database URL:" prefWidth="120.0" />
-                                        <TextField fx:id="dbUrlField" promptText="jdbc:postgresql://localhost:5432/book_recommender" HBox.hgrow="ALWAYS" text="jdbc:postgresql://localhost:5432/book_recommender" />
+                                        <Label text="Ngrok Status:" prefWidth="120.0" />
+                                        <Label fx:id="ngrokStatusLabel" text="Inactive" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" />
                                     </children>
                                 </HBox>
 
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <Label text="Username:" prefWidth="120.0" />
-                                        <TextField fx:id="dbUserField" promptText="book_admin" HBox.hgrow="ALWAYS" text="book_admin" />
+                                        <Label text="Host Ngrok:" prefWidth="120.0" />
+                                        <TextField fx:id="ngrokHostField" promptText="Ngrok host will appear here" HBox.hgrow="ALWAYS" editable="false" />
                                     </children>
                                 </HBox>
 
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <Label text="Password:" prefWidth="120.0" />
-                                        <TextField fx:id="dbPasswordField" promptText="BookRec2024!" HBox.hgrow="ALWAYS" text="BookRec2024!" />
+                                        <Label text="Porta Ngrok:" prefWidth="120.0" />
+                                        <TextField fx:id="ngrokPortField" promptText="Ngrok port will appear here" HBox.hgrow="ALWAYS" editable="false" />
+                                        <Button mnemonicParsing="false" onAction="#onCopyNgrokInfo" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
                                     </children>
                                 </HBox>
 
-                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <HBox spacing="15.0" alignment="CENTER_LEFT">
                                     <VBox.margin>
-                                        <Insets top="10.0" />
+                                        <Insets top="15.0" />
                                     </VBox.margin>
                                     <children>
-                                        <Label fx:id="dbStatusLabel" text="Database status will appear here" />
+                                        <Button fx:id="startNgrokButton" mnemonicParsing="false" onAction="#onStartNgrok" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 5px;" text="Start Ngrok" />
+                                        <Button fx:id="stopNgrokButton" mnemonicParsing="false" onAction="#onStopNgrok" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 5px;" text="Stop Ngrok" disable="true" />
                                     </children>
                                 </HBox>
                             </children>
@@ -125,40 +126,6 @@
                                     <children>
                                         <Button fx:id="startButton" mnemonicParsing="false" onAction="#onStartServer" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 5px;" text="Start" />
                                         <Button fx:id="stopButton" mnemonicParsing="false" onAction="#onStopServer" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 5px;" text="Stop" disable="true" />
-                                    </children>
-                                </HBox>
-                            </children>
-                        </VBox>
-
-                        <!-- Server Log -->
-                        <VBox spacing="5.0" style="-fx-background-color: white; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
-                            <padding>
-                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                            </padding>
-                            <children>
-                                <Label text="Server Log" style="-fx-font-size: 16px; -fx-font-weight: bold;">
-                                    <VBox.margin>
-                                        <Insets bottom="5.0" />
-                                    </VBox.margin>
-                                </Label>
-                                <Separator />
-
-                                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-                                    <content>
-                                        <VBox fx:id="logContainer" spacing="5.0" style="-fx-background-color: #f9f9f9;">
-                                            <padding>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                            </padding>
-                                        </VBox>
-                                    </content>
-                                </ScrollPane>
-
-                                <HBox spacing="10.0" alignment="CENTER_RIGHT">
-                                    <VBox.margin>
-                                        <Insets top="10.0" />
-                                    </VBox.margin>
-                                    <children>
-                                        <Button mnemonicParsing="false" onAction="#onClearLog" prefHeight="30.0" style="-fx-background-color: #9E9E9E; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Clear Log" />
                                     </children>
                                 </HBox>
                             </children>
