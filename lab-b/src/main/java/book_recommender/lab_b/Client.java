@@ -10,9 +10,7 @@ import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.net.Socket;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,29 +39,21 @@ public class Client extends Application {
     private boolean serverShutdownDetected = false;
 
     // Connessione remota
-    private String serverAddress = "localhost";
     private String dbUrl;
-    private String dbUser;
-    private String dbPassword;
+    private String dbUser = "book_admin_8530"; // Credenziali fisse
+    private String dbPassword = "CPuc#@r-zbKY"; // Credenziali fisse
 
-    // Flag per usare ngrok
-    private boolean useNgrok = false;
+    // Flag per usare ngrok - sempre true
+    private boolean useNgrok = true;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Try to connect to the server first
         try {
-            // Chiedi all'utente se vuole usare una connessione diretta o tramite ngrok
-            if (askConnectionType()) {
-                useNgrok = true;
-            }
+            // Ngrok è sempre attivo
+            useNgrok = true;
 
-            // Try to connect to the server socket (solo se non si usa ngrok)
-            if (!useNgrok) {
-                connectToServer();
-            }
-
-            // Ask for database connection parameters
+            // Ask for database connection parameters (solo ngrok host e porta)
             if (!getDatabaseConnectionParameters()) {
                 showServerErrorAlert(primaryStage, "Errore di connessione",
                         "Parametri di connessione mancanti",
@@ -104,48 +94,17 @@ public class Client extends Application {
 
         // Show window
         primaryStage.show();
-
-        // Start a server listener thread to detect server shutdown (solo per connessione diretta)
-        if (!useNgrok && serverSocket != null && !serverSocket.isClosed()) {
-            startServerListener(primaryStage);
-        }
     }
 
     /**
-     * Chiede all'utente che tipo di connessione usare (diretta o ngrok)
-     * @return true se l'utente sceglie ngrok, false per connessione diretta
-     */
-    private boolean askConnectionType() {
-        // Creiamo un dialog personalizzato per la scelta della connessione
-        Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
-        dialog.setTitle("Tipo di Connessione");
-        dialog.setHeaderText("Seleziona il tipo di connessione");
-        dialog.setContentText("Scegli il tipo di connessione al server:");
-
-        // Aggiungi pulsanti personalizzati
-        ButtonType btnDirect = new ButtonType("Connessione Diretta");
-        ButtonType btnNgrok = new ButtonType("Connessione via Ngrok");
-        dialog.getButtonTypes().setAll(btnDirect, btnNgrok);
-
-        // Mostra il dialog e aspetta che l'utente faccia una scelta
-        Optional<ButtonType> result = dialog.showAndWait();
-        return result.isPresent() && result.get() == btnNgrok;
-    }
-
-    /**
-     * Chiedi all'utente i parametri di connessione al database
+     * Chiedi all'utente i parametri di connessione al database (solo ngrok host e porta)
      * @return true se i parametri sono stati forniti, false altrimenti
      */
     private boolean getDatabaseConnectionParameters() {
         // Creiamo un dialog personalizzato per i parametri di connessione
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Connessione al Database");
-
-        if (useNgrok) {
-            dialog.setHeaderText("Inserisci i parametri di connessione via ngrok");
-        } else {
-            dialog.setHeaderText("Inserisci i parametri di connessione al database");
-        }
+        dialog.setHeaderText("Inserisci i parametri di connessione via ngrok");
 
         // Pulsanti
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -156,133 +115,45 @@ public class Client extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // Campi di ingresso
-        TextField hostField = new TextField(serverAddress);
-        if (useNgrok) {
-            hostField.setPromptText("Hostname ngrok (senza tcp://)");
-        } else {
-            hostField.setPromptText("IP del server o hostname");
-        }
+        // Campi di ingresso - solo host e porta ngrok
+        TextField hostField = new TextField();
+        hostField.setPromptText("Hostname ngrok");
 
-        TextField portField = new TextField(useNgrok ? "" : "5432");
-        portField.setPromptText("Porta" + (useNgrok ? " ngrok" : ""));
+        TextField portField = new TextField();
+        portField.setPromptText("Porta ngrok");
 
-        TextField dbNameField = new TextField("book_recommender");
-        dbNameField.setPromptText("Nome database");
-
-        TextField userField = new TextField("book_reader");
-        userField.setPromptText("Username");
-
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
-        passwordField.setText("reader2024");
-
-        // Aggiungi i campi alla griglia
-        grid.add(new Label("Host" + (useNgrok ? " ngrok" : "") + ":"), 0, 0);
+        // Aggiungi solo i campi per host e porta alla griglia
+        grid.add(new Label("Host ngrok:"), 0, 0);
         grid.add(hostField, 1, 0);
-        grid.add(new Label("Porta" + (useNgrok ? " ngrok" : "") + ":"), 0, 1);
+        grid.add(new Label("Porta ngrok:"), 0, 1);
         grid.add(portField, 1, 1);
-        grid.add(new Label("Database:"), 0, 2);
-        grid.add(dbNameField, 1, 2);
-        grid.add(new Label("Username:"), 0, 3);
-        grid.add(userField, 1, 3);
-        grid.add(new Label("Password:"), 0, 4);
-        grid.add(passwordField, 1, 4);
 
         // Aggiunge la griglia al dialog
         dialog.getDialogPane().setContent(grid);
 
-        // Opzionale: preselezione il primo campo
-        Platform.runLater(hostField::requestFocus);
+        // RIMUOVI QUESTA RIGA:
+        // Platform.runLater(hostField::requestFocus);
 
         // Mostra il dialog e aspetta che l'utente faccia una scelta
         Optional<ButtonType> result = dialog.showAndWait();
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // L'utente ha confermato, procedi con i parametri forniti
             String host = hostField.getText().trim();
             String port = portField.getText().trim();
-            String dbName = dbNameField.getText().trim();
-            dbUser = userField.getText().trim();
-            dbPassword = passwordField.getText();
 
             // Verifica che i parametri non siano vuoti
-            if (host.isEmpty() || port.isEmpty() || dbName.isEmpty() || dbUser.isEmpty()) {
+            if (host.isEmpty() || port.isEmpty()) {
                 return false;
             }
 
-            // Costruisci curl's di connessione JDBC
-            dbUrl = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
+            // Costruisci URL di connessione JDBC
+            dbUrl = "jdbc:postgresql://" + host + ":" + port + "/book_recommender";
+
             return true;
         }
 
         // L'utente ha annullato
         return false;
-    }
-
-    /**
-     * Connect to the server socket
-     */
-    private void connectToServer() throws IOException {
-        // Get the address of the server
-        // This will work both on the same machine and across networks
-        serverAddress = "localhost"; // Default to localhost
-
-        try {
-            serverSocket = new Socket(serverAddress, 8888);
-        } catch (IOException e) {
-            // If local connection fails, try asking the user for the server address using the JavaFX dialog
-
-            // Create a TextInputDialog
-            TextInputDialog dialog = new TextInputDialog("192.168.1.1");
-            dialog.setTitle("Server Connection");
-            dialog.setHeaderText("Server not found on localhost");
-            dialog.setContentText("Enter the IP address of the server:");
-
-            // Traditional JavaFX way to get the response value
-            Optional<String> result = dialog.showAndWait();
-
-                serverAddress = result.get();
-
-                serverSocket = new Socket(serverAddress, 8888);
-
-        }
-    }
-
-    /**
-     * Start a thread to listen for server shutdown messages
-     */
-    private void startServerListener(Stage primaryStage) {
-        Thread listener = new Thread(() -> {
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
-                String message;
-
-                while (!serverShutdownDetected && (message = in.readLine()) != null) {
-                    if ("SERVER_SHUTDOWN".equals(message)) {
-                        serverShutdownDetected = true;
-
-                        // Show alert on JavaFX thread
-                        Platform.runLater(() -> {
-                            showServerShutdownAlert(primaryStage);
-                        });
-
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                // If there's a connection error, also show the server shutdown alert
-                if (!serverShutdownDetected) {
-                    serverShutdownDetected = true;
-                    Platform.runLater(() -> {
-                        showServerShutdownAlert(primaryStage);
-                    });
-                }
-            }
-        });
-
-        listener.setDaemon(true);
-        listener.start();
     }
 
     /**
@@ -330,7 +201,7 @@ public class Client extends Application {
 
         } catch (Exception e) {
             System.err.println("Errore durante la registrazione del client: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 

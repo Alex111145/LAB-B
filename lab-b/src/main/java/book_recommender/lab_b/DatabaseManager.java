@@ -18,17 +18,12 @@ public class DatabaseManager {
     // Connection strings - these will be updated at runtime for remote connections
     private static String DB_URL = "jdbc:postgresql://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/" + DEFAULT_DB_NAME;
 
-    // User credentials will be generated dynamically or loaded from saved settings
-    private static String DB_USER = "postgres"; // Fallback default
-    private static String DB_PASSWORD = "postgres"; // Fallback default
-
-    // File to store credentials
-    private static final String CREDENTIALS_FILE = "db_credentials.properties";
+    // User credentials - fixed values
+    private static String DB_USER = "book_admin_8530";
+    private static String DB_PASSWORD = "CPuc#@r-zbKY";
 
     private static DatabaseManager instance;
     private Connection connection;
-
-
 
     /**
      * Private constructor standard
@@ -66,9 +61,6 @@ public class DatabaseManager {
      * @throws SQLException if a database access error occurs
      */
     private void initializeLocalConnection() throws SQLException {
-        // Try to load or create credentials
-        loadOrCreateCredentials();
-
         try {
             // Try to connect directly to the database PostgreSQL
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
@@ -147,8 +139,8 @@ public class DatabaseManager {
     /**
      * Creates a remote instance with specific connection parameters
      * @param jdbcUrl The full JDBC URL for connecting to the database
-     * @param username The username for the database connection
-     * @param password The password for the database connection
+     * @param username The username for the database connection (fixed to book_admin_8530)
+     * @param password The password for the database connection (fixed to CPuc#@r-zbKY)
      * @return A DatabaseManager instance configured for a remote connection
      * @throws SQLException if a database access error occurs
      */
@@ -161,6 +153,7 @@ public class DatabaseManager {
 
         // Set the connection parameters
         DB_URL = jdbcUrl;
+        // We still use the parameters passed, even though they should be the fixed values
         DB_USER = username;
         DB_PASSWORD = password;
 
@@ -209,58 +202,6 @@ public class DatabaseManager {
             }
         }
     }
-
-    /**
-     * Loads existing credentials from a file or creates new ones
-     */
-    private void loadOrCreateCredentials() {
-        java.util.Properties props = new java.util.Properties();
-        java.io.File credFile = new java.io.File(CREDENTIALS_FILE);
-
-        if (credFile.exists()) {
-            try (java.io.FileInputStream fis = new java.io.FileInputStream(credFile)) {
-                props.load(fis);
-                DB_USER = props.getProperty("user", "book_admin");
-                DB_PASSWORD = props.getProperty("password", "BookRec2024!");
-                System.out.println("Loaded existing credentials for user: " + DB_USER);
-            } catch (java.io.IOException e) {
-                System.err.println("Error loading credentials file: " + e.getMessage());
-                generateNewCredentials();
-            }
-        } else {
-            generateNewCredentials();
-        }
-    }
-
-    /**
-     * Generates new random credentials and saves them to file
-     */
-    private void generateNewCredentials() {
-        // Generate a username based on book_admin + random number
-        Random rand = new Random();
-        DB_USER = "book_admin_" + (1000 + rand.nextInt(9000)); // 4-digit number
-
-        // Generate a random strong password
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=";
-        StringBuilder password = new StringBuilder();
-        for (int i = 0; i < 12; i++) {
-            password.append(chars.charAt(rand.nextInt(chars.length())));
-        }
-        DB_PASSWORD = password.toString();
-
-        // Save the credentials to a file
-        java.util.Properties props = new java.util.Properties();
-        props.setProperty("user", DB_USER);
-        props.setProperty("password", DB_PASSWORD);
-
-        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(CREDENTIALS_FILE)) {
-            props.store(fos, "Database credentials");
-            System.out.println("Generated and saved new credentials for user: " + DB_USER);
-        } catch (java.io.IOException e) {
-            System.err.println("Error saving credentials file: " + e.getMessage());
-        }
-    }
-
 
     /**
      * Updates the connected client count in the database.
@@ -390,16 +331,10 @@ public class DatabaseManager {
         return DB_PASSWORD;
     }
 
-
-
-
-
     /**
      * Returns the default port used for database connections
      */
     public static String getDefaultPort() {
         return DEFAULT_PORT;
     }
-
-
 }

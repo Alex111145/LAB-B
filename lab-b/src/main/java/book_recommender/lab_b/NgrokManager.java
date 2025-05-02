@@ -55,14 +55,10 @@ public class NgrokManager {
             return tunnelActive;
         } catch (Exception e) {
             System.err.println("Errore nell'avvio di ngrok: " + e.getMessage());
-
             return false;
         }
     }
 
-    /**
-     * Crea la cartella per contenere ngrok
-     */
     /**
      * Crea la cartella per contenere ngrok e imposta i permessi appropriati
      */
@@ -71,7 +67,6 @@ public class NgrokManager {
         if (!folder.exists()) {
             boolean created = folder.mkdir();
             if (created) {
-
                 // Imposta i permessi appropriati sulla cartella
                 try {
                     if (!System.getProperty("os.name").toLowerCase().contains("win")) {
@@ -79,7 +74,10 @@ public class NgrokManager {
                         Runtime.getRuntime().exec("chmod 755 " + NGROK_FOLDER);
                     }
                 } catch (IOException e) {
-               }}}
+                    // Ignora eventuali errori con i permessi
+                }
+            }
+        }
     }
 
     /**
@@ -112,7 +110,7 @@ public class NgrokManager {
      * @throws IOException in caso di errori durante il download o l'installazione
      */
     private void downloadAndInstallNgrok() throws IOException {
-      // Determina l'URL di download in base al sistema operativo e all'architettura
+        // Determina l'URL di download in base al sistema operativo e all'architettura
         String downloadUrl = getNgrokDownloadUrl();
 
         // Scarica il file zip di ngrok
@@ -279,7 +277,7 @@ public class NgrokManager {
         }
 
         tunnelActive = true;
- }
+    }
 
     /**
      * Ottiene l'URL pubblico generato da ngrok
@@ -318,7 +316,7 @@ public class NgrokManager {
         if (matcher1.find()) {
             publicUrl = matcher1.group(1);
             publicPort = Integer.parseInt(matcher1.group(2));
-          return;
+            return;
         }
 
         // Pattern alternativo per il formato: "public_url":"tcp://0.tcp.eu.ngrok.io:12345"
@@ -328,7 +326,7 @@ public class NgrokManager {
         if (matcher2.find()) {
             publicUrl = matcher2.group(1);
             publicPort = Integer.parseInt(matcher2.group(2));
-         return;
+            return;
         }
 
         // Tentativo generico di trovare qualsiasi URL ngrok
@@ -338,11 +336,12 @@ public class NgrokManager {
         if (matcher3.find()) {
             publicUrl = matcher3.group(1);
             publicPort = Integer.parseInt(matcher3.group(2));
-           return;
+            return;
         }
 
         throw new IOException("Impossibile trovare l'URL pubblico nella risposta di ngrok: " + jsonResponse);
     }
+
     /**
      * Arresta il tunnel ngrok
      */
@@ -358,12 +357,12 @@ public class NgrokManager {
                 Thread.currentThread().interrupt();
             }
             tunnelActive = false;
-       }
+        }
     }
 
     /**
-     * Ottiene l'URL pubblico per la connessione remota
-     * @return l'URL pubblico o null se il tunnel non è attivo
+     * Ottiene l'host pubblico per la connessione remota (senza il protocollo 'tcp://')
+     * @return l'host pubblico o null se il tunnel non è attivo
      */
     public String getPublicUrl() {
         if (tunnelActive) {

@@ -28,7 +28,7 @@ public class Server extends Application {
         // Inizializza NgrokManager
         ngrokManager = new NgrokManager();
 
-
+        // Aggiungi un hook di shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (controller != null) {
                 controller.cleanupDatabaseAndShutdown();
@@ -73,29 +73,27 @@ public class Server extends Application {
      * Delete all downloaded files from temp directory when server shuts down
      */
     private void deleteDownloadedFiles() {
-
-            File tempDir = new File("temp_data");
-            if (tempDir.exists() && tempDir.isDirectory()) {
-                File[] files = tempDir.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        if (file.isFile()) {
-                            boolean deleted = file.delete();
-                            if (!deleted) {
-                         // Try to force to delete it on exit
-                                file.deleteOnExit();
-                            }
+        File tempDir = new File("temp_data");
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            File[] files = tempDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        boolean deleted = file.delete();
+                        if (!deleted) {
+                            // Try to force to delete it on exit
+                            file.deleteOnExit();
                         }
                     }
                 }
-                // Try to delete the directory itself
-                boolean dirDeleted = tempDir.delete();
-                if (!dirDeleted) {
-                    // If not empty or in use, mark for deletion on exit
-                    tempDir.deleteOnExit();
-                }
             }
-
+            // Try to delete the directory itself
+            boolean dirDeleted = tempDir.delete();
+            if (!dirDeleted) {
+                // If not empty or in use, mark for deletion on exit
+                tempDir.deleteOnExit();
+            }
+        }
     }
 
     /**
@@ -122,7 +120,7 @@ public class Server extends Application {
             boolean reachable = address.isReachable(1000); // 1 second timeout
 
             if (reachable) {
-                try (Connection conn = DriverManager.getConnection(dbUrl, "book_admin", "BookRec2024!")) {
+                try (Connection conn = DriverManager.getConnection(dbUrl, "book_admin_8530", "CPuc#@r-zbKY")) {
                     // Successfully connected, check if tables exist
                     DatabaseMetaData meta = conn.getMetaData();
                     ResultSet tables = meta.getTables(null, null, "users", null);
@@ -136,7 +134,6 @@ public class Server extends Application {
             return false; // Host not reachable
         }
     }
-
 
     public static void main(String[] args) {
         launch(args);
