@@ -188,7 +188,6 @@ public class RateBookController implements Initializable {
             }
         } catch (SQLException e) {
             System.err.println("Error checking existing rating: " + e.getMessage());
-
         }
     }
 
@@ -217,6 +216,20 @@ public class RateBookController implements Initializable {
 
             // Mostra il messaggio di errore
             errorLabel.setText("Errore: Devi assegnare un voto a tutte le caratteristiche prima di inviare.");
+            errorLabel.setVisible(true);
+            return;
+        }
+
+        // Verifica che tutti i campi di commento siano stati compilati
+        if (styleCommentArea.getText().trim().isEmpty() ||
+                contentCommentArea.getText().trim().isEmpty() ||
+                pleasantnessCommentArea.getText().trim().isEmpty() ||
+                originalityCommentArea.getText().trim().isEmpty() ||
+                editionCommentArea.getText().trim().isEmpty() ||
+                finalCommentArea.getText().trim().isEmpty()) {
+
+            // Mostra il messaggio di errore per commenti mancanti
+            errorLabel.setText("Errore: Devi valutare e commentare ogni caratteristica prima di inviare.");
             errorLabel.setVisible(true);
             return;
         }
@@ -262,19 +275,18 @@ public class RateBookController implements Initializable {
                 pstmt.setInt(5, pleasantnessRating);
                 pstmt.setInt(6, originalityRating);
                 pstmt.setInt(7, editionRating);
-                pstmt.setString(8, finalCommentArea.getText());
-                pstmt.setString(9, styleCommentArea.getText());
-                pstmt.setString(10, contentCommentArea.getText());
-                pstmt.setString(11, pleasantnessCommentArea.getText());
-                pstmt.setString(12, originalityCommentArea.getText());
-                pstmt.setString(13, editionCommentArea.getText());
+                pstmt.setString(8, finalCommentArea.getText().trim());
+                pstmt.setString(9, styleCommentArea.getText().trim());
+                pstmt.setString(10, contentCommentArea.getText().trim());
+                pstmt.setString(11, pleasantnessCommentArea.getText().trim());
+                pstmt.setString(12, originalityCommentArea.getText().trim());
+                pstmt.setString(13, editionCommentArea.getText().trim());
 
                 pstmt.executeUpdate();
                 return true;
             }
         } catch (SQLException e) {
             System.err.println("Error saving rating: " + e.getMessage());
-
             return false;
         }
     }
@@ -300,8 +312,6 @@ public class RateBookController implements Initializable {
         }
     }
 
-    // Tutti gli altri metodi per la gestione delle stelle rimangono invariati...
-
     @FXML
     private void handleStyleStarClick(MouseEvent event) {
         StackPane source = (StackPane) event.getSource();
@@ -320,22 +330,24 @@ public class RateBookController implements Initializable {
 
         updateStars(styleStar1, styleStar2, styleStar3, styleStar4, styleStar5, styleRating);
         updateAverageRating();
-    }@FXML
+    }
+
+    @FXML
     public void handleCancel(ActionEvent event) {
         try {
-            // Torna alla schermata di selezione del libro
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionalib.fxml"));
+            // Torna alla schermata di selezione libro
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionaLibro.fxml"));
             Parent root = loader.load();
 
-            LibrarySelectionController controller = loader.getController();
-            controller.setUserId(userId, "rate");
+            BookSelectionController controller = loader.getController();
+            controller.setData(userId, libraryName, "rate");
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
+            System.err.println("Errore nel caricamento della schermata di selezione libro: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -471,12 +483,14 @@ public class RateBookController implements Initializable {
                 count++;
             }
 
-
+            if (count > 0) {
                 double average = (double) sum / count;
                 DecimalFormat df = new DecimalFormat("#.#");
                 averageRatingLabel.setText(df.format(average));
 
                 int roundedAverage = (int) Math.round(average);
                 updateStars(averageStar1, averageStar2, averageStar3, averageStar4, averageStar5, roundedAverage);
-
-        }}}
+            }
+        }
+    }
+}

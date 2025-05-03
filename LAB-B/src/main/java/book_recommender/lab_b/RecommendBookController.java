@@ -713,9 +713,24 @@ public class RecommendBookController {
      */
     @FXML
     public void handleCancel(ActionEvent event) {
-        navigateToLibrarySelection(event);
-    }
+        try {
+            // Torna alla schermata di selezione libro
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionaLibro.fxml"));
+            Parent root = loader.load();
 
+            BookSelectionController controller = loader.getController();
+            controller.setData(userId, libraryName, "recommend");
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Errore nel caricamento della schermata di selezione libro: " + e.getMessage());
+            errorLabel.setText("Errore: " + e.getMessage());
+            errorLabel.setVisible(true);
+        }
+    }
     /**
      * Naviga alla schermata di selezione della libreria.
      */

@@ -222,7 +222,6 @@ public class BookDetailsController implements Initializable {
 
         return null;
     }
-
     private void loadRatingsAndReviews(int bookId) {
         // Inizializza le valutazioni con valori predefiniti
         ratings.put("style", 0.0);
@@ -284,18 +283,40 @@ public class BookDetailsController implements Initializable {
                     String originalityComment = rs.getString("originality_comment");
                     String editionComment = rs.getString("edition_comment");
 
+                    // Aggiungi recensioni per lo stile
                     if (styleComment != null && !styleComment.isEmpty()) {
                         styleReviews.add(new Review(userId, style, styleComment));
                     } else if (generalComment != null && !generalComment.isEmpty()) {
                         styleReviews.add(new Review(userId, style, generalComment));
                     }
 
+                    // Aggiungi recensioni per il contenuto
                     if (contentComment != null && !contentComment.isEmpty()) {
                         contentReviews.add(new Review(userId, content, contentComment));
                     } else if (generalComment != null && !generalComment.isEmpty()) {
                         contentReviews.add(new Review(userId, content, generalComment));
                     }
 
+                    // Aggiungi recensioni per la gradevolezza
+                    if (pleasantnessComment != null && !pleasantnessComment.isEmpty()) {
+                        pleasantnessReviews.add(new Review(userId, pleasantness, pleasantnessComment));
+                    } else if (generalComment != null && !generalComment.isEmpty()) {
+                        pleasantnessReviews.add(new Review(userId, pleasantness, generalComment));
+                    }
+
+                    // Aggiungi recensioni per l'originalità
+                    if (originalityComment != null && !originalityComment.isEmpty()) {
+                        originalityReviews.add(new Review(userId, originality, originalityComment));
+                    } else if (generalComment != null && !generalComment.isEmpty()) {
+                        originalityReviews.add(new Review(userId, originality, generalComment));
+                    }
+
+                    // Aggiungi recensioni per l'edizione
+                    if (editionComment != null && !editionComment.isEmpty()) {
+                        editionReviews.add(new Review(userId, edition, editionComment));
+                    } else if (generalComment != null && !generalComment.isEmpty()) {
+                        editionReviews.add(new Review(userId, edition, generalComment));
+                    }
                 }
 
                 // Se ci sono valutazioni, calcola la media
@@ -471,17 +492,12 @@ public class BookDetailsController implements Initializable {
         // Aggiungi l'intestazione
         Label headerLabel = new Label();
         headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        headerLabel.setText("Commento generale");
+        headerLabel.setText("Recenzione generale");
         commentsContainer.getChildren().add(headerLabel);
 
         // Aggiungi il sommario delle valutazioni
         Label summaryLabel = new Label();
-        if (numRaters > 0) {
-            double totalRating = ratings.get("total");
-            summaryLabel.setText("Questo libro ha una valutazione media di " + totalRating + " stelle basata su " + numRaters + " valutazioni.");
-        } else {
-            summaryLabel.setText("Questo libro non ha ancora ricevuto valutazioni.");
-        }
+
         summaryLabel.setWrapText(true);
         commentsContainer.getChildren().add(summaryLabel);
 

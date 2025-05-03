@@ -60,6 +60,7 @@ public class AddBooksToLibraryController implements Initializable {
 
     private DatabaseManager dbManager;
 
+
     /**
      * Inizializza il controller.
      */
@@ -85,8 +86,10 @@ public class AddBooksToLibraryController implements Initializable {
 
         // Aggiorna lo stato del bottone clearAllButton
         updateClearAllButtonState();
-    }
 
+        // Imposta il colore rosso per il pulsante "Cancella Tutti"
+        clearAllButton.setStyle("-fx-background-color: #ff4136; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;");
+    }
     private void updateClearAllButtonState() {
         boolean hasSelectedBooks = !selectedBooks.isEmpty();
         clearAllButton.setDisable(!hasSelectedBooks);
@@ -162,21 +165,8 @@ public class AddBooksToLibraryController implements Initializable {
     @FXML
     public void handleSave(ActionEvent event) {
         if (selectedBooks.isEmpty()) {
-            Alert alert = new Alert(AlertType.WARNING);
-            alert.setTitle("Conferma cancellazione");
-            alert.setHeaderText("Attenzione");
-            alert.setContentText("Non ci sono libri selezionati. La libreria verrà eliminata. Vuoi procedere?");
-
-            ButtonType buttonTypeYes = new ButtonType("Sì");
-            ButtonType buttonTypeNo = new ButtonType("No");
-
-            alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo);
-
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == buttonTypeYes) {
-                deleteLibraryAndRelatedData();
-                navigateToUserMenuWithMessage(event, "Libreria '" + libraryName + "' eliminata con successo!");
-            }
+            errorLabel.setText("Errore: Devi aggiungere almeno un libro.");
+            errorLabel.setVisible(true);
             return;
         }
 
@@ -184,6 +174,7 @@ public class AddBooksToLibraryController implements Initializable {
         saveLibraryToDatabase();
         navigateToUserMenuWithMessage(event, "");
     }
+
 
     private void deleteLibraryAndRelatedData() {
         try (Connection conn = dbManager.getConnection()) {
