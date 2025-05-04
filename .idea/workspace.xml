@@ -5,19 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a88dcd98-1f11-493f-9df8-71ae8211658e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/laaab/Autori.txt" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/Autori.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/README.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/db_credentials.properties" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/db_credentials.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/doc/Manuale Utente.docx" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/doc/Manuale Utente.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/lab-b/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/ConsigliLibri.dati.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/Data.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/Librerie.dati.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/Libri.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/UtentiRegistrati.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laaab/temp_data/ValutazioniLibri.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/lab-b/Autori.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/lab-b/README.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/lab-b/db_credentials.properties" beforeDir="false" />
@@ -112,18 +99,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Alex111145"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Alex111145&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Alex111145/LAB-B.git",
-    "accountId": "2f3dad3a-bfeb-4c30-bf63-c11d91c62706"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Alex111145/LAB-B.git&quot;,
+    &quot;accountId&quot;: &quot;2f3dad3a-bfeb-4c30-bf63-c11d91c62706&quot;
   }
-}]]></component>
+}</component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -140,6 +127,7 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "/Users/alessio/Desktop/lab b git  fra porca troia",
@@ -168,6 +156,7 @@
       <updated>1748003759177</updated>
       <workItem from="1748003760603" duration="122000" />
       <workItem from="1748003943735" duration="1034000" />
+      <workItem from="1748005045144" duration="357000" />
     </task>
     <servers />
   </component>

@@ -446,7 +446,7 @@ public class ServerInterfaceController {
      * Starts a thread to periodically update the connected client count
      */
     private void startClientCountMonitoring() {
-        // Scheduler to update the client count every 3 seconds
+        // Scheduler to update the client count every 2 seconds
         ScheduledExecutorService clientMonitor = Executors.newScheduledThreadPool(1);
         clientMonitor.scheduleAtFixedRate(() -> {
             if (!serverRunning) {
@@ -459,18 +459,17 @@ public class ServerInterfaceController {
                 DatabaseManager dbManager = DatabaseManager.getInstance();
                 int count = dbManager.getConnectedClientCount();
 
-
                 // Update UI
                 Platform.runLater(() -> {
                     clientCountLabel.setText(String.valueOf(count));
+                    addLogMessage("Updated client count: " + count, LogType.INFO);
                 });
             } catch (SQLException e) {
                 // Log error but continue trying
                 addLogMessage("Error updating client count: " + e.getMessage(), LogType.ERROR);
             }
-        }, 0, 3, TimeUnit.SECONDS);
+        }, 0, 2, TimeUnit.SECONDS);
     }
-
 
     @FXML
 
@@ -544,22 +543,36 @@ public class ServerInterfaceController {
                 updateProgress(0.7, "Importing data...");
                 populateDatabase(dbUrl, finalDbUser, finalDbPassword);
 
-                // Step 7: Complete
+                // Step 6: Create active_clients table for client tracking
+                updateProgress(0.8, "Setting up client tracking...");
+                try (Connection conn = dbManager.getConnection();
+                     Statement stmt = conn.createStatement()) {
+                    stmt.execute(
+                            "CREATE TABLE IF NOT EXISTS active_clients (" +
+                                    "    client_id VARCHAR(50) PRIMARY KEY," +
+                                    "    connect_time TIMESTAMP NOT NULL" +
+                                    ")"
+                    );
+                    addLogMessage("Client tracking table created successfully", LogType.SUCCESS);
+                } catch (SQLException e) {
+                    addLogMessage("Error creating client tracking table: " + e.getMessage(), LogType.ERROR);
+                    // Continue anyway, as this is not critical
+                }
+
+                // Step 7: Start client count monitoring
+                updateProgress(0.85, "Starting client monitoring...");
+                startClientCountMonitoring();
+                addLogMessage("Client monitoring started", LogType.SUCCESS);
+
+                // Step 8: Start Ngrok automatically
+                updateProgress(0.9, "Starting ngrok tunnel...");
+                startNgrokAutomatically();
+
+                // Complete
                 updateProgress(1.0, "Server started successfully!");
                 Platform.runLater(() -> {
                     serverStatusLabel.setText("Running");
                     serverStatusLabel.setTextFill(Color.GREEN);
-
-                    // Final step: Start Ngrok automatically
-                    updateProgress(0.9, "Avvio tunnel ngrok...");
-                    startNgrokAutomatically();
-
-                    // Complete
-                    updateProgress(1.0, "Server avviato con successo!");
-                    Platform.runLater(() -> {
-                        serverStatusLabel.setText("Running");
-                        serverStatusLabel.setTextFill(Color.GREEN);
-                    });
                 });
             } catch (Exception e) {
                 throw new RuntimeException("Database initialization failed", e);
@@ -579,7 +592,6 @@ public class ServerInterfaceController {
             });
         }
     }
-
 
     private void startNgrokAutomatically() {
         // Get the PostgreSQL port

@@ -191,17 +191,25 @@ public class Client extends Application {
     /**
      * Register client connection or disconnection in the database
      */
+    /**
+     * Register client connection or disconnection in the database
+     */
     private void registerClientConnection(boolean isConnecting) {
         try {
             // Create a shorter client ID (just UUID, without hostname and IP)
-            String clientIdShort = clientId.substring(0, 32); // Take only UUID
+            String clientIdShort = clientId.substring(0, 8); // Use a shorter ID for better readability
 
             // Update active_clients table in database
-            dbManager.updateClientConnection(clientIdShort, isConnecting);
-
+            if (dbManager != null) {
+                dbManager.updateClientConnection(clientIdShort, isConnecting);
+                System.out.println("Client " + (isConnecting ? "registered" : "unregistered") +
+                        " with ID: " + clientIdShort);
+            } else {
+                System.err.println("Database manager is null, cannot register client");
+            }
         } catch (Exception e) {
-            System.err.println("Errore durante la registrazione del client: " + e.getMessage());
-
+            System.err.println("Error registering client connection: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

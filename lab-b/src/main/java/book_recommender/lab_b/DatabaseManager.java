@@ -211,6 +211,14 @@ public class DatabaseManager {
      * @param isConnecting true if a client is connecting, false if disconnecting
      * @throws SQLException if database error occurs
      */
+    /**
+     * Updates the connected client count in the database.
+     * This creates a table to track client connections if it doesn't exist.
+     *
+     * @param clientId A unique identifier for the client
+     * @param isConnecting true if a client is connecting, false if disconnecting
+     * @throws SQLException if database error occurs
+     */
     public void updateClientConnection(String clientId, boolean isConnecting) throws SQLException {
         Connection conn = getConnection();
 
@@ -222,6 +230,9 @@ public class DatabaseManager {
                             "    connect_time TIMESTAMP NOT NULL" +
                             ")"
             );
+        } catch (SQLException e) {
+            System.err.println("Error creating active_clients table: " + e.getMessage());
+            // Continue anyway, as the table might already exist
         }
 
         if (isConnecting) {
@@ -230,18 +241,19 @@ public class DatabaseManager {
                     "INSERT INTO active_clients (client_id, connect_time) VALUES (?, NOW()) " +
                             "ON CONFLICT (client_id) DO UPDATE SET connect_time = NOW()")) {
                 pstmt.setString(1, clientId);
-                pstmt.executeUpdate();
+                int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Client registered: " + clientId + ", rows affected: " + rowsAffected);
             }
         } else {
             // Remove client from active_clients table
             try (PreparedStatement pstmt = conn.prepareStatement(
                     "DELETE FROM active_clients WHERE client_id = ?")) {
                 pstmt.setString(1, clientId);
-                pstmt.executeUpdate();
+                int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Client unregistered: " + clientId + ", rows affected: " + rowsAffected);
             }
         }
     }
-
     /**
      * Gets the current count of connected clients
      *

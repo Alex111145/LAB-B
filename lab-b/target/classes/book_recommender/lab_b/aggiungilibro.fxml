@@ -73,11 +73,7 @@
                                                 <!-- Tab ricerca per titolo -->
                                                 <Tab style="-fx-background-color: lightgreen; -fx-background-radius: 8px 8px 0 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Titolo">
                                                     <graphic>
-                                                        <HBox alignment="CENTER" spacing="5.0">
-                                                            <children>
-                                                                <Label style="-fx-font-size: 16px;" text="📚" />
-                                                            </children>
-                                                        </HBox>
+                                                        <HBox alignment="CENTER" spacing="5.0" />
                                                     </graphic>
                                                     <content>
                                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -121,11 +117,7 @@
                                                 <!-- Tab ricerca per autore -->
                                                 <Tab style="-fx-background-color: lightgrey; -fx-background-radius: 8px 8px 0 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Autore">
                                                     <graphic>
-                                                        <HBox alignment="CENTER" spacing="5.0">
-                                                            <children>
-                                                                <Label style="-fx-font-size: 34px;" text="✍️" />
-                                                            </children>
-                                                        </HBox>
+                                                        <HBox alignment="CENTER" spacing="5.0" />
                                                     </graphic>
                                                     <content>
                                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -169,11 +161,7 @@
                                                 <!-- Tab ricerca per autore e anno -->
                                                 <Tab style="-fx-background-color: skyblue; -fx-background-radius: 8px 8px 0 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Autore e Anno">
                                                     <graphic>
-                                                        <HBox alignment="CENTER" spacing="5.0">
-                                                            <children>
-                                                                <Label style="-fx-font-size: 16px;" text="📅" />
-                                                            </children>
-                                                        </HBox>
+                                                        <HBox alignment="CENTER" spacing="5.0" />
                                                     </graphic>
                                                     <content>
                                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
