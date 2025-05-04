@@ -192,7 +192,22 @@ public class RateBookController implements Initializable {
         }
     }
 
-    // Altri metodi rimangono invariati...
+    @FXML
+    public void handleBack(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/homepage.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     private void handleSubmit(ActionEvent event) {
@@ -305,6 +320,26 @@ public class RateBookController implements Initializable {
 
         updateStars(styleStar1, styleStar2, styleStar3, styleStar4, styleStar5, styleRating);
         updateAverageRating();
+    }@FXML
+    public void handleCancel(ActionEvent event) {
+        try {
+            // Torna alla schermata di selezione del libro
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionalib.fxml"));
+            Parent root = loader.load();
+
+            LibrarySelectionController controller = loader.getController();
+            controller.setUserId(userId, "rate");
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
+            e.printStackTrace();
+            errorLabel.setText("Errore: " + e.getMessage());
+            errorLabel.setVisible(true);
+        }
     }
 
     @FXML

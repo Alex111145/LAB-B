@@ -92,7 +92,37 @@ public class ServerInterfaceController {
     private ScheduledExecutorService scheduler;
     private final AtomicInteger connectedClients = new AtomicInteger(0);
     private boolean serverRunning = false;
+// Modifica in ServerInterfaceController.java
 
+    @FXML
+    public void onCopyNgrokHost(ActionEvent event) {
+        // Copia solo l'host negli appunti
+        String hostInfo = ngrokManager.getPublicUrl();
+        if (hostInfo != null) {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(hostInfo);
+            clipboard.setContent(content);
+            addLogMessage("Host ngrok copiato negli appunti", LogType.INFO);
+        } else {
+            addLogMessage("Ngrok non attivo, impossibile copiare l'host", LogType.WARNING);
+        }
+    }
+
+    @FXML
+    public void onCopyNgrokPort(ActionEvent event) {
+        // Copia solo la porta negli appunti
+        int portInfo = ngrokManager.getPublicPort();
+        if (portInfo > 0) {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(String.valueOf(portInfo));
+            clipboard.setContent(content);
+            addLogMessage("Porta ngrok copiata negli appunti", LogType.INFO);
+        } else {
+            addLogMessage("Ngrok non attivo, impossibile copiare la porta", LogType.WARNING);
+        }
+    }
     @FXML
     public void initialize() {
         // Create a temp directory if it doesn't exist
@@ -143,11 +173,9 @@ public class ServerInterfaceController {
             ContextMenu contextMenu = new ContextMenu();
             MenuItem copyItem = new MenuItem("Copia informazioni di connessione");
             copyItem.setOnAction(e -> {
-                String connectionInfo = getNgrokConnectionInfo();
-                Clipboard clipboard = Clipboard.getSystemClipboard();
+              Clipboard clipboard = Clipboard.getSystemClipboard();
                 ClipboardContent content = new ClipboardContent();
-                content.putString(connectionInfo);
-                clipboard.setContent(content);
+               clipboard.setContent(content);
                 addLogMessage("Informazioni di connessione ngrok copiate negli appunti", LogType.INFO);
             });
             contextMenu.getItems().add(copyItem);
@@ -160,35 +188,17 @@ public class ServerInterfaceController {
 
     @FXML
     public void onCopyNgrokInfo(ActionEvent event) {
-        String connectionInfo = getNgrokConnectionInfo();
 
         // Copia negli appunti
         javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
         javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-        content.putString(connectionInfo);
+
         clipboard.setContent(content);
 
         addLogMessage("Informazioni di connessione ngrok copiate negli appunti", LogType.INFO);
     }
 
-    /**
-     * Gets a formatted string with Ngrok connection information
-     * @return String containing connection details
-     */
-    private String getNgrokConnectionInfo() {
-        if (!ngrokEnabled || ngrokManager == null) {
-            return "Ngrok non attivo";
-        }
 
-        String publicUrl = ngrokManager.getPublicUrl();
-        int publicPort = ngrokManager.getPublicPort();
-
-        return "Host Ngrok: " + publicUrl + "\n" +
-                "Porta Ngrok: " + publicPort + "\n" +
-                "Database: book_recommender\n" +
-                "Username: book_admin_8530\n" +
-                "Password: CPuc#@r-zbKY";
-    }
 
 
     @FXML

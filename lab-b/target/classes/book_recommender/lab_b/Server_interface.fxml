@@ -51,7 +51,7 @@
                                     <children>
                                         <Label prefWidth="120.0" text="Host Ngrok:" />
                                         <TextField fx:id="ngrokHostField" editable="false" promptText="Ngrok host will appear here" HBox.hgrow="ALWAYS" />
-                                        <Button mnemonicParsing="false" onAction="#onCopyNgrokInfo" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
+                                        <Button fx:id="copyHostButton" mnemonicParsing="false" onAction="#onCopyNgrokHost" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
                                     </children>
                                 </HBox>
 
@@ -59,7 +59,7 @@
                                     <children>
                                         <Label prefWidth="120.0" text="Porta Ngrok:" />
                                         <TextField fx:id="ngrokPortField" editable="false" promptText="Ngrok port will appear here" HBox.hgrow="ALWAYS" />
-                              <Button mnemonicParsing="false" onAction="#onCopyNgrokInfo" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
+                                        <Button fx:id="copyPortButton" mnemonicParsing="false" onAction="#onCopyNgrokPort" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
                                     </children>
                                 </HBox>
 
@@ -67,6 +67,10 @@
                                     <VBox.margin>
                                         <Insets top="15.0" />
                                     </VBox.margin>
+                                    <children>
+                                        <Button fx:id="startNgrokButton" mnemonicParsing="false" onAction="#onStartNgrok" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Start Ngrok" />
+                                        <Button fx:id="stopNgrokButton" disable="true" mnemonicParsing="false" onAction="#onStopNgrok" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Stop Ngrok" />
+                                    </children>
                                 </HBox>
                             </children>
                         </VBox>
