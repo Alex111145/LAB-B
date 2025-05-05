@@ -42,7 +42,7 @@
                         </Label>
                         <ListView fx:id="booksListView" prefHeight="250.0" prefWidth="560.0" />
                         <Label fx:id="noBooksLabel" style="-fx-font-size: 16px; -fx-text-fill: red;" text="Non ci sono libri disponibili nella libreria selezionata." visible="false" />
-                        <Label fx:id="errorLabel" style="-fx-font-size: 14px; -fx-text-fill: red;" text="Errore: Seleziona un libro prima di procedere." visible="false" />
+                        <Label fx:id="errorLabel" style="-fx-font-size: 14px; -fx-text-fill: red;" text="Seleziona un libro prima di procedere." visible="false" />
                         <HBox alignment="CENTER" spacing="20.0">
                             <children>
                                 <Button fx:id="selectButton" mnemonicParsing="false" onAction="#handleSelect" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 40px; -fx-padding: 10px 20px; " text="Seleziona" />

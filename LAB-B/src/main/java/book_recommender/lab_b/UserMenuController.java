@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class UserMenuController {
 
@@ -20,6 +21,7 @@ public class UserMenuController {
     private Label statusLabel;
 
     private String userId;
+    private DatabaseManager dbManager;
 
     /**
      * Inizializza il controller.
@@ -28,6 +30,12 @@ public class UserMenuController {
     public void initialize() {
         // Le inizializzazioni che non dipendono da dati esterni vanno qui
         statusLabel.setText("");
+
+        try {
+            dbManager = DatabaseManager.getInstance();
+        } catch (SQLException e) {
+            System.err.println("Error initializing database connection: " + e.getMessage());
+        }
     }
 
     /**
@@ -57,6 +65,9 @@ public class UserMenuController {
     @FXML
     public void onLogoutClicked(ActionEvent event) {
         try {
+            // Rimuove l'utente dalla lista degli utenti connessi
+            unregisterUserConnection();
+
             // Torna alla homepage
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/homepage.fxml"));
             Parent root = loader.load();
@@ -70,6 +81,31 @@ public class UserMenuController {
             System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile tornare alla homepage");
+        }
+    }
+
+    /**
+     * Rimuove l'utente dalla tabella degli utenti connessi
+     */
+    private void unregisterUserConnection() {
+        try {
+            if (dbManager != null && userId != null) {
+                // Cerca tutti i client IDs che contengono questo userID
+                String clientIdPattern = "user_" + userId + "_%";
+
+                // Rimuove l'utente dalla lista degli utenti connessi usando una query speciale
+                String sql = "DELETE FROM active_clients WHERE client_id LIKE ?";
+
+                java.sql.Connection conn = dbManager.getConnection();
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, clientIdPattern);
+                pstmt.executeUpdate();
+                pstmt.close();
+
+                System.out.println("Utente " + userId + " disconnesso");
+            }
+        } catch (SQLException e) {
+            System.err.println("Errore durante la disconnessione dell'utente: " + e.getMessage());
         }
     }
 
@@ -203,4 +239,5 @@ public class UserMenuController {
 
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
-    }}
+    }
+}

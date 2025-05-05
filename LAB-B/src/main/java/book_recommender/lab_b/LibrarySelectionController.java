@@ -108,7 +108,7 @@ public class LibrarySelectionController {
 
         } catch (SQLException e) {
             System.err.println("Error loading user libraries: " + e.getMessage());
-            errorLabel.setText("Errore: Impossibile caricare le librerie. " + e.getMessage());
+            errorLabel.setText("Impossibile caricare le librerie. " + e.getMessage());
             errorLabel.setVisible(true);
         }
     }
@@ -118,7 +118,7 @@ public class LibrarySelectionController {
         String selectedLibrary = librariesListView.getSelectionModel().getSelectedItem();
 
         if (selectedLibrary == null) {
-            errorLabel.setText("Errore: Seleziona una libreria prima di procedere.");
+            errorLabel.setText("Seleziona una libreria prima di procedere.");
             errorLabel.setVisible(true);
             return;
         }

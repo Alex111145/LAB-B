@@ -52,8 +52,14 @@ public class Client extends Application {
     // Flag per usare ngrok - sempre true
     private boolean useNgrok = true;
 
+    // Riferimento allo Stage principale
+    private Stage primaryStage;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Salva il riferimento allo stage principale
+        this.primaryStage = primaryStage;
+
         // Try to connect to the server first
         try {
             // Ngrok è sempre attivo
@@ -118,6 +124,10 @@ public class Client extends Application {
 
                         // Allow window resizing
                         primaryStage.setResizable(true);
+
+                        // Avvia il monitoraggio del server
+                        startServerMonitoring();
+
                     } catch (Exception e) {
                         showServerErrorAlert(primaryStage, "Errore applicazione",
                                 "Errore durante il caricamento dell'interfaccia",
@@ -313,6 +323,80 @@ public class Client extends Application {
             }
         } catch (IOException e) {
             System.err.println("Errore durante la chiusura della connessione: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Avvia il monitoraggio del server per rilevare quando viene spento
+     */
+    private void startServerMonitoring() {
+        Thread monitorThread = new Thread(() -> {
+            while (!serverShutdownDetected && !Thread.currentThread().isInterrupted()) {
+                try {
+                    Thread.sleep(3000); // Controlla ogni 3 secondi
+
+                    // Prova a controllare la connessione al database
+                    if (dbManager != null) {
+                        try {
+                            Connection conn = dbManager.getConnection();
+                            // Se la connessione fallisce, lancerà un'eccezione
+                        } catch (SQLException e) {
+                            // Connessione persa, segnala la disconnessione
+                            Platform.runLater(() -> {
+                                showServerDisconnectedScreen();
+                            });
+                            serverShutdownDetected = true;
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    // Se c'è un errore, mostra la schermata di disconnessione
+                    Platform.runLater(() -> {
+                        showServerDisconnectedScreen();
+                    });
+                    serverShutdownDetected = true;
+                    break;
+                }
+            }
+        });
+
+        monitorThread.setDaemon(true);
+        monitorThread.start();
+    }
+
+    /**
+     * Mostra la schermata di disconnessione del server
+     */
+    private void showServerDisconnectedScreen() {
+        try {
+            // Interrompi eventuale monitoraggio per evitare chiamate multiple
+            serverShutdownDetected = true;
+
+            // Carica il layout FXML per la schermata di disconnessione
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/server_disconnected.fxml"));
+            Parent root = loader.load();
+
+            // Crea una nuova scena con lo schermo di disconnessione
+            Scene scene = new Scene(root, 600, 400);
+
+            // Applica la scena alla finestra primaria
+            Platform.runLater(() -> {
+                primaryStage.setScene(scene);
+                primaryStage.setTitle("Server Disconnesso");
+                primaryStage.setResizable(false);
+                primaryStage.centerOnScreen();
+            });
+
+        } catch (IOException e) {
+            System.err.println("Errore nel caricare la schermata di disconnessione: " + e.getMessage());
+
+            // Fallback nel caso in cui non si riesca a caricare il FXML
+            Platform.runLater(() -> {
+                showServerShutdownAlert(primaryStage);
+            });
         }
     }
 

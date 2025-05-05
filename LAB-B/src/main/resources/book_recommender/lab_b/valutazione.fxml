@@ -316,7 +316,7 @@
                         </VBox>
 
                         <!-- Validazione errori -->
-                        <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 14px;" text="Errore: Devi assegnare un voto a tutte le caratteristiche prima di inviare." visible="false">
+                        <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 14px;" text="Devi assegnare un voto a tutte le caratteristiche prima di inviare." visible="false">
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>

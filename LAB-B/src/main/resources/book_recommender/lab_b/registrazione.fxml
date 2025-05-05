@@ -60,7 +60,7 @@
                               </Label>
                               <TextField fx:id="userIdField" maxWidth="1.7976931348623157E308" promptText="Inserisci UserID" />
                               <Label fx:id="userIdError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: l'UserID deve essere al massimo di 8 caratteri." visible="false" />
-                              <Label fx:id="userIdExistsError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="UserID già esistente. Procedere al login?" visible="false" />
+                              <Label fx:id="userIdExistsError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="UserID già esistente." visible="false" />
 
                               <Label text="Codice Fiscale:">
                                  <font>

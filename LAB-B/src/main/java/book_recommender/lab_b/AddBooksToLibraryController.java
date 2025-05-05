@@ -14,7 +14,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.scene.control.Alert;
@@ -40,7 +42,6 @@ public class AddBooksToLibraryController implements Initializable {
     @FXML private TextField yearSearchField;
 
     // Pulsanti
-
     @FXML private Button clearAllButton;
     @FXML private Button saveButton;
 
@@ -90,6 +91,7 @@ public class AddBooksToLibraryController implements Initializable {
         // Imposta il colore rosso per il pulsante "Cancella Tutti"
         clearAllButton.setStyle("-fx-background-color: #ff4136; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;");
     }
+
     private void updateClearAllButtonState() {
         boolean hasSelectedBooks = !selectedBooks.isEmpty();
         clearAllButton.setDisable(!hasSelectedBooks);
@@ -102,7 +104,7 @@ public class AddBooksToLibraryController implements Initializable {
             updateClearAllButtonState();
         });
 
-        selectedBooksListView.setCellFactory(new Callback<>() { // usiamo <> invece che <String> perche esplicito
+        selectedBooksListView.setCellFactory(new Callback<>() {
             @Override
             public ListCell<String> call(ListView<String> param) {
                 ListCell<String> cell = new ListCell<>() {
@@ -165,7 +167,7 @@ public class AddBooksToLibraryController implements Initializable {
     @FXML
     public void handleSave(ActionEvent event) {
         if (selectedBooks.isEmpty()) {
-            errorLabel.setText("Errore: Devi aggiungere almeno un libro.");
+            errorLabel.setText("Devi aggiungere almeno un libro.");
             errorLabel.setVisible(true);
             return;
         }
@@ -346,6 +348,12 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Crea un box per visualizzare un libro nei risultati di ricerca.
+     *
+     * @param book Il libro da visualizzare
+     * @return Un HBox contenente le informazioni del libro e un pulsante per aggiungerlo
+     */
     private HBox createBookResultBox(Book book) {
         HBox bookBox = new HBox();
         bookBox.setAlignment(Pos.CENTER_LEFT);
@@ -353,51 +361,137 @@ public class AddBooksToLibraryController implements Initializable {
         bookBox.setPadding(new Insets(10));
         bookBox.setStyle("-fx-background-color: white; -fx-border-color: #EEEEEE; -fx-border-radius: 5px;");
 
+        // Informazioni del libro in un contenitore
         VBox infoBox = new VBox(5);
         infoBox.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(infoBox, Priority.ALWAYS);
 
+        // Titolo del libro più grande e in evidenza
         Label titleLabel = new Label(book.getTitle());
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;");
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(480);
+        titleLabel.setMaxWidth(480); // Imposta una larghezza massima per evitare troncamenti
 
+        // Autore del libro
         Label authorLabel = new Label("Autore: " + book.getAuthors());
         authorLabel.setStyle("-fx-font-size: 14px;");
         authorLabel.setWrapText(true);
 
+        // Dettagli del libro su una riga
         Label detailsLabel = new Label("Categoria: " + book.getCategory() + " | Editore: " + book.getPublisher() + " | Anno: " + book.getPublishYear());
         detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #777777;");
         detailsLabel.setWrapText(true);
 
+        // Aggiungi le etichette al contenitore delle informazioni
         infoBox.getChildren().addAll(titleLabel, authorLabel, detailsLabel);
 
+        // Creazione del pulsante con le stesse proprietà di consigli.fxml
         Button actionButton = new Button();
+
+        // CONFIGURAZIONE FISSA DEL PULSANTE - Garantisce sempre le stesse dimensioni
+        actionButton.setPrefHeight(40.0);
+        actionButton.setPrefWidth(100.0);
+        actionButton.setMinHeight(40.0);
+        actionButton.setMinWidth(100.0);
+        actionButton.setMaxHeight(40.0);   // Fissa l'altezza massima
+        actionButton.setMaxWidth(100.0);   // Fissa la larghezza massima
+
+        // Impedisce al pulsante di adattarsi al contenuto
+        HBox.setHgrow(actionButton, Priority.NEVER);
+
+        // Aggiungi l'effetto ombra
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.web("#00000080"));
+        shadow.setHeight(4.0);
+        shadow.setRadius(1.5);
+        shadow.setWidth(4.0);
+        actionButton.setEffect(shadow);
+
+        // Controlla se il libro è già selezionato
         boolean isSelected = selectedBooks.contains(book.getTitle());
 
         if (isSelected) {
+            // Il libro è già nella lista dei selezionati
             actionButton.setText("Rimuovi");
-            actionButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;");
+            actionButton.setStyle(
+                    "-fx-background-color: red; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-size: 14px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-padding: 10px 15px; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-min-width: 100px; " +   // Garantisce una larghezza minima
+                            "-fx-min-height: 40px; " +   // Garantisce un'altezza minima
+                            "-fx-max-width: 100px; " +   // Limita la larghezza massima
+                            "-fx-max-height: 40px;"      // Limita l'altezza massima
+            );
         } else {
+            // Il libro non è ancora selezionato
             actionButton.setText("Aggiungi");
-            actionButton.setStyle("-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;");
+            actionButton.setStyle(
+                    "-fx-background-color: #75B965; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-size: 14px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-padding: 10px 15px; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-min-width: 100px; " +   // Garantisce una larghezza minima
+                            "-fx-min-height: 40px; " +   // Garantisce un'altezza minima
+                            "-fx-max-width: 100px; " +   // Limita la larghezza massima
+                            "-fx-max-height: 40px;"      // Limita l'altezza massima
+            );
         }
 
+        // Crea un contenitore per il pulsante per garantire posizionamento e dimensioni fisse
+        HBox buttonContainer = new HBox();
+        buttonContainer.setAlignment(Pos.CENTER);
+        buttonContainer.setPrefWidth(100);   // Larghezza fissa per il contenitore
+        buttonContainer.setMinWidth(100);    // Larghezza minima fissa
+        buttonContainer.setMaxWidth(100);    // Larghezza massima fissa
+        buttonContainer.getChildren().add(actionButton);
+
+        // Imposta l'azione per il pulsante
         actionButton.setOnAction(e -> toggleBookSelection(book.getTitle(), actionButton));
 
-        bookBox.getChildren().addAll(infoBox, actionButton);
+        // Aggiungi gli elementi al box
+        bookBox.getChildren().addAll(infoBox, buttonContainer);
         return bookBox;
     }
-
     private void toggleBookSelection(String bookTitle, Button button) {
         if (selectedBooks.contains(bookTitle)) {
             selectedBooks.remove(bookTitle);
             button.setText("Aggiungi");
-            button.setStyle("-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;");
+            button.setStyle(
+                    "-fx-background-color: #75B965; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-size: 14px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-padding: 10px 15px; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-min-height: 40px; " +
+                            "-fx-max-width: 100px; " +
+                            "-fx-max-height: 40px;"
+            );
         } else {
             selectedBooks.add(bookTitle);
             button.setText("Rimuovi");
-            button.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;");
+            button.setStyle(
+                    "-fx-background-color: red; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-size: 14px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-padding: 10px 15px; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-min-width: 100px; " +
+                            "-fx-min-height: 40px; " +
+                            "-fx-max-width: 100px; " +
+                            "-fx-max-height: 40px;"
+            );
         }
 
         updateSelectedBooksList();
