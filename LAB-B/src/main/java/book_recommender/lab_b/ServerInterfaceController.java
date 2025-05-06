@@ -30,12 +30,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ServerInterfaceController {
 
     // Google Drive file IDs
-    private static final String VALUTAZIONI_FILE_ID = "1tA9TbRVQK6ioJPU36_aHqTaQLZp1nI8L";
-    private static final String UTENTI_FILE_ID = "13D5cg16dW6gp4ZfsTBYVfGu1FUFBbIsD";
-    private static final String LIBRI_FILE_ID = "1gGz_uVrfVlPvErMShcTU630dYGF5nNOO";
-    private static final String LIBRERIE_FILE_ID = "1r0jBnnG-aKBQZ76eyKxzWpsL1aLThZW3";
-    private static final String DATA_FILE_ID = "1jX6zWXBjf6-eT1y9ypv55tfEtawz86Cz";
-    private static final String CONSIGLI_FILE_ID = "1hLT7yvnA2hV6Rg_oTnFsywyPaPstjKo8";
+    private static final String VALUTAZIONI_FILE_ID = "1Qj-T4_warMiZKTom5mqRgbIwvCp6vQ10";
+    private static final String UTENTI_FILE_ID = "1SOKgKVMGPnYhfhZ_DIBlL47PUh5iH-qc";
+    private static final String LIBRI_FILE_ID = "1kXi-D1kMGqzfL77eLIrVF02rFfVfn325";
+    private static final String LIBRERIE_FILE_ID = "1Q6JKFy39qewXx7KBmv5XbtES5e8oPfpM";
+    private static final String DATA_FILE_ID = "1M-C9XWeQoketrqS2ybAhw_fTHSzpcdMd";
+    private static final String CONSIGLI_FILE_ID = "1m5sPTNxVlEIfELkiWYL2mWOXQwEj8mfn";
 
     private ScheduledExecutorService clientMonitorScheduler;  // Add at the top of the class with other fields
     private NgrokManager ngrokManager;
@@ -104,9 +104,6 @@ public class ServerInterfaceController {
             ClipboardContent content = new ClipboardContent();
             content.putString(hostInfo);
             clipboard.setContent(content);
-            addLogMessage("Host ngrok copiato negli appunti", LogType.INFO);
-        } else {
-            addLogMessage("Ngrok non attivo, impossibile copiare l'host", LogType.WARNING);
         }
     }
 
@@ -119,9 +116,6 @@ public class ServerInterfaceController {
             ClipboardContent content = new ClipboardContent();
             content.putString(String.valueOf(portInfo));
             clipboard.setContent(content);
-            addLogMessage("Porta ngrok copiata negli appunti", LogType.INFO);
-        } else {
-            addLogMessage("Ngrok non attivo, impossibile copiare la porta", LogType.WARNING);
         }
     }
     @FXML
@@ -177,8 +171,7 @@ public class ServerInterfaceController {
               Clipboard clipboard = Clipboard.getSystemClipboard();
                 ClipboardContent content = new ClipboardContent();
                clipboard.setContent(content);
-                addLogMessage("Informazioni di connessione ngrok copiate negli appunti", LogType.INFO);
-            });
+          });
             contextMenu.getItems().add(copyItem);
             ngrokHostField.setContextMenu(contextMenu);
             ngrokPortField.setContextMenu(contextMenu);
@@ -196,8 +189,7 @@ public class ServerInterfaceController {
 
         clipboard.setContent(content);
 
-        addLogMessage("Informazioni di connessione ngrok copiate negli appunti", LogType.INFO);
-    }
+   }
 
 
     @FXML
@@ -207,7 +199,6 @@ public class ServerInterfaceController {
         // Disable the button during initialization
         startButton.setDisable(true);
 
-        addLogMessage("Checking for existing server...", LogType.INFO);
 
         // Run check in the background thread
         new Thread(() -> {
@@ -232,26 +223,22 @@ public class ServerInterfaceController {
                 // First, check if the PostgreSQL is installed and running
                 updateProgress(0.1, "Checking PostgreSQL status...");
                 if (!isPostgresInstalled()) {
-                    addLogMessage("PostgreSQL not installed, attempting to install...", LogType.WARNING);
-                    if (!installPostgresIfNeeded()) {
+                   if (!installPostgresIfNeeded()) {
                         Platform.runLater(() -> {
                             dbStatusLabel.setText("PostgreSQL not installed");
                             dbStatusLabel.setTextFill(Color.RED);
-                            addLogMessage("PostgreSQL installation is required to continue", LogType.ERROR);
-                            startButton.setDisable(false);
+                          startButton.setDisable(false);
                         });
                         return;
                     }
                 }
 
                 if (!isPostgresRunning()) {
-                    addLogMessage("PostgreSQL not running, attempting to start...", LogType.WARNING);
-                    if (!startPostgresIfNeeded()) {
+                 if (!startPostgresIfNeeded()) {
                         Platform.runLater(() -> {
                             dbStatusLabel.setText("PostgreSQL is not running");
                             dbStatusLabel.setTextFill(Color.RED);
-                            addLogMessage("Unable to start PostgreSQL. Start it manually.", LogType.ERROR);
-                            startButton.setDisable(false);
+                          startButton.setDisable(false);
                         });
                         return;
                     }
@@ -291,8 +278,7 @@ public class ServerInterfaceController {
                 }
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    addLogMessage("Error: " + e.getMessage(), LogType.ERROR);
-                    startButton.setDisable(false);
+                   startButton.setDisable(false);
 
                     // Reset server state in case of error
                     serverRunning = false;
@@ -309,15 +295,10 @@ public class ServerInterfaceController {
     private boolean checkExistingServer(String dbUrl) {
         try {
             boolean serverRunning = Server.isAnotherServerRunning(dbUrl);
-            if (serverRunning) {
-                addLogMessage("Found existing server running", LogType.INFO);
-            } else {
-                addLogMessage("No existing server found, will create a new one", LogType.INFO);
-            }
+
             return serverRunning;
         } catch (Exception e) {
-            addLogMessage("Error checking for existing server: " + e.getMessage(), LogType.ERROR);
-            return false;
+           return false;
         }
     }
 
@@ -357,13 +338,11 @@ public class ServerInterfaceController {
                     ngrokStatusLabel.setText("Attivo");
                     ngrokStatusLabel.setTextFill(Color.GREEN);
 
-                    addLogMessage("Tunnel ngrok avviato con successo: " + publicUrl + ":" + publicPort, LogType.SUCCESS);
                 } else {
                     ngrokStatusLabel.setText("Errore");
                     ngrokStatusLabel.setTextFill(Color.RED);
                     startNgrokButton.setDisable(false);
 
-                    addLogMessage("Errore nell'avvio di ngrok", LogType.ERROR);
                 }
             });
         }).start();
@@ -377,7 +356,6 @@ public class ServerInterfaceController {
         ngrokEnabled = false;
         updateNgrokUIState(false);
 
-        addLogMessage("Tunnel ngrok arrestato", LogType.INFO);
     }
     private void updateNgrokUIState(boolean running) {
         Platform.runLater(() -> {
@@ -405,7 +383,6 @@ public class ServerInterfaceController {
             updateProgress(0.4, "Connecting to database...");
             Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
 
-            addLogMessage("Connected to existing server database", LogType.SUCCESS);
 
             // Update UI to reflect we're connected to the existing server
             serverRunning = true;
@@ -455,8 +432,7 @@ public class ServerInterfaceController {
 
         } catch (SQLException e) {
             Platform.runLater(() -> {
-                addLogMessage("Error connecting to existing server: " + e.getMessage(), LogType.ERROR);
-                startButton.setDisable(false);
+              startButton.setDisable(false);
             });
         }
     }
@@ -486,15 +462,12 @@ public class ServerInterfaceController {
                 // Update UI
                 Platform.runLater(() -> {
                     clientCountLabel.setText(String.valueOf(count));
-                    addLogMessage("Updated client count: " + count, LogType.INFO);
-                });
+               });
             } catch (SQLException e) {
                 // Log error but continue trying if server is still running
-                addLogMessage("Error updating client count: " + e.getMessage(), LogType.ERROR);
             }
         }, 0, 2, TimeUnit.SECONDS);
 
-        addLogMessage("Client monitoring started", LogType.INFO);
     }
     /**
      * Stops the client count monitoring thread
@@ -506,11 +479,9 @@ public class ServerInterfaceController {
                 if (!clientMonitorScheduler.awaitTermination(2, TimeUnit.SECONDS)) {
                     clientMonitorScheduler.shutdownNow();
                 }
-                addLogMessage("Client monitoring stopped", LogType.INFO);
-            } catch (InterruptedException e) {
+           } catch (InterruptedException e) {
                 clientMonitorScheduler.shutdownNow();
                 Thread.currentThread().interrupt();
-                addLogMessage("Client monitoring shutdown interrupted", LogType.WARNING);
             }
         }
     }
@@ -524,7 +495,6 @@ public class ServerInterfaceController {
     @FXML
     private void onClearLog() {
         logContainer.getChildren().clear();
-        addLogMessage("Log cleared", LogType.INFO);
     }
 
     private void startServerProcess() {
@@ -539,23 +509,19 @@ public class ServerInterfaceController {
         try {
             // Step 1: Initialize progress
             updateProgress(0.0, "Initializing server...");
-            addLogMessage("Server initialization started", LogType.INFO);
 
             // Start a socket server early
             updateProgress(0.1, "Starting socket server...");
             startSocketServer();
-            addLogMessage("Socket server started on port 8888", LogType.SUCCESS);
 
             // Step 1.5: Verifica e avvia PostgreSQL se necessario
             updateProgress(0.15, "Checking PostgreSQL status...");
             if (!isPostgresInstalled()) {
-                addLogMessage("PostgreSQL not installed, attempting to install...", LogType.WARNING);
-                installPostgresIfNeeded(); // Continua anche se fallisce
+              installPostgresIfNeeded(); // Continua anche se fallisce
             }
 
             if (!isPostgresRunning()) {
-                addLogMessage("PostgreSQL not running, attempting to start...", LogType.WARNING);
-                startPostgresIfNeeded(); // Continua anche se fallisce
+              startPostgresIfNeeded(); // Continua anche se fallisce
             }
 
             // Step 2: Initialize the database connection using DatabaseManager
@@ -572,7 +538,6 @@ public class ServerInterfaceController {
                     if (dbPasswordField != null) dbPasswordField.setText(finalDbPassword);
                 });
 
-                addLogMessage("Database connection initialized successfully", LogType.SUCCESS);
 
                 // Step 3: Always download files
                 updateProgress(0.3, "Downloading data files...");
@@ -596,16 +561,13 @@ public class ServerInterfaceController {
                                     "    connect_time TIMESTAMP NOT NULL" +
                                     ")"
                     );
-                    addLogMessage("Client tracking table created successfully", LogType.SUCCESS);
                 } catch (SQLException e) {
-                    addLogMessage("Error creating client tracking table: " + e.getMessage(), LogType.ERROR);
-                    // Continue anyway, as this is not critical
+
                 }
 
                 // Step 7: Start client count monitoring
                 updateProgress(0.85, "Starting client monitoring...");
                 startClientCountMonitoring();
-                addLogMessage("Client monitoring started", LogType.SUCCESS);
 
                 // Step 8: Start Ngrok automatically
                 updateProgress(0.9, "Starting ngrok tunnel...");
@@ -623,8 +585,7 @@ public class ServerInterfaceController {
 
         } catch (Exception e) {
             String errorMsg = "Server initialization failed: " + e.getMessage();
-            addLogMessage(errorMsg, LogType.ERROR);
-            e.printStackTrace();
+          e.printStackTrace();
 
             // Update UI on error
             Platform.runLater(() -> {
@@ -665,23 +626,10 @@ public class ServerInterfaceController {
                     ngrokStatusLabel.setText("Attivo");
                     ngrokStatusLabel.setTextFill(Color.GREEN);
 
-                    addLogMessage("Tunnel ngrok avviato automaticamente", LogType.SUCCESS);
-
-                    // Display connection info clearly
-                    String dbInfo = "==========================================\n" +
-                            "INFORMAZIONI DI CONNESSIONE PER IL CLIENT:\n" +
-                            "Host Ngrok: " + publicUrl + "\n" +
-                            "Porta Ngrok: " + publicPort + "\n" +
-                            "Database: book_recommender\n" +
-                            "Username: book_admin_8530\n" +
-                            "Password: CPuc#@r-zbKY\n" +
-                            "==========================================";
-                    addLogMessage(dbInfo, LogType.INFO);
                 } else {
                     ngrokStatusLabel.setText("Errore");
                     ngrokStatusLabel.setTextFill(Color.RED);
-                    addLogMessage("Errore nell'avvio automatico di ngrok", LogType.ERROR);
-                }
+               }
             });
         }).start();
     }
@@ -694,8 +642,7 @@ public class ServerInterfaceController {
         // Arresta il tunnel ngrok se attivo
         if (ngrokManager != null) {
             try {
-                addLogMessage("Arresto del tunnel ngrok...", LogType.INFO);
-                ngrokManager.stopTunnel();
+              ngrokManager.stopTunnel();
 
                 // Aggiorna UI per ngrok
                 Platform.runLater(() -> {
@@ -716,10 +663,7 @@ public class ServerInterfaceController {
                         stopNgrokButton.setDisable(true);
                     }
                 });
-
-                addLogMessage("Tunnel ngrok arrestato con successo", LogType.SUCCESS);
-            } catch (Exception e) {
-                addLogMessage("Errore durante l'arresto del tunnel ngrok: " + e.getMessage(), LogType.ERROR);
+ } catch (Exception e) {
             }
         }
 
@@ -736,9 +680,7 @@ public class ServerInterfaceController {
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
-                addLogMessage("Server socket closed", LogType.SUCCESS);
             } catch (IOException e) {
-                addLogMessage("Error closing server socket: " + e.getMessage(), LogType.ERROR);
             }
         }
 
@@ -749,12 +691,10 @@ public class ServerInterfaceController {
                 if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                     scheduler.shutdownNow();
                 }
-                addLogMessage("Scheduler terminated", LogType.SUCCESS);
-            } catch (InterruptedException e) {
+         } catch (InterruptedException e) {
                 scheduler.shutdownNow();
                 Thread.currentThread().interrupt();
-                addLogMessage("Scheduler shutdown interrupted", LogType.WARNING);
-            }
+          }
         }
 
         // Reimpostazione delle variabili di stato del server - AGGIUNGI QUESTA SEZIONE
@@ -797,7 +737,6 @@ public class ServerInterfaceController {
             }
         });
 
-        addLogMessage("Server stopped, database cleaned, and all clients notified", LogType.SUCCESS);
     }
     /**
      * Delete all files in the temporary directory
@@ -812,9 +751,7 @@ public class ServerInterfaceController {
                         if (file.isFile()) {
                             boolean deleted = file.delete();
                             if (!deleted) {
-                                addLogMessage("Failed to delete file: " + file.getName(), LogType.WARNING);
-                                // Try to force to delete it on exit
-                                file.deleteOnExit();
+                              file.deleteOnExit();
                             }
                         }
                     }
@@ -825,17 +762,14 @@ public class ServerInterfaceController {
                     // If not empty or in use, mark for deletion on exit
                     tempDir.deleteOnExit();
                 }
-                addLogMessage("Temporary files cleaned up", LogType.SUCCESS);
             }
         } catch (Exception e) {
-            addLogMessage("Error deleting temp files: " + e.getMessage(), LogType.ERROR);
         }
     }
     /**
      * Cleans up the database by dropping all tables
      */
     private void cleanDatabase() {
-        addLogMessage("Cleaning up database...", LogType.INFO);
 
         String dbUrl = dbUrlField.getText();
         String dbUser = dbUserField.getText();
@@ -859,22 +793,18 @@ public class ServerInterfaceController {
                 stmt.execute(sql);
             }
 
-            addLogMessage("Database cleaned successfully", LogType.SUCCESS);
         } catch (SQLException e) {
-            addLogMessage("Error cleaning database: " + e.getMessage(), LogType.ERROR);
         }
     }
 
     private void downloadAllFiles() throws IOException {
-        addLogMessage("Downloading files from Google Drive...", LogType.ERROR);
 
         // Assicurati che la directory temp_data esista prima di iniziare il download
         File tempDir = new File(TEMP_DIR);
         if (!tempDir.exists()) {
             boolean created = tempDir.mkdirs();
             if (!created) {
-                addLogMessage("Impossibile creare la directory " + TEMP_DIR, LogType.ERROR);
-                throw new IOException("Failed to create directory: " + TEMP_DIR);
+             throw new IOException("Failed to create directory: " + TEMP_DIR);
             }
         }
 
@@ -886,10 +816,8 @@ public class ServerInterfaceController {
             downloadFromGoogleDrive(DATA_FILE_ID, "Data.csv");
             downloadFromGoogleDrive(CONSIGLI_FILE_ID, "ConsigliLibri.dati.csv");
 
-            addLogMessage("All files downloaded successfully", LogType.SUCCESS);
         } catch (IOException e) {
-            addLogMessage("Errore durante il download dei file: " + e.getMessage(), LogType.ERROR);
-            throw e; // Rilancia l'eccezione per gestirla nel metodo chiamante
+          throw e; // Rilancia l'eccezione per gestirla nel metodo chiamante
         }
     }
     private void downloadFromGoogleDrive(String fileId, String fileName) throws IOException {
@@ -897,12 +825,7 @@ public class ServerInterfaceController {
         File tempDir = new File(TEMP_DIR);
         if (!tempDir.exists()) {
             boolean created = tempDir.mkdirs(); // Usa mkdirs() invece di mkdir() per creare anche le directory parent se necessario
-            if (created) {
-                addLogMessage("Creata directory " + TEMP_DIR, LogType.INFO);
-            } else {
-                addLogMessage("Impossibile creare la directory " + TEMP_DIR, LogType.ERROR);
-                throw new IOException("Failed to create directory: " + TEMP_DIR);
-            }
+
         }
 
         String urlString = "https://drive.google.com/uc?id=" + fileId + "&export=download";
@@ -915,17 +838,14 @@ public class ServerInterfaceController {
                  FileOutputStream fos = new FileOutputStream(TEMP_DIR + fileName)) {
 
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                addLogMessage("Downloaded: " + fileName, LogType.SUCCESS);
-            }
+           }
         } catch (Exception e) {
             String errorMsg = "Error downloading file " + fileName + ": " + e.getMessage();
-            addLogMessage(errorMsg, LogType.ERROR);
-            throw new IOException("Failed to download file: " + fileName, e);
+           throw new IOException("Failed to download file: " + fileName, e);
         }
     }
 
     private void initializeDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException {
-        addLogMessage("Creating database tables...", LogType.INFO);
 
         try {
             // Use the DatabaseManager instance instead of direct connection
@@ -951,9 +871,9 @@ public class ServerInterfaceController {
                 String[] createTableStatements = {
                         // Users' table
                         "CREATE TABLE IF NOT EXISTS users (" +
-                                "    user_id VARCHAR(8) PRIMARY KEY," +
+                                "    user_id VARCHAR(8) PRIMARY KEY UNIQUE," +
                                 "    full_name VARCHAR(100) NOT NULL," +
-                                "    fiscal_code VARCHAR(16) NOT NULL UNIQUE," +
+                                "    fiscal_code VARCHAR(16) NOT NULL ," +
                                 "    email VARCHAR(100) NOT NULL," +
                                 "    password VARCHAR(100) NOT NULL" +
                                 ")",
@@ -1018,15 +938,12 @@ public class ServerInterfaceController {
                     stmt.execute(sql);
                 }
 
-                addLogMessage("Database tables created successfully", LogType.SUCCESS);
-            }
+           }
         } catch (SQLException e) {
-            addLogMessage("Error creating database tables: " + e.getMessage(), LogType.ERROR);
-            throw e;
+           throw e;
         }
     }
     private void populateDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException, IOException {
-        addLogMessage("Populating database with data...", LogType.INFO);
 
         try {
             // Use the DatabaseManager instance instead of direct connection
@@ -1038,8 +955,6 @@ public class ServerInterfaceController {
             try {
                 // Import books from Data.csv
                 importBooks(conn, TEMP_DIR + "Data.csv");
-                // Also check if Libri.csv has additional books
-                importAdditionalBooks(conn, TEMP_DIR + "Libri.csv");
 
                 // Import users
                 importUsers(conn);
@@ -1057,21 +972,118 @@ public class ServerInterfaceController {
                 }
 
                 conn.commit();
-                addLogMessage("Database populated successfully", LogType.SUCCESS);
 
             } catch (Exception e) {
                 conn.rollback();
-                addLogMessage("Error populating database: " + e.getMessage(), LogType.ERROR);
-                throw e;
+              throw e;
             }
         } catch (SQLException e) {
-            addLogMessage("Error connecting to database: " + e.getMessage(), LogType.ERROR);
             throw e;
         }
     }
+    private void importRecommendations(Connection conn) throws SQLException, IOException {
+        // First, check if ConsigliLibri.dati.csv exists and has content
+        File file = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
+        if (!file.exists() || file.length() == 0) {
+            // Log the problem
+            System.err.println("ConsigliLibri.dati.csv file missing or empty");
+            return;
+        }
 
+        String findBookIdByTitleSql = "SELECT id FROM books WHERE title ILIKE ?";
+        String insertRecommendationSql =
+                "INSERT INTO book_recommendations (user_id, source_book_id, recommended_book_id) " +
+                        "VALUES (?, ?, ?) ON CONFLICT (user_id, source_book_id, recommended_book_id) DO NOTHING";
+
+        int recommendationCount = 0;
+        int errorCount = 0;
+
+        try (PreparedStatement pstmtFindBook = conn.prepareStatement(findBookIdByTitleSql);
+             PreparedStatement pstmtInsert = conn.prepareStatement(insertRecommendationSql);
+             BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "ConsigliLibri.dati.csv"))) {
+
+            String line = reader.readLine(); // Skip header line
+            if (line == null) return;
+
+            while ((line = reader.readLine()) != null) {
+                try {
+                    String[] fields = parseCsvLine(line);
+                    if (fields.length >= 3) {  // Need at least userId, source book, and one recommendation
+                        String userId = fields[0].trim();
+                        String sourceBookTitle = fields[1].trim();
+
+                        // Find source book ID
+                        pstmtFindBook.setString(1, sourceBookTitle);
+                        ResultSet sourceBookRs = pstmtFindBook.executeQuery();
+
+                        if (sourceBookRs.next()) {
+                            int sourceBookId = sourceBookRs.getInt(1);
+
+                            // Process each recommended book
+                            for (int i = 2; i < fields.length; i++) {
+                                String recommendedBookTitle = fields[i].trim();
+                                if (recommendedBookTitle.isEmpty() || recommendedBookTitle.equalsIgnoreCase("null")) {
+                                    continue;  // Skip empty recommendations
+                                }
+
+                                // Find recommended book ID
+                                pstmtFindBook.setString(1, recommendedBookTitle);
+                                ResultSet recBookRs = pstmtFindBook.executeQuery();
+
+                                if (recBookRs.next()) {
+                                    int recommendedBookId = recBookRs.getInt(1);
+
+                                    // Insert recommendation
+                                    pstmtInsert.setString(1, userId);
+                                    pstmtInsert.setInt(2, sourceBookId);
+                                    pstmtInsert.setInt(3, recommendedBookId);
+
+                                    try {
+                                        pstmtInsert.executeUpdate();
+                                        recommendationCount++;
+                                    } catch (SQLException e) {
+                                        if (!e.getMessage().contains("duplicate key")) {
+                                            // Only log non-duplicate errors
+                                            System.err.println("Error inserting recommendation: " + e.getMessage());
+                                            errorCount++;
+                                        }
+                                    }
+                                } else {
+                                    // Add the book if it doesn't exist
+                                    String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
+                                            "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
+                                    try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
+                                        pstmtInsertBook.setString(1, recommendedBookTitle);
+                                        ResultSet newBookRs = pstmtInsertBook.executeQuery();
+
+                                        if (newBookRs.next()) {
+                                            int newBookId = newBookRs.getInt(1);
+
+                                            // Insert recommendation with new book
+                                            pstmtInsert.setString(1, userId);
+                                            pstmtInsert.setInt(2, sourceBookId);
+                                            pstmtInsert.setInt(3, newBookId);
+                                            pstmtInsert.executeUpdate();
+                                            recommendationCount++;
+                                        }
+                                    } catch (SQLException e) {
+                                        errorCount++;
+                                    }
+                                }
+                            }
+                        } else {
+                            errorCount++;
+                        }
+                    }
+                } catch (Exception e) {
+                    errorCount++;
+                }
+            }
+        }
+
+        System.out.println("Imported " + recommendationCount + " book recommendations with " + errorCount + " errors");
+    }
     private void importBooks(Connection conn, String filePath) throws SQLException, IOException {
-        addLogMessage("Importing books from Data.csv...", LogType.INFO);
 
         String sql = "INSERT INTO books (title, authors, category, publisher, publish_year) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (title, authors) DO NOTHING";
@@ -1111,7 +1123,6 @@ public class ServerInterfaceController {
             }
         }
 
-        addLogMessage("Imported books: Success=" + successCount + ", Errors=" + errorCount, LogType.INFO);
     }
     /**
      * Verifica se PostgreSQL è installato sul sistema
@@ -1134,8 +1145,7 @@ public class ServerInterfaceController {
 
             return exitCode == 0;
         } catch (Exception e) {
-            addLogMessage("Errore durante la verifica dell'installazione di PostgreSQL: " + e.getMessage(), LogType.ERROR);
-            return false;
+        return false;
         }
     }
 
@@ -1145,11 +1155,9 @@ public class ServerInterfaceController {
      */
     private boolean installPostgresIfNeeded() {
         if (isPostgresInstalled()) {
-            addLogMessage("PostgreSQL è già installato", LogType.INFO);
-            return true;
+           return true;
         }
 
-        addLogMessage("PostgreSQL non è installato. Tentativo di installazione...", LogType.WARNING);
 
         try {
             // Il comando di installazione dipende dal sistema operativo
@@ -1157,9 +1165,7 @@ public class ServerInterfaceController {
             String osName = System.getProperty("os.name").toLowerCase();
 
             if (osName.contains("win")) {
-                // Windows - apre una pagina di download per Windows
-                addLogMessage("Apertura pagina di download di PostgreSQL per Windows...", LogType.INFO);
-                Runtime.getRuntime().exec("cmd /c start https://www.postgresql.org/download/windows/");
+               Runtime.getRuntime().exec("cmd /c start https://www.postgresql.org/download/windows/");
 
                 // Mostra istruzioni all'utente
                 Platform.runLater(() -> {
@@ -1173,8 +1179,6 @@ public class ServerInterfaceController {
 
                 return false;
             } else if (osName.contains("mac")) {
-                // macOS - usa Homebrew se disponibile
-                addLogMessage("Tentativo di installazione su macOS usando Homebrew...", LogType.INFO);
 
                 // Verifica se Homebrew è installato
                 Process brewCheck = Runtime.getRuntime().exec("which brew");
@@ -1182,8 +1186,7 @@ public class ServerInterfaceController {
                     Process process = Runtime.getRuntime().exec("brew install postgresql");
                     int exitCode = process.waitFor();
                     if (exitCode == 0) {
-                        addLogMessage("PostgreSQL installato con successo tramite Homebrew", LogType.SUCCESS);
-                        return true;
+                      return true;
                     }
                 } else {
                     // Chiedi all'utente di installare Homebrew o PostgreSQL manualmente
@@ -1200,8 +1203,6 @@ public class ServerInterfaceController {
                     return false;
                 }
             } else {
-                // Linux - assume un sistema basato su Debian/Ubuntu
-                addLogMessage("Tentativo di installazione su Linux...", LogType.INFO);
 
                 // Chiedi conferma all'utente
                 AtomicBoolean proceed = new AtomicBoolean(false);
@@ -1229,27 +1230,22 @@ public class ServerInterfaceController {
                     Process process = Runtime.getRuntime().exec("pk exec apt-get -y install postgresql postgresql-contrib");
                     int exitCode = process.waitFor();
                     if (exitCode == 0) {
-                        addLogMessage("PostgreSQL installato con successo", LogType.SUCCESS);
-                        return true;
+                      return true;
                     }
                 }
             }
 
-            addLogMessage("Impossibile installare PostgreSQL automaticamente", LogType.ERROR);
             return false;
         } catch (Exception e) {
-            addLogMessage("Errore durante l'installazione di PostgreSQL: " + e.getMessage(), LogType.ERROR);
             return false;
         }
     }
 
     private boolean startPostgresIfNeeded() {
         if (isPostgresRunning()) {
-            addLogMessage("PostgreSQL è già in esecuzione", LogType.INFO);
             return true;
         }
 
-        addLogMessage("PostgreSQL non è in esecuzione. Tentativo di avvio...", LogType.WARNING);
 
         try {
             String osName = System.getProperty("os.name").toLowerCase();
@@ -1267,13 +1263,9 @@ public class ServerInterfaceController {
                     String arch = reader.readLine();
                     if (arch != null && arch.equals("arm64")) {
                         isAppleSilicon = true;
-                        addLogMessage("Rilevato Mac con Apple Silicon", LogType.INFO);
-                    } else {
-                        addLogMessage("Rilevato Mac con Intel", LogType.INFO);
-                    }
+                   } else {
+                   }
                 } catch (Exception e) {
-                    // In caso di errore, prova entrambi i tipi di comandi
-                    addLogMessage("Impossibile rilevare l'architettura, verranno provati tutti i comandi", LogType.WARNING);
                 }
 
                 if (isAppleSilicon) {
@@ -1317,27 +1309,23 @@ public class ServerInterfaceController {
 
                 // Prova tutti i comandi
                 for (String command : allMacCommands) {
-                    addLogMessage("Tentativo di avvio con comando: " + command, LogType.INFO);
-                    try {
+                  try {
                         Process process = Runtime.getRuntime().exec(command);
                         process.waitFor(5, TimeUnit.SECONDS);
 
                         // Attendi e verifica se PostgreSQL è partito
                         Thread.sleep(3000);
                         if (isPostgresRunning()) {
-                            addLogMessage("PostgreSQL avviato con successo usando: " + command, LogType.SUCCESS);
-                            success = true;
+                           success = true;
                             break;
                         }
                     } catch (Exception e) {
-                        addLogMessage("Comando fallito: " + e.getMessage(), LogType.WARNING);
                     }
                 }
 
                 // Se tutti i comandi falliscono, prova un approccio alternativo
                 if (!success) {
-                    addLogMessage("Tentativo di avvio tramite comando specifico per la nostra installazione...", LogType.INFO);
-                    try {
+                  try {
                         // Comando specifico basato sul percorso dove hai installato PostgreSQL
                         Process process = Runtime.getRuntime().exec("pg_ctl -D /opt/homebrew/var/postgresql@14 start");
                         process.waitFor(10, TimeUnit.SECONDS);
@@ -1345,18 +1333,14 @@ public class ServerInterfaceController {
                         // Leggi l'uscita del processo
                         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                         String line;
-                        while ((line = reader.readLine()) != null) {
-                            addLogMessage("Output: " + line, LogType.INFO);
-                        }
+
 
                         // Attendi un po' più a lungo
                         Thread.sleep(5000);
                         if (isPostgresRunning()) {
-                            addLogMessage("PostgreSQL avviato con successo usando comando personalizzato", LogType.SUCCESS);
-                            success = true;
+                          success = true;
                         }
                     } catch (Exception e) {
-                        addLogMessage("Anche il comando personalizzato è fallito: " + e.getMessage(), LogType.WARNING);
                     }
                 }
             } else if (osName.contains("win")) {
@@ -1375,7 +1359,6 @@ public class ServerInterfaceController {
                 };
 
                 for (String command : windowsCommands) {
-                    addLogMessage("Tentativo di avvio con comando: " + command, LogType.INFO);
                     try {
                         Process process;
                         if (command.startsWith("\"")) {
@@ -1390,12 +1373,10 @@ public class ServerInterfaceController {
                         // Attendi e verifica
                         Thread.sleep(3000);
                         if (isPostgresRunning()) {
-                            addLogMessage("PostgreSQL avviato con successo usando: " + command, LogType.SUCCESS);
-                            success = true;
+                           success = true;
                             break;
                         }
                     } catch (Exception e) {
-                        addLogMessage("Comando fallito: " + e.getMessage(), LogType.WARNING);
                     }
                 }
             } else {
@@ -1416,19 +1397,16 @@ public class ServerInterfaceController {
 
                         Thread.sleep(3000);
                         if (isPostgresRunning()) {
-                            addLogMessage("PostgreSQL avviato con successo usando: " + command, LogType.SUCCESS);
-                            success = true;
+                           success = true;
                             break;
                         }
                     } catch (Exception e) {
-                        addLogMessage("Comando fallito: " + e.getMessage(), LogType.WARNING);
                     }
                 }
             }
 
             // Se tutti i tentativi falliscono, mostra un avviso ma continua comunque
             if (!success) {
-                addLogMessage("Impossibile avviare PostgreSQL automaticamente", LogType.WARNING);
 
                 Platform.runLater(() -> {
                     // Mostra un alert con le istruzioni per l'avvio manuale
@@ -1462,8 +1440,7 @@ public class ServerInterfaceController {
             // Continua comunque, anche se PostgreSQL non è partito
             return true;
         } catch (Exception e) {
-            addLogMessage("Errore durante il tentativo di avvio di PostgreSQL: " + e.getMessage(), LogType.ERROR);
-            return false;
+           return false;
         }
     }
 
@@ -1501,11 +1478,9 @@ public class ServerInterfaceController {
     private void importAdditionalBooks(Connection conn, String filePath) throws SQLException, IOException {
         File file = new File(filePath);
         if (!file.exists() || file.length() == 0) {
-            addLogMessage("Libri.csv is empty or does not exist. Skipping...", LogType.WARNING);
             return;
         }
 
-        addLogMessage("Importing additional books from Libri.csv...", LogType.INFO);
 
         String sql = "INSERT INTO books (title, authors, category, publisher, publish_year) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (title, authors) DO NOTHING";
@@ -1543,12 +1518,9 @@ public class ServerInterfaceController {
                 }
             }
         }
-
-        addLogMessage("Imported additional books: Success=" + successCount + ", Errors=" + errorCount, LogType.INFO);
-    }
+}
 
     private void importUsers(Connection conn) throws SQLException, IOException {
-        addLogMessage("Importing users...", LogType.INFO);
 
         String sql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO NOTHING";
@@ -1577,13 +1549,14 @@ public class ServerInterfaceController {
                     userCount++;
                 }
             }
-            addLogMessage("Users imported successfully. Total: " + userCount, LogType.SUCCESS);
         }
     }
 
-    private void importLibraries(Connection conn) throws SQLException, IOException {
-        addLogMessage("Importing libraries...", LogType.INFO);
 
+    /**
+     * Improved method to import libraries that handles spaces in book titles
+     */
+    private void importLibraries(Connection conn) throws SQLException, IOException {
         String insertLibrarySql = "INSERT INTO libraries (user_id, library_name) " +
                 "VALUES (?, ?) ON CONFLICT (user_id, library_name) DO NOTHING " +
                 "RETURNING id";
@@ -1591,7 +1564,7 @@ public class ServerInterfaceController {
         String insertLibraryBookSql = "INSERT INTO library_books (library_id, book_id) " +
                 "VALUES (?, ?) ON CONFLICT DO NOTHING";
 
-        String findBookSql = "SELECT id FROM books WHERE title = ?";
+        String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
 
         int libraryCount = 0;
         int bookCount = 0;
@@ -1602,40 +1575,51 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "Librerie.dati.csv"))) {
 
             String line;
+            // Skip header if exists
+            if ((line = reader.readLine()) != null && line.contains("UserID")) {
+                // Skip header
+            }
 
             while ((line = reader.readLine()) != null) {
-                String[] fields = parseCsvLine(line);
+                try {
+                    String[] fields = parseCsvLine(line);
 
-                if (fields.length >= 2) {
-                    String userId = fields[0].trim().replaceAll("^\"|\"$", "");
-                    String libraryName = fields[1].trim().replaceAll("^\"|\"$", "");
+                    if (fields.length >= 2) {
+                        String userId = fields[0].trim();
+                        String libraryName = fields[1].trim();
 
-                    // Check if user exists
-                    String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
-                    try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
-                        pstmtCheckUser.setString(1, userId);
-                        ResultSet userRs = pstmtCheckUser.executeQuery();
+                        // Check if user exists
+                        String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
+                        try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
+                            pstmtCheckUser.setString(1, userId);
+                            ResultSet userRs = pstmtCheckUser.executeQuery();
 
-                        if (!userRs.next()) {
-                            continue;
+                            if (!userRs.next()) {
+                                System.out.println("Skipping library for non-existent user: " + userId);
+                                continue;
+                            }
                         }
-                    }
 
-                    // Insert library
-                    pstmtLib.setString(1, userId);
-                    pstmtLib.setString(2, libraryName);
+                        // Insert library
+                        pstmtLib.setString(1, userId);
+                        pstmtLib.setString(2, libraryName);
 
-                    ResultSet rs = pstmtLib.executeQuery();
-                    if (rs.next()) {
-                        int libraryId = rs.getInt(1);
-                        libraryCount++;
+                        ResultSet rs = pstmtLib.executeQuery();
+                        if (rs.next()) {
+                            int libraryId = rs.getInt(1);
+                            libraryCount++;
 
-                        // Add books to a library (remaining fields are book titles)
-                        for (int i = 2; i < fields.length && i < 12; i++) {
-                            String bookField = fields[i].trim().replaceAll("^\"|\"$", "");
-                            if (!bookField.equals("null") && !bookField.isEmpty()) {
-                                String bookTitle = bookField.replace("_", " ");
+                            // Add books to library (remaining fields are book titles)
+                            for (int i = 2; i < fields.length; i++) {
+                                String bookTitle = fields[i].trim();
+                                if (bookTitle.equals("null") || bookTitle.isEmpty()) {
+                                    continue;
+                                }
 
+                                // Replace underscores with spaces for lookup
+                                bookTitle = bookTitle.replace("_", " ");
+
+                                // Use ILIKE for case-insensitive matching with wildcard
                                 pstmtFindBook.setString(1, bookTitle);
                                 ResultSet bookRs = pstmtFindBook.executeQuery();
 
@@ -1645,24 +1629,28 @@ public class ServerInterfaceController {
                                     pstmtLibBook.setInt(2, bookId);
                                     pstmtLibBook.executeUpdate();
                                     bookCount++;
+                                } else {
+                                    System.out.println("Book not found in database: " + bookTitle);
                                 }
                             }
                         }
                     }
+                } catch (Exception e) {
+                    System.err.println("Error processing library line: " + line + " - " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
-            addLogMessage("Libraries imported: " + libraryCount + " libraries with " + bookCount + " books", LogType.SUCCESS);
-        } catch (Exception e) {
-            addLogMessage("Error importing libraries: " + e.getMessage(), LogType.ERROR);
-            throw e;
+            System.out.println("Imported " + libraryCount + " libraries with " + bookCount + " books");
         }
     }
 
-    private void importRatings(Connection conn) throws SQLException, IOException {
-        addLogMessage("Importing book ratings...", LogType.INFO);
 
-        String findBookSql = "SELECT id FROM books WHERE title = ?";
+    /**
+     * Improved method to import ratings with better CSV parsing
+     */
+    private void importRatings(Connection conn) throws SQLException, IOException {
+        String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
         String insertRatingSql = "INSERT INTO book_ratings (user_id, book_id, style_rating, " +
                 "content_rating, pleasantness_rating, originality_rating, " +
                 "edition_rating, average_rating, general_comment, style_comment, content_comment, " +
@@ -1679,60 +1667,57 @@ public class ServerInterfaceController {
             String line = reader.readLine(); // Read header
 
             while ((line = reader.readLine()) != null) {
-                String[] fields = parseCsvLine(line);
-                if (fields.length >= 8) {
-                    String userId = fields[0].trim();      // userid
-                    String bookTitle = fields[1].trim();   // titoloLibro
+                try {
+                    String[] fields = parseCsvLine(line);
+                    if (fields.length >= 8) {
+                        String userId = fields[0].trim();      // userid
+                        String bookTitle = fields[1].trim();   // titoloLibro
 
-                    // Find book ID
-                    pstmtFindBook.setString(1, bookTitle);
-                    ResultSet bookRs = pstmtFindBook.executeQuery();
+                        // Find book ID using case-insensitive search
+                        pstmtFindBook.setString(1, bookTitle);
+                        ResultSet bookRs = pstmtFindBook.executeQuery();
 
-                    if (bookRs.next()) {
-                        int bookId = bookRs.getInt(1);
+                        if (bookRs.next()) {
+                            int bookId = bookRs.getInt(1);
 
-                        pstmtRating.setString(1, userId);
-                        pstmtRating.setInt(2, bookId);
-                        pstmtRating.setInt(3, Integer.parseInt(fields[2].trim())); // stile
-                        pstmtRating.setInt(4, Integer.parseInt(fields[3].trim())); // contenuto
-                        pstmtRating.setInt(5, Integer.parseInt(fields[4].trim())); // gradevolezza
-                        pstmtRating.setInt(6, Integer.parseInt(fields[5].trim())); // originalita
-                        pstmtRating.setInt(7, Integer.parseInt(fields[6].trim())); // edizione
-                        pstmtRating.setFloat(8, Float.parseFloat(fields[7].trim())); // media
+                            pstmtRating.setString(1, userId);
+                            pstmtRating.setInt(2, bookId);
 
-                        // Comments
-                        pstmtRating.setString(9, fields.length > 8 ? fields[8].trim() : null);  // recensione
-                        pstmtRating.setString(10, fields.length > 9 ? fields[9].trim() : null); // commentoStile
-                        pstmtRating.setString(11, fields.length > 10 ? fields[10].trim() : null); // commentoContenuto
-                        pstmtRating.setString(12, fields.length > 11 ? fields[11].trim() : null); // commentoGradevolezza
-                        pstmtRating.setString(13, fields.length > 12 ? fields[12].trim() : null); // commentoOriginalita
-                        pstmtRating.setString(14, fields.length > 13 ? fields[13].trim() : null); // commentoEdizione
+                            // Parse ratings, handling potential format issues
+                            try {
+                                pstmtRating.setInt(3, Integer.parseInt(fields[2].trim())); // stile
+                                pstmtRating.setInt(4, Integer.parseInt(fields[3].trim())); // contenuto
+                                pstmtRating.setInt(5, Integer.parseInt(fields[4].trim())); // gradevolezza
+                                pstmtRating.setInt(6, Integer.parseInt(fields[5].trim())); // originalita
+                                pstmtRating.setInt(7, Integer.parseInt(fields[6].trim())); // edizione
+                                pstmtRating.setFloat(8, Float.parseFloat(fields[7].trim())); // media
+                            } catch (NumberFormatException e) {
+                                System.err.println("Error parsing rating values for book: " + bookTitle);
+                                continue;
+                            }
 
-                        pstmtRating.executeUpdate();
-                        ratingCount++;
+                            // Comments - handle array bounds carefully
+                            pstmtRating.setString(9, fields.length > 8 ? fields[8].trim() : null);  // recensione
+                            pstmtRating.setString(10, fields.length > 9 ? fields[9].trim() : null); // commentoStile
+                            pstmtRating.setString(11, fields.length > 10 ? fields[10].trim() : null); // commentoContenuto
+                            pstmtRating.setString(12, fields.length > 11 ? fields[11].trim() : null); // commentoGradevolezza
+                            pstmtRating.setString(13, fields.length > 12 ? fields[12].trim() : null); // commentoOriginalita
+                            pstmtRating.setString(14, fields.length > 13 ? fields[13].trim() : null); // commentoEdizione
+
+                            pstmtRating.executeUpdate();
+                            ratingCount++;
+                        } else {
+                            System.out.println("Book not found for rating: " + bookTitle);
+                        }
                     }
+                } catch (Exception e) {
+                    System.err.println("Error processing rating line: " + line);
+                    e.printStackTrace();
                 }
             }
 
-            addLogMessage("Ratings imported successfully. Total: " + ratingCount, LogType.SUCCESS);
+            System.out.println("Imported " + ratingCount + " book ratings");
         }
-    }
-
-    private void importRecommendations(Connection conn) throws SQLException, IOException {
-        addLogMessage("Checking for recommendations data...", LogType.INFO);
-
-        // First, check if ConsigliLibri.dati.csv exists and has content
-        File file = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
-        if (!file.exists() || file.length() == 0) {
-            addLogMessage("ConsigliLibri.dati.csv is empty or does not exist. Skipping...", LogType.WARNING);
-            return;
-        }
-
-        addLogMessage("Importing recommendations...", LogType.INFO);
-
-        // Implementation could be added here based on file structure
-
-        addLogMessage("Recommendations import - structure not defined, skipping", LogType.WARNING);
     }
 
     private void startSocketServer() {
@@ -1743,7 +1728,6 @@ public class ServerInterfaceController {
             try {
                 // Create a server socket that binds to all network interfaces
                 serverSocket = new ServerSocket(port, 50, InetAddress.getByName("0.0.0.0"));
-                addLogMessage("Server socket created on port " + port + " (accessible from network)", LogType.SUCCESS);
                 success = true;
 
                 // Start a thread for accepting client connections
@@ -1757,8 +1741,7 @@ public class ServerInterfaceController {
 
                         } catch (IOException e) {
                             if (serverRunning) {
-                                addLogMessage("Error accepting client connection: " + e.getMessage(), LogType.ERROR);
-                            }
+                           }
                         }
                     }
                 }).start();
@@ -1766,15 +1749,12 @@ public class ServerInterfaceController {
                 break; // Exit the loop if successful
 
             } catch (IOException e) {
-                addLogMessage("Failed to bind to port " + port + ": " + e.getMessage(), LogType.WARNING);
-                // Continue to try the next port
             }
         }
 
         if (!success) {
             String errorMsg = "Could not bind to any port. Tried ports: " + Arrays.toString(portsToTry);
-            addLogMessage(errorMsg, LogType.ERROR);
-            throw new RuntimeException("Failed to start server: " + errorMsg);
+          throw new RuntimeException("Failed to start server: " + errorMsg);
         }
     }
     private void handleClient(Socket clientSocket) {
@@ -1803,7 +1783,6 @@ public class ServerInterfaceController {
                 }
             }
         } catch (Exception e) {
-            addLogMessage("Error handling client: " + e.getMessage(), LogType.ERROR);
         } finally {
             // Clean up
             try {
@@ -1822,9 +1801,7 @@ public class ServerInterfaceController {
             Platform.runLater(() -> {
                 clientCountLabel.setText(String.valueOf(currentClients));
             });
-
-            addLogMessage("Client disconnected", LogType.INFO);
-        }
+ }
     }
     /**
      * Notifies all connected clients about server shutdown and initiates server shutdown
@@ -1832,10 +1809,9 @@ public class ServerInterfaceController {
     public void notifyAllClientsAndShutdown() {
         if (!serverRunning) return;
 
-        addLogMessage("Notifying all clients of server shutdown...", LogType.INFO);
 
         // Notify all connected clients
-        synchronized(connectedClientSockets) {
+        synchronized (connectedClientSockets) {
             for (Socket clientSocket : connectedClientSockets) {
                 try {
                     if (!clientSocket.isClosed()) {
@@ -1843,8 +1819,6 @@ public class ServerInterfaceController {
                         out.println("SERVER_SHUTDOWN");
                     }
                 } catch (IOException e) {
-                    // Ignore errors during shutdown
-                    addLogMessage("Error notifying client: " + e.getMessage(), LogType.WARNING);
                 }
             }
         }
@@ -1857,7 +1831,6 @@ public class ServerInterfaceController {
             try {
                 serverSocket.close();
             } catch (IOException e) {
-                addLogMessage("Error closing server socket: " + e.getMessage(), LogType.ERROR);
             }
         }
 
@@ -1880,31 +1853,29 @@ public class ServerInterfaceController {
             uptimeLabel.setText("-");
         });
 
-        addLogMessage("Server stopped and all clients notified", LogType.SUCCESS);
     }
+    /**
+     * Improved CSV line parser that better handles quotes and commas
+     */
     private String[] parseCsvLine(String line) {
-        // First, try to split by tabs if the line contains tabs
-        if (line.contains("\t")) {
-            return line.split("\t");
-        }
-
-        // Otherwise, use the standard CSV parsing logic
         List<String> fields = new ArrayList<>();
         StringBuilder currentField = new StringBuilder();
         boolean inQuotes = false;
+        char prevChar = 0;
 
         for (char c : line.toCharArray()) {
-            if (c == '"') {
+            if (c == '"' && prevChar != '\\') {
                 inQuotes = !inQuotes;
             } else if (c == ',' && !inQuotes) {
-                fields.add(currentField.toString());
+                fields.add(currentField.toString().trim().replaceAll("^\"|\"$", ""));
                 currentField = new StringBuilder();
             } else {
                 currentField.append(c);
             }
+            prevChar = c;
         }
 
-        fields.add(currentField.toString());
+        fields.add(currentField.toString().trim().replaceAll("^\"|\"$", ""));
         return fields.toArray(new String[0]);
     }
 
@@ -1962,20 +1933,7 @@ public class ServerInterfaceController {
         });
     }
 
-    private void addLogMessage(String message, LogType logType) {
-        String timestamp = getCurrentTimestamp();
-        String logEntry = "[" + timestamp + "] [" + logType.name() + "] " + message;
 
-        // Output to console instead of UI
-        System.out.println(logEntry);
-
-        // If for some reason we need to keep UI updates (e.g., for future reference)
-        // but the logContainer doesn't exist in the FXML, we can just skip that part
-    }
-    private String getCurrentTimestamp() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return sdf.format(new Date());
-    }
 
     private enum LogType {
         INFO(Color.RED),

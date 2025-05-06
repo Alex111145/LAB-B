@@ -31,7 +31,10 @@ public class RegistrationController {
     @FXML private Label successMessage;
 
 
-    private final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+    // Migliorato il pattern per l'email che richiede un dominio con TLD (.com, .it, ecc.)
+    private final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)\\.(com|it|org|net|edu|gov|mil|biz|info|io|co|uk|de|fr|es|ru|cn|jp|br|nl|eu|ch|se|no|dk|fi|pl|au|nz|in)$");
+
+    // Pattern del codice fiscale che ora verrà applicato dopo la conversione in maiuscolo
     private final Pattern CF_PATTERN = Pattern.compile("^[A-Z]{6}\\d{2}[A-Z]\\d{2}[A-Z]\\d{3}[A-Z]$");
     private final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
 
@@ -64,7 +67,9 @@ public class RegistrationController {
             isValid = false;
         }
 
-        if (!isValidCodiceFiscale(codiceFiscaleField.getText().trim())) {
+        // Converte il codice fiscale in maiuscolo prima della validazione
+        String codiceFiscale = codiceFiscaleField.getText().trim().toUpperCase();
+        if (!isValidCodiceFiscale(codiceFiscale)) {
             codiceFiscaleError.setVisible(true);
             isValid = false;
         }
@@ -113,7 +118,8 @@ public class RegistrationController {
 
             pstmt.setString(1, userIdField.getText().trim());
             pstmt.setString(2, nomeCognomeField.getText().trim());
-            pstmt.setString(3, codiceFiscaleField.getText().trim());
+            // Salva il codice fiscale in maiuscolo
+            pstmt.setString(3, codiceFiscaleField.getText().trim().toUpperCase());
             pstmt.setString(4, emailField.getText().trim());
             pstmt.setString(5, passwordField.getText());
 
@@ -158,7 +164,7 @@ public class RegistrationController {
         } catch (IOException e) {
             System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
-            successMessage.setText("Errore: " + e.getMessage());
+            successMessage.setText(e.getMessage());
             successMessage.setVisible(true);
         }
     }
@@ -168,6 +174,7 @@ public class RegistrationController {
     }
 
     private boolean isValidCodiceFiscale(String cf) {
+        // La validazione avviene su una stringa già convertita in maiuscolo
         return cf != null && !cf.isEmpty() && CF_PATTERN.matcher(cf).matches();
     }
 

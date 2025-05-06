@@ -378,7 +378,7 @@ public class AddBooksToLibraryController implements Initializable {
         authorLabel.setWrapText(true);
 
         // Dettagli del libro su una riga
-        Label detailsLabel = new Label("Categoria: " + book.getCategory() + " | Editore: " + book.getPublisher() + " | Anno: " + book.getPublishYear());
+        Label detailsLabel = new Label(" Autore: " + book.getAuthors() + " | Anno: " + book.getPublishYear());
         detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #777777;");
         detailsLabel.setWrapText(true);
 

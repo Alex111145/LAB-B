@@ -48,7 +48,7 @@
                                  </font>
                               </Label>
                               <TextField fx:id="nomeCognomeField" maxWidth="1.7976931348623157E308" promptText="Inserisci nome e cognome" />
-                              <Label fx:id="nomeCognomeError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: Il nome e cognome non possono essere vuoti." visible="false" />
+                              <Label fx:id="nomeCognomeError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Il nome e cognome non possono essere vuoti." visible="false" />
 
                               <Label text="UserID (massimo 8 caratteri):">
                                  <font>
@@ -59,7 +59,7 @@
                                  </VBox.margin>
                               </Label>
                               <TextField fx:id="userIdField" maxWidth="1.7976931348623157E308" promptText="Inserisci UserID" />
-                              <Label fx:id="userIdError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: l'UserID deve essere al massimo di 8 caratteri." visible="false" />
+                              <Label fx:id="userIdError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="L'UserID deve essere al massimo di 8 caratteri." visible="false" />
                               <Label fx:id="userIdExistsError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="UserID già esistente." visible="false" />
 
                               <Label text="Codice Fiscale:">
@@ -71,7 +71,7 @@
                                  </VBox.margin>
                               </Label>
                               <TextField fx:id="codiceFiscaleField" maxWidth="1.7976931348623157E308" promptText="Inserisci codice fiscale" />
-                              <Label fx:id="codiceFiscaleError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: il codice fiscale deve seguire il formato XXXXXX00X00X000X, riprova." visible="false" />
+                              <Label fx:id="codiceFiscaleError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Il codice fiscale deve seguire il formato XXXXXX00X00X000X, riprova." visible="false" />
 
                               <Label text="Indirizzo di Posta Elettronica:">
                                  <font>
@@ -82,7 +82,7 @@
                                  </VBox.margin>
                               </Label>
                               <TextField fx:id="emailField" maxWidth="1.7976931348623157E308" promptText="Inserisci email" />
-                              <Label fx:id="emailError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: formato email non valido." visible="false" />
+                              <Label fx:id="emailError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Formato email non valido." visible="false" />
 
                               <Label text="Password:">
                                  <font>
@@ -94,7 +94,7 @@
                               </Label>
                               <PasswordField fx:id="passwordField" maxWidth="1.7976931348623157E308" promptText="Inserisci password" />
                               <Label style="-fx-text-fill: #666666; -fx-font-size: 12px;" text="La password deve contenere almeno 8 caratteri, includere almeno una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale (@$!%*?&amp;)." wrapText="true" />
-                              <Label fx:id="passwordError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="Errore: la password deve contenere almeno 8 caratteri, includere almeno una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale." visible="false" wrapText="true" />
+                              <Label fx:id="passwordError" style="-fx-text-fill: red; -fx-font-size: 12px;" text="La password deve contenere almeno 8 caratteri, includere almeno una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale." visible="false" wrapText="true" />
                               <Button fx:id="registerButton" maxWidth="1.7976931348623157E308" minHeight="40.0" mnemonicParsing="false" onAction="#handleRegistration" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 40px; -fx-padding: 10px 20px;" text="Registrati" />
 
                               <Label fx:id="successMessage" style="-fx-text-fill: #75B965; -fx-font-size: 14px; -fx-font-weight: bold;" text="✓ Registrazione completata con successo!" visible="false">

@@ -572,7 +572,6 @@ public class RecommendBookController {
         // Nascondi eventuali messaggi di errore
         errorLabel.setVisible(false);
     }
-
     /**
      * Gestisce il salvataggio dei consigli.
      */
@@ -606,13 +605,10 @@ public class RecommendBookController {
 
         // Se ci sono libri consigliati, salva i consigli
         if (saveRecommendations()) {
-            // Mostra un messaggio di successo
-            errorLabel.setText("Consigli salvati con successo!");
-            errorLabel.setStyle("-fx-text-fill: green; -fx-font-size: 18px;");
-            errorLabel.setVisible(true);
+            // Invece di mostrare il messaggio di successo, naviga direttamente al menu utente
+            navigateToUserMenu(event);
         }
     }
-
     /**
      * Salva le raccomandazioni nel database.
      * @return true se il salvataggio è avvenuto con successo, false altrimenti

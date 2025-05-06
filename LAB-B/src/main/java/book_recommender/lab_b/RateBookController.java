@@ -215,7 +215,7 @@ public class RateBookController implements Initializable {
                 originalityRating == 0 || editionRating == 0) {
 
             // Mostra il messaggio di errore
-            errorLabel.setText("Errore: Devi assegnare un voto a tutte le caratteristiche prima di inviare.");
+            errorLabel.setText("Devi assegnare un voto e una descrizione a tutte le caratteristiche prima di inviare.");
             errorLabel.setVisible(true);
             return;
         }
