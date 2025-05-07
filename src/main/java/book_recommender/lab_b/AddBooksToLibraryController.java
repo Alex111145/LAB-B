@@ -60,6 +60,7 @@ public class AddBooksToLibraryController implements Initializable {
 
     private DatabaseManager dbManager;
 
+
     /**
      * Inizializza il controller.
      */
@@ -85,8 +86,10 @@ public class AddBooksToLibraryController implements Initializable {
 
         // Aggiorna lo stato del bottone clearAllButton
         updateClearAllButtonState();
-    }
 
+        // Imposta il colore rosso per il pulsante "Cancella Tutti"
+        clearAllButton.setStyle("-fx-background-color: #ff4136; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;");
+    }
     private void updateClearAllButtonState() {
         boolean hasSelectedBooks = !selectedBooks.isEmpty();
         clearAllButton.setDisable(!hasSelectedBooks);
