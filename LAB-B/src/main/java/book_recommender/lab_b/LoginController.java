@@ -33,7 +33,6 @@ public class LoginController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -86,7 +85,6 @@ public class LoginController {
             return rs.next(); // Se c'è almeno un risultato, l'utente è già connesso
 
         } catch (SQLException e) {
-            System.err.println("Errore durante la verifica degli utenti connessi: " + e.getMessage());
             return false; // In caso di errore, procediamo come se l'utente non fosse connesso
         }
     }
@@ -105,7 +103,6 @@ public class LoginController {
             dbManager.updateClientConnection(clientId, isConnecting);
 
         } catch (SQLException e) {
-            System.err.println("Errore durante la registrazione della connessione utente: " + e.getMessage());
         }
     }
 
@@ -133,7 +130,6 @@ public class LoginController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
             errorMessage.setText("Errore: " + e.getMessage());
             errorMessage.setVisible(true);
         }
@@ -152,7 +148,6 @@ public class LoginController {
             return rs.next();
 
         } catch (SQLException e) {
-            System.err.println("Error validating login: " + e.getMessage());
             return false;
         }
     }
@@ -171,7 +166,6 @@ public class LoginController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
             errorMessage.setText("Errore: " + e.getMessage());
             errorMessage.setVisible(true);
@@ -190,7 +184,6 @@ public class LoginController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
 
             errorMessage.setText("Errore: " + e.getMessage());
             errorMessage.setVisible(true);

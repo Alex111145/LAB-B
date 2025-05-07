@@ -17,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -87,7 +86,6 @@ public class RateBookController implements Initializable {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
 
         // Nasconde l'etichetta di errore all'avvio
@@ -143,7 +141,6 @@ public class RateBookController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting book ID: " + e.getMessage());
         }
 
         // Controlla se l'utente ha già valutato questo libro
@@ -187,7 +184,6 @@ public class RateBookController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking existing rating: " + e.getMessage());
         }
     }
 
@@ -203,7 +199,6 @@ public class RateBookController implements Initializable {
 
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -286,7 +281,6 @@ public class RateBookController implements Initializable {
                 return true;
             }
         } catch (SQLException e) {
-            System.err.println("Error saving rating: " + e.getMessage());
             return false;
         }
     }
@@ -305,7 +299,6 @@ public class RateBookController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -347,7 +340,6 @@ public class RateBookController implements Initializable {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della schermata di selezione libro: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);

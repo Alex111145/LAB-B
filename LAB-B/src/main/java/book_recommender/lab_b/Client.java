@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.Connection;
@@ -99,9 +98,7 @@ public class Client extends Application {
                         registerClientConnection(true);
                         return true;
                     } catch (Exception e) {
-                        System.err.println("ERRORE: Impossibile connettersi al server. Assicurarsi che il server sia in esecuzione.");
-                        System.err.println("Dettagli: " + e.getMessage());
-                        return false;
+                      return false;
                     }
                 }
             };
@@ -152,9 +149,7 @@ public class Client extends Application {
             new Thread(connectionTask).start();
 
         } catch (Exception e) {
-            System.err.println("ERRORE: Impossibile connettersi al server. Assicurarsi che il server sia in esecuzione.");
-            System.err.println("Dettagli: " + e.getMessage());
-            showServerErrorAlert(primaryStage, "Errore di connessione",
+          showServerErrorAlert(primaryStage, "Errore di connessione",
                     "Connessione al database fallita",
                     "Impossibile connettersi al database: " + e.getMessage() +
                             "\nL'applicazione verrà chiusa. Verificare i parametri di connessione.");
@@ -233,8 +228,7 @@ public class Client extends Application {
                 testConnection.close();
                 return true;
             } catch (SQLException e) {
-                System.err.println("Test di connessione fallito: " + e.getMessage());
-                showConnectionParametersError();
+               showConnectionParametersError();
                 return false;
             }
         }
@@ -297,14 +291,9 @@ public class Client extends Application {
             // Update active_clients table in database
             if (dbManager != null) {
                 dbManager.updateClientConnection(clientIdShort, isConnecting);
-                System.out.println("Client " + (isConnecting ? "registered" : "unregistered") +
-                        " with ID: " + clientIdShort);
-            } else {
-                System.err.println("Database manager is null, cannot register client");
-            }
+           }
         } catch (Exception e) {
-            System.err.println("Error registering client connection: " + e.getMessage());
-            e.printStackTrace();
+           e.printStackTrace();
         }
     }
 
@@ -322,8 +311,7 @@ public class Client extends Application {
                 serverSocket.close();
             }
         } catch (IOException e) {
-            System.err.println("Errore durante la chiusura della connessione: " + e.getMessage());
-        }
+      }
     }
 
     /**
@@ -391,7 +379,6 @@ public class Client extends Application {
             });
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricare la schermata di disconnessione: " + e.getMessage());
 
             // Fallback nel caso in cui non si riesca a caricare il FXML
             Platform.runLater(() -> {

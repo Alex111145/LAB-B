@@ -44,7 +44,6 @@ public class RegistrationController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -105,7 +104,6 @@ public class RegistrationController {
             return rs.next();
 
         } catch (SQLException e) {
-            System.err.println("Error checking if userId exists: " + e.getMessage());
             return true; // Return true to prevent registration on error
         }
     }
@@ -127,7 +125,6 @@ public class RegistrationController {
             return true;
 
         } catch (SQLException e) {
-            System.err.println("Error saving user to database: " + e.getMessage());
             return false;
         }
     }
@@ -142,7 +139,6 @@ public class RegistrationController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
 
         }
     }
@@ -162,7 +158,6 @@ public class RegistrationController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
             successMessage.setText(e.getMessage());
             successMessage.setVisible(true);

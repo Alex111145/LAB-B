@@ -15,12 +15,10 @@ import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,12 +28,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ServerInterfaceController {
 
     // Google Drive file IDs
-    private static final String VALUTAZIONI_FILE_ID = "1Qj-T4_warMiZKTom5mqRgbIwvCp6vQ10";
-    private static final String UTENTI_FILE_ID = "1SOKgKVMGPnYhfhZ_DIBlL47PUh5iH-qc";
-    private static final String LIBRI_FILE_ID = "1kXi-D1kMGqzfL77eLIrVF02rFfVfn325";
-    private static final String LIBRERIE_FILE_ID = "1Q6JKFy39qewXx7KBmv5XbtES5e8oPfpM";
-    private static final String DATA_FILE_ID = "1M-C9XWeQoketrqS2ybAhw_fTHSzpcdMd";
-    private static final String CONSIGLI_FILE_ID = "1m5sPTNxVlEIfELkiWYL2mWOXQwEj8mfn";
+    private static final String VALUTAZIONI_FILE_ID = "1kBmaKQoCb-Z_DrTXGzEXt0htDYxG0ZRd";
+    private static final String UTENTI_FILE_ID = "1Yn_pEZa7TpcT1ZIynhBCL31jtAHyRHBj";
+    private static final String LIBRI_FILE_ID = "1C7Uz6fc6MRR0zp4tcDeU9D-THXW8n5mk";
+    private static final String LIBRERIE_FILE_ID = "1S5G3wYhCq9UXDrhfGuhOZ7JzQ_YCyR4Q";
+    private static final String DATA_FILE_ID = "17E35q-wg3YQn3EUsYyKeHDpzXOre8pYU";
+    private static final String CONSIGLI_FILE_ID = "1tuUDCljamjaC4VKsu2VBwXSYFV7e8ilC";
+
 
     private ScheduledExecutorService clientMonitorScheduler;  // Add at the top of the class with other fields
     private NgrokManager ngrokManager;
@@ -104,9 +103,12 @@ public class ServerInterfaceController {
             ClipboardContent content = new ClipboardContent();
             content.putString(hostInfo);
             clipboard.setContent(content);
+
+            // Fornisci feedback visivo al bottone
+            Button sourceButton = (Button) event.getSource();
+            showButtonFeedback(sourceButton);
         }
     }
-
     @FXML
     public void onCopyNgrokPort(ActionEvent event) {
         // Copia solo la porta negli appunti
@@ -116,12 +118,16 @@ public class ServerInterfaceController {
             ClipboardContent content = new ClipboardContent();
             content.putString(String.valueOf(portInfo));
             clipboard.setContent(content);
+
+            // Fornisci feedback visivo al bottone
+            Button sourceButton = (Button) event.getSource();
+            showButtonFeedback(sourceButton);
         }
     }
     @FXML
     public void initialize() {
         // Create a temp directory if it doesn't exist
-        new File(TEMP_DIR).mkdirs();
+        new File(TEMP_DIR);
 
         // Initialize scheduler for updating uptime
         scheduler = Executors.newScheduledThreadPool(1);
@@ -180,16 +186,7 @@ public class ServerInterfaceController {
         // Remaining code stays the same...
     }
 
-    @FXML
-    public void onCopyNgrokInfo(ActionEvent event) {
 
-        // Copia negli appunti
-        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
-        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-
-        clipboard.setContent(content);
-
-   }
 
 
     @FXML
@@ -486,11 +483,29 @@ public class ServerInterfaceController {
         }
     }
     @FXML
-
     private void onStopServer(ActionEvent event) {
         if (!serverRunning) return;
 
-        cleanupDatabaseAndShutdown();
+        // Show confirmation dialog before shutting down
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Spegni Server");
+            alert.setHeaderText("Spegnimento del Server in corso...");
+            alert.setContentText("Sei sicuro di voler arrestare il Server? \nTutti gli utenti collegati verranno immediatamente scollegati.");
+
+            // Customize the buttons
+            ((Button) alert.getDialogPane().lookupButton(ButtonType.OK)).setText("OK");
+            ((Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("Annulla");
+
+            // Handle the result
+            alert.showAndWait().ifPresent(result -> {
+                if (result == ButtonType.OK) {
+                    // User confirmed, proceed with shutdown
+                    cleanupDatabaseAndShutdown();
+                }
+                // If cancel, do nothing
+            });
+        });
     }
     @FXML
     private void onClearLog() {
@@ -514,14 +529,18 @@ public class ServerInterfaceController {
             updateProgress(0.1, "Starting socket server...");
             startSocketServer();
 
-            // Step 1.5: Verifica e avvia PostgreSQL se necessario
+            // Step 1.5: Verify and start PostgreSQL if necessary
             updateProgress(0.15, "Checking PostgreSQL status...");
             if (!isPostgresInstalled()) {
-              installPostgresIfNeeded(); // Continua anche se fallisce
+                boolean installed = installPostgresIfNeeded();
+                if (!installed) {
+                }
             }
 
             if (!isPostgresRunning()) {
-              startPostgresIfNeeded(); // Continua anche se fallisce
+                boolean started = startPostgresIfNeeded();
+                if (!started) {
+                }
             }
 
             // Step 2: Initialize the database connection using DatabaseManager
@@ -538,32 +557,20 @@ public class ServerInterfaceController {
                     if (dbPasswordField != null) dbPasswordField.setText(finalDbPassword);
                 });
 
-
-                // Step 3: Always download files
+                // Step 3: Download files
                 updateProgress(0.3, "Downloading data files...");
                 downloadAllFiles();
 
-                // Step 4: Always initialize a database
-                updateProgress(0.5, "Recreating database tables...");
+                // Step 4: Initialize database tables
+                updateProgress(0.5, "Creating database tables...");
                 initializeDatabase(dbUrl, finalDbUser, finalDbPassword);
 
-                // Step 5: Always import data
+                // Step 5: Import data
                 updateProgress(0.7, "Importing data...");
                 populateDatabase(dbUrl, finalDbUser, finalDbPassword);
 
-                // Step 6: Create active_clients table for client tracking
+                // Step 6: Create active_clients table for client tracking (already done in initializeDatabase)
                 updateProgress(0.8, "Setting up client tracking...");
-                try (Connection conn = dbManager.getConnection();
-                     Statement stmt = conn.createStatement()) {
-                    stmt.execute(
-                            "CREATE TABLE IF NOT EXISTS active_clients (" +
-                                    "    client_id VARCHAR(50) PRIMARY KEY," +
-                                    "    connect_time TIMESTAMP NOT NULL" +
-                                    ")"
-                    );
-                } catch (SQLException e) {
-
-                }
 
                 // Step 7: Start client count monitoring
                 updateProgress(0.85, "Starting client monitoring...");
@@ -580,12 +587,13 @@ public class ServerInterfaceController {
                     serverStatusLabel.setTextFill(Color.GREEN);
                 });
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException("Database initialization failed", e);
             }
 
         } catch (Exception e) {
             String errorMsg = "Server initialization failed: " + e.getMessage();
-          e.printStackTrace();
+            e.printStackTrace();
 
             // Update UI on error
             Platform.runLater(() -> {
@@ -595,6 +603,27 @@ public class ServerInterfaceController {
                 serverRunning = false;
             });
         }
+    }
+
+    // Metodo di utilità per dare feedback visivo al bottone dopo il clic
+    private void showButtonFeedback(Button button) {
+        // Salva il colore originale
+        String originalStyle = button.getStyle();
+
+        // Imposta il colore verde
+        button.setStyle("-fx-background-color: #00C853; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;");
+
+        // Dopo un breve ritardo, ripristina il colore originale
+        new Thread(() -> {
+            try {
+                Thread.sleep(500); // Attesa di 500ms
+                Platform.runLater(() -> {
+                    button.setStyle(originalStyle);
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
 
     private void startNgrokAutomatically() {
@@ -740,31 +769,75 @@ public class ServerInterfaceController {
     }
     /**
      * Delete all files in the temporary directory
+     * Metodo migliorato per la cancellazione efficace dei file temporanei
      */
     private void deleteTemporaryFiles() {
-        try {
+
             File tempDir = new File(TEMP_DIR);
             if (tempDir.exists() && tempDir.isDirectory()) {
+                // First, delete all files in the directory
                 File[] files = tempDir.listFiles();
                 if (files != null) {
                     for (File file : files) {
                         if (file.isFile()) {
                             boolean deleted = file.delete();
                             if (!deleted) {
-                              file.deleteOnExit();
+                             file.deleteOnExit();
                             }
+                        } else if (file.isDirectory()) {
+                            // Handle subdirectories recursively
+                            deleteDirectoryRecursively(file);
                         }
                     }
                 }
-                // Try to delete the directory itself
+
+                // Now try to delete the directory itself
                 boolean dirDeleted = tempDir.delete();
                 if (!dirDeleted) {
-                    // If not empty or in use, mark for deletion on exit
-                    tempDir.deleteOnExit();
+
+                    // Try force garbage collection to release locks
+                    System.gc();
+                    try {
+                        Thread.sleep(200); // Give a little time for GC
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    dirDeleted = tempDir.delete();
+
+                    if (!dirDeleted) {
+                        // If still can't delete, schedule for deletion on JVM exit
+                        tempDir.deleteOnExit();
+                  }
                 }
             }
-        } catch (Exception e) {
         }
+
+    /**
+     * Helper method to delete a directory and all its contents recursively
+     * Nuovo metodo helper per la cancellazione ricorsiva di directory
+     */
+    private boolean deleteDirectoryRecursively(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectoryRecursively(file);
+                    } else {
+                        boolean deleted = file.delete();
+                        if (!deleted) {
+                         file.deleteOnExit();
+                        }
+                    }
+                }
+            }
+        }
+        boolean deleted = directory.delete();
+        if (!deleted) {
+           directory.deleteOnExit();
+        }
+        return deleted;
     }
     /**
      * Cleans up the database by dropping all tables
@@ -799,138 +872,176 @@ public class ServerInterfaceController {
 
     private void downloadAllFiles() throws IOException {
 
-        // Assicurati che la directory temp_data esista prima di iniziare il download
+        // Make sure the temp directory exists
         File tempDir = new File(TEMP_DIR);
         if (!tempDir.exists()) {
             boolean created = tempDir.mkdirs();
             if (!created) {
-             throw new IOException("Failed to create directory: " + TEMP_DIR);
+                throw new IOException("Failed to create directory: " + TEMP_DIR);
             }
         }
 
         try {
+            // Download all required files
             downloadFromGoogleDrive(VALUTAZIONI_FILE_ID, "ValutazioniLibri.csv");
             downloadFromGoogleDrive(UTENTI_FILE_ID, "UtentiRegistrati.csv");
             downloadFromGoogleDrive(LIBRI_FILE_ID, "Libri.csv");
             downloadFromGoogleDrive(LIBRERIE_FILE_ID, "Librerie.dati.csv");
             downloadFromGoogleDrive(DATA_FILE_ID, "Data.csv");
-            downloadFromGoogleDrive(CONSIGLI_FILE_ID, "ConsigliLibri.dati.csv");
+            downloadFromGoogleDrive(CONSIGLI_FILE_ID, "ConsigliLibri.csv");
 
-        } catch (IOException e) {
-          throw e; // Rilancia l'eccezione per gestirla nel metodo chiamante
+      } catch (IOException e) {
+           throw e;
         }
     }
+
     private void downloadFromGoogleDrive(String fileId, String fileName) throws IOException {
-        // Assicurati che la directory temp_data esista
-        File tempDir = new File(TEMP_DIR);
-        if (!tempDir.exists()) {
-            boolean created = tempDir.mkdirs(); // Usa mkdirs() invece di mkdir() per creare anche le directory parent se necessario
-
-        }
-
+       
         String urlString = "https://drive.google.com/uc?id=" + fileId + "&export=download";
+        File outputFile = new File(TEMP_DIR + fileName);
 
         try {
-            URL url = URI.create(urlString).toURL();
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(10000); // 10 seconds
+            connection.setReadTimeout(60000);    // 60 seconds
 
-            try (InputStream in = url.openStream();
-                 ReadableByteChannel rbc = Channels.newChannel(in);
-                 FileOutputStream fos = new FileOutputStream(TEMP_DIR + fileName)) {
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new IOException("HTTP error code: " + responseCode);
+            }
 
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            // Get file size for logging
+            int fileSize = connection.getContentLength();
+         
+            // Create parent directories if needed
+            if (outputFile.getParentFile() != null) {
+                outputFile.getParentFile().mkdirs();
+            }
+
+            // Download file
+            try (InputStream in = connection.getInputStream();
+                 FileOutputStream out = new FileOutputStream(outputFile)) {
+
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                long totalBytesRead = 0;
+
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
+
+                    // Log progress for large files
+                    if (fileSize > 1000000 && totalBytesRead % 500000 == 0) { // 500KB increments for files > 1MB
+                  }
+                }
+
            }
+
+            // Check if file was actually downloaded
+            if (!outputFile.exists() || outputFile.length() == 0) {
+                throw new IOException("File downloaded but is empty or not found: " + outputFile.getAbsolutePath());
+            }
+
         } catch (Exception e) {
-            String errorMsg = "Error downloading file " + fileName + ": " + e.getMessage();
-           throw new IOException("Failed to download file: " + fileName, e);
+            throw new IOException("Failed to download file: " + fileName, e);
         }
     }
 
     private void initializeDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException {
-
+      
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
             Connection conn = dbManager.getConnection();
 
             try (Statement stmt = conn.createStatement()) {
-                // Drop existing tables if any
+                // Drop existing tables if any (in reverse order to handle foreign keys)
                 String[] dropStatements = {
                         "DROP TABLE IF EXISTS book_recommendations CASCADE",
                         "DROP TABLE IF EXISTS book_ratings CASCADE",
                         "DROP TABLE IF EXISTS library_books CASCADE",
                         "DROP TABLE IF EXISTS libraries CASCADE",
                         "DROP TABLE IF EXISTS books CASCADE",
-                        "DROP TABLE IF EXISTS users CASCADE"
+                        "DROP TABLE IF EXISTS users CASCADE",
+                        "DROP TABLE IF EXISTS active_clients CASCADE"
                 };
 
                 for (String sql : dropStatements) {
                     stmt.execute(sql);
-                }
+              }
 
-                // Create tables
+                // Create tables in proper order
                 String[] createTableStatements = {
-                        // Users' table
+                        // Users table
                         "CREATE TABLE IF NOT EXISTS users (" +
-                                "    user_id VARCHAR(8) PRIMARY KEY UNIQUE," +
-                                "    full_name VARCHAR(100) NOT NULL," +
-                                "    fiscal_code VARCHAR(16) NOT NULL ," +
-                                "    email VARCHAR(100) NOT NULL," +
-                                "    password VARCHAR(100) NOT NULL" +
+                                "user_id VARCHAR(8) PRIMARY KEY UNIQUE," +
+                                "full_name VARCHAR(100) NOT NULL," +
+                                "fiscal_code VARCHAR(16) NOT NULL," +
+                                "email VARCHAR(100) NOT NULL," +
+                                "password VARCHAR(100) NOT NULL" +
                                 ")",
 
                         // Books table
                         "CREATE TABLE IF NOT EXISTS books (" +
-                                "    id SERIAL PRIMARY KEY," +
-                                "    title TEXT NOT NULL," +
-                                "    authors TEXT NOT NULL," +
-                                "    category TEXT," +
-                                "    publisher TEXT," +
-                                "    publish_year INTEGER," +
-                                "    UNIQUE(title, authors)" +
+                                "id SERIAL PRIMARY KEY," +
+                                "title TEXT NOT NULL," +
+                                "authors TEXT NOT NULL," +
+                                "category TEXT," +
+                                "publisher TEXT," +
+                                "publish_year INTEGER," +
+                                "UNIQUE(title, authors)" +
                                 ")",
 
-                        // Libraries' table
+                        // Libraries table
                         "CREATE TABLE IF NOT EXISTS libraries (" +
-                                "    id SERIAL PRIMARY KEY," +
-                                "    user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
-                                "    library_name VARCHAR(100) NOT NULL," +
-                                "    UNIQUE(user_id, library_name)" +
+                                "id SERIAL PRIMARY KEY," +
+                                "user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
+                                "library_name VARCHAR(100) NOT NULL," +
+                                "UNIQUE(user_id, library_name)" +
                                 ")",
 
                         // Library_Books table (many-to-many relationship)
                         "CREATE TABLE IF NOT EXISTS library_books (" +
-                                "    library_id INTEGER REFERENCES libraries(id) ON DELETE CASCADE," +
-                                "    book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
-                                "    PRIMARY KEY (library_id, book_id)" +
+                                "library_id INTEGER REFERENCES libraries(id) ON DELETE CASCADE," +
+                                "book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
+                                "PRIMARY KEY (library_id, book_id)" +
                                 ")",
 
                         // Book_Ratings table
                         "CREATE TABLE IF NOT EXISTS book_ratings (" +
-                                "    id SERIAL PRIMARY KEY," +
-                                "    user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
-                                "    book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
-                                "    style_rating INTEGER CHECK (style_rating >= 1 AND style_rating <= 5)," +
-                                "    content_rating INTEGER CHECK (content_rating >= 1 AND content_rating <= 5)," +
-                                "    pleasantness_rating INTEGER CHECK (pleasantness_rating >= 1 AND pleasantness_rating <= 5)," +
-                                "    originality_rating INTEGER CHECK (originality_rating >= 1 AND originality_rating <= 5)," +
-                                "    edition_rating INTEGER CHECK (edition_rating >= 1 AND edition_rating <= 5)," +
-                                "    average_rating FLOAT," +
-                                "    general_comment TEXT," +
-                                "    style_comment TEXT," +
-                                "    content_comment TEXT," +
-                                "    pleasantness_comment TEXT," +
-                                "    originality_comment TEXT," +
-                                "    edition_comment TEXT," +
-                                "    UNIQUE(user_id, book_id)" +
+                                "id SERIAL PRIMARY KEY," +
+                                "user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
+                                "book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
+                                "style_rating INTEGER CHECK (style_rating >= 1 AND style_rating <= 5)," +
+                                "content_rating INTEGER CHECK (content_rating >= 1 AND content_rating <= 5)," +
+                                "pleasantness_rating INTEGER CHECK (pleasantness_rating >= 1 AND pleasantness_rating <= 5)," +
+                                "originality_rating INTEGER CHECK (originality_rating >= 1 AND originality_rating <= 5)," +
+                                "edition_rating INTEGER CHECK (edition_rating >= 1 AND edition_rating <= 5)," +
+                                "average_rating FLOAT," +
+                                "general_comment TEXT," +         // Commento generale
+                                "style_comment TEXT," +           // Commento sullo stile
+                                "content_comment TEXT," +         // Commento sul contenuto
+                                "pleasantness_comment TEXT," +    // Commento sulla gradevolezza
+                                "originality_comment TEXT," +     // Commento sull'originalità
+                                "edition_comment TEXT," +         // Commento sull'edizione
+                                "UNIQUE(user_id, book_id)" +
                                 ")",
 
                         // Book_Recommendations table
                         "CREATE TABLE IF NOT EXISTS book_recommendations (" +
-                                "    id SERIAL PRIMARY KEY," +
-                                "    user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
-                                "    source_book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
-                                "    recommended_book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
-                                "    UNIQUE(user_id, source_book_id, recommended_book_id)" +
+                                "id SERIAL PRIMARY KEY," +
+                                "user_id VARCHAR(8) REFERENCES users(user_id) ON DELETE CASCADE," +
+                                "source_book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
+                                "recommended_book_id INTEGER REFERENCES books(id) ON DELETE CASCADE," +
+                                "UNIQUE(user_id, source_book_id, recommended_book_id)" +
+                                ")",
+
+                        // Active_Clients table
+                        "CREATE TABLE IF NOT EXISTS active_clients (" +
+                                "client_id VARCHAR(50) PRIMARY KEY," +
+                                "connect_time TIMESTAMP NOT NULL" +
                                 ")"
                 };
 
@@ -938,59 +1049,155 @@ public class ServerInterfaceController {
                     stmt.execute(sql);
                 }
 
-           }
+                // Create indexes for better performance
+                String[] indexStatements = {
+                        "CREATE INDEX IF NOT EXISTS idx_books_title ON books(title)",
+                        "CREATE INDEX IF NOT EXISTS idx_books_authors ON books(authors)",
+                        "CREATE INDEX IF NOT EXISTS idx_book_ratings_user_id ON book_ratings(user_id)",
+                        "CREATE INDEX IF NOT EXISTS idx_book_ratings_book_id ON book_ratings(book_id)",
+                        "CREATE INDEX IF NOT EXISTS idx_library_books_book_id ON library_books(book_id)",
+                        "CREATE INDEX IF NOT EXISTS idx_library_books_library_id ON library_books(library_id)"
+                };
+
+                for (String sql : indexStatements) {
+                    stmt.execute(sql);
+              }
+            }
+
         } catch (SQLException e) {
-           throw e;
+            throw e;
         }
     }
-    private void populateDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException, IOException {
 
+    private void populateDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException, IOException {
+    
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
             Connection conn = dbManager.getConnection();
 
+            // Disable auto-commit for better performance
+            boolean originalAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
             try {
-                // Import books from Data.csv
-                importBooks(conn, TEMP_DIR + "Data.csv");
-
-                // Import users
-                importUsers(conn);
-
-                // Import libraries
-                importLibraries(conn);
-
-                // Import ratings
-                importRatings(conn);
-
-                // Import recommendations (if available)
-                File recFile = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
-                if (recFile.exists() && recFile.length() > 0) {
-                    importRecommendations(conn);
-                }
-
+                // Import books from Data.csv first (this contains all book metadata)
+             importBooks(conn, TEMP_DIR + "Data.csv");
                 conn.commit();
+            
+                // Import users from UtentiRegistrati.csv
+                importUsers(conn);
+                conn.commit();
+             
+                // Import libraries from Librerie.dati.csv
+             importLibraries(conn);
+                conn.commit();
+             
+                // Import ratings from ValutazioniLibri.csv
+               importRatings(conn);
+                conn.commit();
+              
+                // Import recommendations from ConsigliLibri.dati.csv or ConsigliLibri.csv
+              importRecommendations(conn);
+                conn.commit();
+             
+                // Verify database content
+                verifyDatabaseContent(conn);
 
             } catch (Exception e) {
+                // Rollback on error
+                e.printStackTrace();
                 conn.rollback();
-              throw e;
+                throw e;
+            } finally {
+                // Restore original auto-commit setting
+                conn.setAutoCommit(originalAutoCommit);
             }
         } catch (SQLException e) {
             throw e;
         }
-    }
-    private void importRecommendations(Connection conn) throws SQLException, IOException {
-        // First, check if ConsigliLibri.dati.csv exists and has content
-        File file = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
-        if (!file.exists() || file.length() == 0) {
-            // Log the problem
-            System.err.println("ConsigliLibri.dati.csv file missing or empty");
-            return;
+ }
+    private void verifyDatabaseContent(Connection conn) throws SQLException {
+       
+        try (Statement stmt = conn.createStatement()) {
+            // Check users table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
+                if (rs.next()) {
+             }
+            }
+
+            // Check books table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM books")) {
+                if (rs.next()) {
+                }
+            }
+
+            // Check libraries table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM libraries")) {
+                if (rs.next()) {
+               }
+            }
+
+            // Check library_books table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM library_books")) {
+                if (rs.next()) {
+               }
+            }
+
+            // Check book_ratings table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_ratings")) {
+                if (rs.next()) {
+               }
+            }
+
+            // Check book_recommendations table
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_recommendations")) {
+                if (rs.next()) {
+              }
+            }
+
+            // Sample data check
+       
+            // Sample users
+            try (ResultSet rs = stmt.executeQuery("SELECT user_id, full_name, email FROM users LIMIT 3")) {
+              while (rs.next()) {
+               }
+            }
+
+            // Sample books
+            try (ResultSet rs = stmt.executeQuery("SELECT id, title, authors, category FROM books LIMIT 3")) {
+               while (rs.next()) {
+               }
+            }
+
+            // Sample ratings
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT br.user_id, b.title, br.average_rating " +
+                            "FROM book_ratings br " +
+                            "JOIN books b ON br.book_id = b.id " +
+                            "LIMIT 3")) {
+               while (rs.next()) {
+               }
+            }
         }
 
-        String findBookIdByTitleSql = "SELECT id FROM books WHERE title ILIKE ?";
+    }
+
+    private void importRecommendations(Connection conn) throws SQLException, IOException {
+      
+        // Try both possible filenames
+        File consigliFile = new File(TEMP_DIR + "ConsigliLibri.csv");
+        if (!consigliFile.exists()) {
+            consigliFile = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
+            if (!consigliFile.exists()) {
+               return;
+            }
+        }
+
+      
+        String findBookByTitleSql = "SELECT id FROM books WHERE title = ?";
+        String findBookByTitleLikeSql = "SELECT id FROM books WHERE title ILIKE ?";
+
         String insertRecommendationSql =
                 "INSERT INTO book_recommendations (user_id, source_book_id, recommended_book_id) " +
                         "VALUES (?, ?, ?) ON CONFLICT (user_id, source_book_id, recommended_book_id) DO NOTHING";
@@ -998,93 +1205,142 @@ public class ServerInterfaceController {
         int recommendationCount = 0;
         int errorCount = 0;
 
-        try (PreparedStatement pstmtFindBook = conn.prepareStatement(findBookIdByTitleSql);
+        try (PreparedStatement pstmtFindBook = conn.prepareStatement(findBookByTitleSql);
+             PreparedStatement pstmtFindBookLike = conn.prepareStatement(findBookByTitleLikeSql);
              PreparedStatement pstmtInsert = conn.prepareStatement(insertRecommendationSql);
-             BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "ConsigliLibri.dati.csv"))) {
+             BufferedReader reader = new BufferedReader(new FileReader(consigliFile))) {
 
-            String line = reader.readLine(); // Skip header line
-            if (line == null) return;
-
+            String line = reader.readLine(); // Skip header
+        int lineNum = 1;
             while ((line = reader.readLine()) != null) {
+                lineNum++;
                 try {
                     String[] fields = parseCsvLine(line);
-                    if (fields.length >= 3) {  // Need at least userId, source book, and one recommendation
-                        String userId = fields[0].trim();
-                        String sourceBookTitle = fields[1].trim();
 
-                        // Find source book ID
-                        pstmtFindBook.setString(1, sourceBookTitle);
-                        ResultSet sourceBookRs = pstmtFindBook.executeQuery();
+                    if (fields.length < 3) {
+                      continue;
+                    }
 
-                        if (sourceBookRs.next()) {
-                            int sourceBookId = sourceBookRs.getInt(1);
+                    String userId = fields[0].trim();
+                    String sourceBookTitle = fields[1].trim();
 
-                            // Process each recommended book
-                            for (int i = 2; i < fields.length; i++) {
-                                String recommendedBookTitle = fields[i].trim();
-                                if (recommendedBookTitle.isEmpty() || recommendedBookTitle.equalsIgnoreCase("null")) {
-                                    continue;  // Skip empty recommendations
-                                }
+                    // Skip if required fields are empty
+                    if (userId.isEmpty() || sourceBookTitle.isEmpty()) {
+                     continue;
+                    }
 
-                                // Find recommended book ID
-                                pstmtFindBook.setString(1, recommendedBookTitle);
-                                ResultSet recBookRs = pstmtFindBook.executeQuery();
+                    // Check if user exists
+                    String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
+                    try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
+                        pstmtCheckUser.setString(1, userId);
+                        ResultSet userRs = pstmtCheckUser.executeQuery();
 
-                                if (recBookRs.next()) {
-                                    int recommendedBookId = recBookRs.getInt(1);
-
-                                    // Insert recommendation
-                                    pstmtInsert.setString(1, userId);
-                                    pstmtInsert.setInt(2, sourceBookId);
-                                    pstmtInsert.setInt(3, recommendedBookId);
-
-                                    try {
-                                        pstmtInsert.executeUpdate();
-                                        recommendationCount++;
-                                    } catch (SQLException e) {
-                                        if (!e.getMessage().contains("duplicate key")) {
-                                            // Only log non-duplicate errors
-                                            System.err.println("Error inserting recommendation: " + e.getMessage());
-                                            errorCount++;
-                                        }
-                                    }
-                                } else {
-                                    // Add the book if it doesn't exist
-                                    String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
-                                            "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
-                                    try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
-                                        pstmtInsertBook.setString(1, recommendedBookTitle);
-                                        ResultSet newBookRs = pstmtInsertBook.executeQuery();
-
-                                        if (newBookRs.next()) {
-                                            int newBookId = newBookRs.getInt(1);
-
-                                            // Insert recommendation with new book
-                                            pstmtInsert.setString(1, userId);
-                                            pstmtInsert.setInt(2, sourceBookId);
-                                            pstmtInsert.setInt(3, newBookId);
-                                            pstmtInsert.executeUpdate();
-                                            recommendationCount++;
-                                        }
-                                    } catch (SQLException e) {
-                                        errorCount++;
-                                    }
-                                }
-                            }
-                        } else {
-                            errorCount++;
+                        if (!userRs.next()) {
+                         continue;
                         }
                     }
+
+                    // Find source book ID - try exact match first
+                    Integer sourceBookId = null;
+                    pstmtFindBook.setString(1, sourceBookTitle);
+                    ResultSet sourceBookRs = pstmtFindBook.executeQuery();
+
+                    if (sourceBookRs.next()) {
+                        sourceBookId = sourceBookRs.getInt(1);
+                    } else {
+                        // Try LIKE search
+                        pstmtFindBookLike.setString(1, "%" + sourceBookTitle + "%");
+                        sourceBookRs = pstmtFindBookLike.executeQuery();
+
+                        if (sourceBookRs.next()) {
+                            sourceBookId = sourceBookRs.getInt(1);
+                        }
+                    }
+
+                    if (sourceBookId == null) {
+             
+                        // Add the book to the database
+                        String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
+                                "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
+                        try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
+                            pstmtInsertBook.setString(1, sourceBookTitle);
+                            ResultSet newBookRs = pstmtInsertBook.executeQuery();
+
+                            if (newBookRs.next()) {
+                                sourceBookId = newBookRs.getInt(1);
+                          } else {
+                                continue; // Skip if failed to add book
+                            }
+                        }
+                    }
+
+                    // Process recommended books
+                    for (int i = 2; i < fields.length; i++) {
+                        String recBookTitle = fields[i].trim();
+                        if (recBookTitle.isEmpty() || recBookTitle.equalsIgnoreCase("null")) {
+                            continue;
+                        }
+
+                        // Find recommended book ID
+                        Integer recBookId = null;
+                        pstmtFindBook.setString(1, recBookTitle);
+                        ResultSet recBookRs = pstmtFindBook.executeQuery();
+
+                        if (recBookRs.next()) {
+                            recBookId = recBookRs.getInt(1);
+                        } else {
+                            // Try LIKE search
+                            pstmtFindBookLike.setString(1, "%" + recBookTitle + "%");
+                            recBookRs = pstmtFindBookLike.executeQuery();
+
+                            if (recBookRs.next()) {
+                                recBookId = recBookRs.getInt(1);
+                            }
+                        }
+
+                        if (recBookId == null) {
+                            // Add the book to the database
+                            String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
+                                    "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
+                            try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
+                                pstmtInsertBook.setString(1, recBookTitle);
+                                ResultSet newBookRs = pstmtInsertBook.executeQuery();
+
+                                if (newBookRs.next()) {
+                                    recBookId = newBookRs.getInt(1);
+                                } else {
+                                    continue; // Skip if failed to add book
+                                }
+                            }
+                        }
+
+                        // Insert recommendation
+                        pstmtInsert.setString(1, userId);
+                        pstmtInsert.setInt(2, sourceBookId);
+                        pstmtInsert.setInt(3, recBookId);
+
+                        try {
+                            int rowsAffected = pstmtInsert.executeUpdate();
+                            if (rowsAffected > 0) {
+                                recommendationCount++;
+                            }
+                        } catch (SQLException e) {
+                            if (!e.getMessage().contains("duplicate key")) {
+                                throw e; // Re-throw if not a duplicate key error
+                            }
+                        }
+                    }
+
                 } catch (Exception e) {
                     errorCount++;
-                }
+             }
             }
         }
 
-        System.out.println("Imported " + recommendationCount + " book recommendations with " + errorCount + " errors");
     }
-    private void importBooks(Connection conn, String filePath) throws SQLException, IOException {
 
+    private void importBooks(Connection conn, String filePath) throws SQLException, IOException {
+       
         String sql = "INSERT INTO books (title, authors, category, publisher, publish_year) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (title, authors) DO NOTHING";
 
@@ -1094,35 +1350,70 @@ public class ServerInterfaceController {
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 
-            String line = reader.readLine(); // Read the header line
-            if (line == null) return;
-
+            String line = reader.readLine(); // Skip header
+            
+            // Process each line
+            int lineNum = 1;
             while ((line = reader.readLine()) != null) {
+                lineNum++;
                 try {
                     String[] fields = parseCsvLine(line);
-                    if (fields.length >= 5) {
-                        pstmt.setString(1, fields[0].trim()); // Title
-                        pstmt.setString(2, fields[1].trim()); // Authors
-                        pstmt.setString(3, fields[2].trim()); // Category
-                        pstmt.setString(4, fields[3].trim()); // Publisher
 
-                        // Publish Date (Year)
-                        try {
-                            float yearFloat = Float.parseFloat(fields[4].trim());
-                            pstmt.setInt(5, (int) yearFloat);
-                        } catch (NumberFormatException e) {
-                            pstmt.setNull(5, Types.INTEGER);
-                        }
+                    if (fields.length < 5) {
+                      continue;
+                    }
 
-                        pstmt.executeUpdate();
+                    String title = fields[0].trim();
+                    String authors = fields[1].trim();
+                    String category = fields[2].trim();
+                    String publisher = fields[3].trim();
+
+                    // Skip if title or author is empty
+                    if (title.isEmpty() || authors.isEmpty()) {
+                     continue;
+                    }
+
+                    pstmt.setString(1, title);
+                    pstmt.setString(2, authors);
+                    pstmt.setString(3, category);
+                    pstmt.setString(4, publisher);
+
+                    // Handle publish year
+                    try {
+                        float yearFloat = Float.parseFloat(fields[4].trim());
+                        pstmt.setInt(5, (int) yearFloat);
+                    } catch (NumberFormatException e) {
+                        pstmt.setNull(5, Types.INTEGER);
+                   }
+
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected > 0) {
                         successCount++;
+                        if (successCount % 100 == 0) {
+                      }
                     }
                 } catch (Exception e) {
                     errorCount++;
                 }
             }
         }
-
+}
+    /**
+     * Helper method to parse integers with default value if parsing fails
+     */
+    private int parseInt(String value, int defaultValue) {
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            // Ensure the rating is between 1 and 5
+            if (parsed < 1) parsed = 1;
+            if (parsed > 5) parsed = 5;
+            return parsed;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
     /**
      * Verifica se PostgreSQL è installato sul sistema
@@ -1521,42 +1812,73 @@ public class ServerInterfaceController {
 }
 
     private void importUsers(Connection conn) throws SQLException, IOException {
-
+      
         String sql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
-                "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO NOTHING";
+                "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET " +
+                "full_name = EXCLUDED.full_name, " +
+                "fiscal_code = EXCLUDED.fiscal_code, " +
+                "email = EXCLUDED.email, " +
+                "password = EXCLUDED.password";
+
+        int userCount = 0;
+        int errorCount = 0;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "UtentiRegistrati.csv"))) {
 
-            String line;
-
-            int userCount = 0;
+            String line = reader.readLine(); // Skip header if exists
+       
+            int lineNum = 1;
             while ((line = reader.readLine()) != null) {
-                String[] fields = parseCsvLine(line);
-                if (fields.length >= 5) {
-                    String userId = fields[3].trim().replaceAll("^\"|\"$", "");
-                    String fullName = fields[0].trim().replaceAll("^\"|\"$", "");
-                    String fiscalCode = fields[1].trim().replaceAll("^\"|\"$", "");
-                    String email = fields[2].trim().replaceAll("^\"|\"$", "");
-                    String password = fields[4].trim().replaceAll("^\"|\"$", "");
+                lineNum++;
+                try {
+                    String[] fields;
+
+                    // Detect if this is a tab-delimited file
+                    if (line.contains("\t")) {
+                        fields = line.split("\t", -1);
+                    } else {
+                        fields = parseCsvLine(line);
+                    }
+
+                    if (fields.length < 5) {
+                     continue;
+                    }
+
+                    String fullName = fields[0].trim();
+                    String fiscalCode = fields[1].trim();
+                    String email = fields[2].trim();
+                    String userId = fields[3].trim();
+                    String password = fields[4].trim();
+
+                    // Skip if required fields are empty
+                    if (userId.isEmpty() || fullName.isEmpty()) {
+                        continue;
+                    }
 
                     pstmt.setString(1, userId);
                     pstmt.setString(2, fullName);
                     pstmt.setString(3, fiscalCode);
                     pstmt.setString(4, email);
                     pstmt.setString(5, password);
-                    pstmt.executeUpdate();
-                    userCount++;
+
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        userCount++;
+                        if (userCount % 50 == 0) {
+                        }
+                    }
+                } catch (Exception e) {
+                    errorCount++;
                 }
             }
         }
+
     }
 
 
-    /**
-     * Improved method to import libraries that handles spaces in book titles
-     */
     private void importLibraries(Connection conn) throws SQLException, IOException {
+
         String insertLibrarySql = "INSERT INTO libraries (user_id, library_name) " +
                 "VALUES (?, ?) ON CONFLICT (user_id, library_name) DO NOTHING " +
                 "RETURNING id";
@@ -1568,158 +1890,379 @@ public class ServerInterfaceController {
 
         int libraryCount = 0;
         int bookCount = 0;
+        int errorCount = 0;
 
         try (PreparedStatement pstmtLib = conn.prepareStatement(insertLibrarySql);
              PreparedStatement pstmtLibBook = conn.prepareStatement(insertLibraryBookSql);
              PreparedStatement pstmtFindBook = conn.prepareStatement(findBookSql);
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "Librerie.dati.csv"))) {
 
-            String line;
-            // Skip header if exists
-            if ((line = reader.readLine()) != null && line.contains("UserID")) {
-                // Skip header
-            }
+            String line = reader.readLine(); // Skip header if exists
 
+            int lineNum = 1;
             while ((line = reader.readLine()) != null) {
+                lineNum++;
                 try {
-                    String[] fields = parseCsvLine(line);
+                    String[] fields;
 
-                    if (fields.length >= 2) {
-                        String userId = fields[0].trim();
-                        String libraryName = fields[1].trim();
+                    // Detect if this is a tab-delimited file
+                    if (line.contains("\t")) {
+                        fields = line.split("\t", -1);
+                    } else {
+                        fields = parseCsvLine(line);
+                    }
 
-                        // Check if user exists
-                        String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
-                        try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
-                            pstmtCheckUser.setString(1, userId);
-                            ResultSet userRs = pstmtCheckUser.executeQuery();
+                    if (fields.length < 2) {
+                        continue;
+                    }
 
-                            if (!userRs.next()) {
-                                System.out.println("Skipping library for non-existent user: " + userId);
+                    String userId = fields[0].trim();
+                    String libraryName = fields[1].trim();
+
+                    // Skip if required fields are empty
+                    if (userId.isEmpty() || libraryName.isEmpty()) {
+                        continue;
+                    }
+
+                    // If userId contains a tab character, it might be incorrectly parsed
+                    if (userId.contains("\t")) {
+                        String[] parts = userId.split("\t");
+                        userId = parts[0].trim();
+
+                        // Adjust other fields if needed
+                        if (parts.length > 1 && (libraryName == null || libraryName.isEmpty())) {
+                            libraryName = parts[1].trim();
+                        }
+                    }
+
+                    // Check if user exists
+                    String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
+                    try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
+                        pstmtCheckUser.setString(1, userId);
+                        ResultSet userRs = pstmtCheckUser.executeQuery();
+
+                        if (!userRs.next()) {
+                            // Try to create the user
+                            try {
+                                String createUserSql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
+                                        "VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING";
+                                try (PreparedStatement pstmtCreateUser = conn.prepareStatement(createUserSql)) {
+                                    pstmtCreateUser.setString(1, userId);
+                                    pstmtCreateUser.setString(2, userId); // Use userId as name temporarily
+                                    pstmtCreateUser.setString(3, "UNKNOWN");
+                                    pstmtCreateUser.setString(4, userId + "@example.com");
+                                    pstmtCreateUser.setString(5, "password");
+
+                                    int created = pstmtCreateUser.executeUpdate();
+                                    if (created > 0) {
+                                    } else {
+                                        continue; // Skip if we can't create the user
+                                    }
+                                }
+                            } catch (SQLException e) {
                                 continue;
                             }
                         }
+                    }
 
-                        // Insert library
-                        pstmtLib.setString(1, userId);
-                        pstmtLib.setString(2, libraryName);
+                    // Insert library
+                    pstmtLib.setString(1, userId);
+                    pstmtLib.setString(2, libraryName);
 
-                        ResultSet rs = pstmtLib.executeQuery();
-                        if (rs.next()) {
-                            int libraryId = rs.getInt(1);
-                            libraryCount++;
+                    ResultSet rs = pstmtLib.executeQuery();
+                    if (rs.next()) {
+                        int libraryId = rs.getInt(1);
+                        libraryCount++;
 
-                            // Add books to library (remaining fields are book titles)
-                            for (int i = 2; i < fields.length; i++) {
-                                String bookTitle = fields[i].trim();
-                                if (bookTitle.equals("null") || bookTitle.isEmpty()) {
-                                    continue;
-                                }
+                        // Add books to library (remaining fields are book titles)
+                        for (int i = 2; i < fields.length; i++) {
+                            String bookTitle = fields[i].trim();
+                            if (bookTitle.isEmpty() || bookTitle.equalsIgnoreCase("null")) {
+                                continue;
+                            }
 
-                                // Replace underscores with spaces for lookup
-                                bookTitle = bookTitle.replace("_", " ");
+                            // Try to find the book (case insensitive)
+                            pstmtFindBook.setString(1, "%" + bookTitle + "%");
+                            ResultSet bookRs = pstmtFindBook.executeQuery();
 
-                                // Use ILIKE for case-insensitive matching with wildcard
-                                pstmtFindBook.setString(1, bookTitle);
-                                ResultSet bookRs = pstmtFindBook.executeQuery();
+                            if (bookRs.next()) {
+                                int bookId = bookRs.getInt(1);
+                                pstmtLibBook.setInt(1, libraryId);
+                                pstmtLibBook.setInt(2, bookId);
 
-                                if (bookRs.next()) {
-                                    int bookId = bookRs.getInt(1);
-                                    pstmtLibBook.setInt(1, libraryId);
-                                    pstmtLibBook.setInt(2, bookId);
-                                    pstmtLibBook.executeUpdate();
+                                int added = pstmtLibBook.executeUpdate();
+                                if (added > 0) {
                                     bookCount++;
-                                } else {
-                                    System.out.println("Book not found in database: " + bookTitle);
+                                }
+                            } else {
+                                // Create the book
+                                String insertBookSql =
+                                        "INSERT INTO books (title, authors, category, publisher) " +
+                                                "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
+                                try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
+                                    pstmtInsertBook.setString(1, bookTitle);
+                                    ResultSet newBookRs = pstmtInsertBook.executeQuery();
+
+                                    if (newBookRs.next()) {
+                                        int bookId = newBookRs.getInt(1);
+                                        pstmtLibBook.setInt(1, libraryId);
+                                        pstmtLibBook.setInt(2, bookId);
+
+                                        int added = pstmtLibBook.executeUpdate();
+                                        if (added > 0) {
+                                            bookCount++;
+                                        }
+                                    }
+                                } catch (SQLException e) {
                                 }
                             }
                         }
                     }
                 } catch (Exception e) {
-                    System.err.println("Error processing library line: " + line + " - " + e.getMessage());
-                    e.printStackTrace();
+                    errorCount++;
                 }
             }
-
-            System.out.println("Imported " + libraryCount + " libraries with " + bookCount + " books");
         }
-    }
 
+   }
 
-    /**
-     * Improved method to import ratings with better CSV parsing
-     */
     private void importRatings(Connection conn) throws SQLException, IOException {
+        // Log informativo
+        System.out.println("Importazione delle valutazioni in corso...");
+
         String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
-        String insertRatingSql = "INSERT INTO book_ratings (user_id, book_id, style_rating, " +
-                "content_rating, pleasantness_rating, originality_rating, " +
-                "edition_rating, average_rating, general_comment, style_comment, content_comment, " +
-                "pleasantness_comment, originality_comment, edition_comment) " +
+
+        String insertRatingSql = "INSERT INTO book_ratings " +
+                "(user_id, book_id, style_rating, content_rating, pleasantness_rating, " +
+                "originality_rating, edition_rating, average_rating, general_comment, " +
+                "style_comment, content_comment, pleasantness_comment, originality_comment, edition_comment) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT (user_id, book_id) DO NOTHING";
 
         int ratingCount = 0;
+        int errorCount = 0;
 
         try (PreparedStatement pstmtFindBook = conn.prepareStatement(findBookSql);
              PreparedStatement pstmtRating = conn.prepareStatement(insertRatingSql);
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "ValutazioniLibri.csv"))) {
 
-            String line = reader.readLine(); // Read header
+            String line = reader.readLine(); // Skip header
+            System.out.println("Header line: " + line);
 
+            // Check if the format is numeric ID or user_id
+            boolean isNumericIdFormat = line != null && line.contains("\"id\"");
+
+            int lineNum = 1;
             while ((line = reader.readLine()) != null) {
+                lineNum++;
                 try {
+                    // Per file CSV con valori delimitati da virgolette e virgole come separatori
                     String[] fields = parseCsvLine(line);
-                    if (fields.length >= 8) {
-                        String userId = fields[0].trim();      // userid
-                        String bookTitle = fields[1].trim();   // titoloLibro
 
-                        // Find book ID using case-insensitive search
-                        pstmtFindBook.setString(1, bookTitle);
-                        ResultSet bookRs = pstmtFindBook.executeQuery();
+                    if (fields.length < 5) {
+                        System.out.println("Riga " + lineNum + ": troppo pochi campi (" + fields.length + ")");
+                        continue;
+                    }
 
-                        if (bookRs.next()) {
-                            int bookId = bookRs.getInt(1);
+                    String userId;
+                    String bookTitle;
+                    int startIndexForRatings;
 
-                            pstmtRating.setString(1, userId);
-                            pstmtRating.setInt(2, bookId);
+                    if (isNumericIdFormat) {
+                        // Format is like: id, user_id, book_id, ...
+                        // Skip the id field
+                        userId = fields[1].trim();
+                        bookTitle = fields[2].trim();
+                        startIndexForRatings = 3;
+                    } else {
+                        // Format is like: user_id, book_title, ...
+                        userId = fields[0].trim();
+                        bookTitle = fields[1].trim();
+                        startIndexForRatings = 2;
+                    }
 
-                            // Parse ratings, handling potential format issues
+                    // Skip if required fields are empty
+                    if (userId.isEmpty() || bookTitle.isEmpty()) {
+                        System.out.println("Riga " + lineNum + ": user_id o book_title mancante");
+                        continue;
+                    }
+
+                    // Check if user exists
+                    String checkUserSql = "SELECT 1 FROM users WHERE user_id = ?";
+                    try (PreparedStatement pstmtCheckUser = conn.prepareStatement(checkUserSql)) {
+                        pstmtCheckUser.setString(1, userId);
+                        ResultSet userRs = pstmtCheckUser.executeQuery();
+
+                        if (!userRs.next()) {
+                            System.out.println("Riga " + lineNum + ": user_id " + userId + " non trovato, creazione automatica");
+
+                            // Try to create the user
                             try {
-                                pstmtRating.setInt(3, Integer.parseInt(fields[2].trim())); // stile
-                                pstmtRating.setInt(4, Integer.parseInt(fields[3].trim())); // contenuto
-                                pstmtRating.setInt(5, Integer.parseInt(fields[4].trim())); // gradevolezza
-                                pstmtRating.setInt(6, Integer.parseInt(fields[5].trim())); // originalita
-                                pstmtRating.setInt(7, Integer.parseInt(fields[6].trim())); // edizione
-                                pstmtRating.setFloat(8, Float.parseFloat(fields[7].trim())); // media
-                            } catch (NumberFormatException e) {
-                                System.err.println("Error parsing rating values for book: " + bookTitle);
+                                String createUserSql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
+                                        "VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING";
+                                try (PreparedStatement pstmtCreateUser = conn.prepareStatement(createUserSql)) {
+                                    pstmtCreateUser.setString(1, userId);
+                                    pstmtCreateUser.setString(2, userId); // Use userId as name temporarily
+                                    pstmtCreateUser.setString(3, "UNKNOWN");
+                                    pstmtCreateUser.setString(4, userId + "@example.com");
+                                    pstmtCreateUser.setString(5, "password");
+
+                                    int created = pstmtCreateUser.executeUpdate();
+                                    if (created > 0) {
+                                        System.out.println("Utente creato: " + userId);
+                                    } else {
+                                        System.out.println("Impossibile creare l'utente: " + userId);
+                                        continue; // Skip if we can't create the user
+                                    }
+                                }
+                            } catch (SQLException e) {
+                                System.out.println("Errore durante la creazione dell'utente: " + e.getMessage());
                                 continue;
                             }
-
-                            // Comments - handle array bounds carefully
-                            pstmtRating.setString(9, fields.length > 8 ? fields[8].trim() : null);  // recensione
-                            pstmtRating.setString(10, fields.length > 9 ? fields[9].trim() : null); // commentoStile
-                            pstmtRating.setString(11, fields.length > 10 ? fields[10].trim() : null); // commentoContenuto
-                            pstmtRating.setString(12, fields.length > 11 ? fields[11].trim() : null); // commentoGradevolezza
-                            pstmtRating.setString(13, fields.length > 12 ? fields[12].trim() : null); // commentoOriginalita
-                            pstmtRating.setString(14, fields.length > 13 ? fields[13].trim() : null); // commentoEdizione
-
-                            pstmtRating.executeUpdate();
-                            ratingCount++;
-                        } else {
-                            System.out.println("Book not found for rating: " + bookTitle);
                         }
                     }
+
+                    // Find or create book
+                    Integer bookId = null;
+
+                    // Try to find the book (case insensitive)
+                    pstmtFindBook.setString(1, "%" + bookTitle + "%");
+                    ResultSet bookRs = pstmtFindBook.executeQuery();
+
+                    if (bookRs.next()) {
+                        bookId = bookRs.getInt(1);
+                        System.out.println("Libro trovato: " + bookTitle + " (ID: " + bookId + ")");
+                    } else {
+                        // Book not found, create it
+                        System.out.println("Libro non trovato: " + bookTitle + ", creazione in corso...");
+                        String insertBookSql =
+                                "INSERT INTO books (title, authors, category, publisher) " +
+                                        "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
+                        try (PreparedStatement pstmtInsertBook = conn.prepareStatement(insertBookSql)) {
+                            pstmtInsertBook.setString(1, bookTitle);
+                            ResultSet newBookRs = pstmtInsertBook.executeQuery();
+
+                            if (newBookRs.next()) {
+                                bookId = newBookRs.getInt(1);
+                                System.out.println("Libro creato: " + bookTitle + " (ID: " + bookId + ")");
+                            } else {
+                                System.out.println("Impossibile creare il libro: " + bookTitle);
+                            }
+                        } catch (SQLException e) {
+                            System.out.println("Errore durante la creazione del libro: " + e.getMessage());
+                            continue;
+                        }
+                    }
+
+                    if (bookId == null) {
+                        System.out.println("Impossibile trovare o creare il libro: " + bookTitle);
+                        continue;
+                    }
+
+                    pstmtRating.setString(1, userId);
+                    pstmtRating.setInt(2, bookId);
+
+                    // Process ratings from fields
+                    if (fields.length >= startIndexForRatings + 5) {
+                        try {
+                            // Parse the ratings
+                            int styleRating = parseInt(fields[startIndexForRatings], 3);
+                            int contentRating = parseInt(fields[startIndexForRatings + 1], 3);
+                            int pleasantnessRating = parseInt(fields[startIndexForRatings + 2], 3);
+                            int originalityRating = parseInt(fields[startIndexForRatings + 3], 3);
+                            int editionRating = parseInt(fields[startIndexForRatings + 4], 3);
+
+                            pstmtRating.setInt(3, styleRating);
+                            pstmtRating.setInt(4, contentRating);
+                            pstmtRating.setInt(5, pleasantnessRating);
+                            pstmtRating.setInt(6, originalityRating);
+                            pstmtRating.setInt(7, editionRating);
+
+                            // Calculate average
+                            float avgRating = (styleRating + contentRating + pleasantnessRating +
+                                    originalityRating + editionRating) / 5.0f;
+                            // Arrotonda a un decimale
+                            avgRating = Math.round(avgRating * 10) / 10.0f;
+                            pstmtRating.setFloat(8, avgRating);
+
+                            // Imposta i commenti in base all'ordine specificato:
+                            // general_comment, style_comment, content_comment, pleasantness_comment, originality_comment, edition_comment
+                            int commentIndex = startIndexForRatings + 5;
+
+                            // Commento generale (general_comment)
+                            if (fields.length > commentIndex) {
+                                String comment = fields[commentIndex].trim();
+                                pstmtRating.setString(9, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(9, Types.VARCHAR);
+                            }
+
+                            // Commento sullo stile (style_comment)
+                            if (fields.length > commentIndex + 1) {
+                                String comment = fields[commentIndex + 1].trim();
+                                pstmtRating.setString(10, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(10, Types.VARCHAR);
+                            }
+
+                            // Commento sul contenuto (content_comment)
+                            if (fields.length > commentIndex + 2) {
+                                String comment = fields[commentIndex + 2].trim();
+                                pstmtRating.setString(11, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(11, Types.VARCHAR);
+                            }
+
+                            // Commento sulla gradevolezza (pleasantness_comment)
+                            if (fields.length > commentIndex + 3) {
+                                String comment = fields[commentIndex + 3].trim();
+                                pstmtRating.setString(12, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(12, Types.VARCHAR);
+                            }
+
+                            // Commento sull'originalità (originality_comment)
+                            if (fields.length > commentIndex + 4) {
+                                String comment = fields[commentIndex + 4].trim();
+                                pstmtRating.setString(13, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(13, Types.VARCHAR);
+                            }
+
+                            // Commento sull'edizione (edition_comment)
+                            if (fields.length > commentIndex + 5) {
+                                String comment = fields[commentIndex + 5].trim();
+                                pstmtRating.setString(14, comment.isEmpty() ? null : comment);
+                            } else {
+                                pstmtRating.setNull(14, Types.VARCHAR);
+                            }
+
+                            int rowsAffected = pstmtRating.executeUpdate();
+                            if (rowsAffected > 0) {
+                                ratingCount++;
+                                if (ratingCount % 50 == 0) {
+                                    System.out.println("Importate " + ratingCount + " valutazioni");
+                                }
+                            } else {
+                                System.out.println("Nessuna riga inserita per: " + userId + ", " + bookTitle);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Errore nel parsing dei valori numerici alla riga " + lineNum + ": " + e.getMessage());
+                            errorCount++;
+                        }
+                    } else {
+                        System.out.println("Riga " + lineNum + ": campi insufficienti per le valutazioni");
+                        errorCount++;
+                    }
                 } catch (Exception e) {
-                    System.err.println("Error processing rating line: " + line);
-                    e.printStackTrace();
+                    System.out.println("Errore generico alla riga " + lineNum + ": " + e.getMessage());
+                    errorCount++;
                 }
             }
-
-            System.out.println("Imported " + ratingCount + " book ratings");
         }
-    }
 
+        System.out.println("Importazione valutazioni completata: " + ratingCount + " valutazioni importate, " + errorCount + " errori");
+    }
     private void startSocketServer() {
         int[] portsToTry = {8888, 8889, 8890, 8891, 8892};
         boolean success = false;
@@ -1854,30 +2397,85 @@ public class ServerInterfaceController {
         });
 
     }
+
+
     /**
-     * Improved CSV line parser that better handles quotes and commas
+     * Improved CSV line parser that handles both comma and tab-delimited formats
+     * and properly manages quoted fields
      */
     private String[] parseCsvLine(String line) {
-        List<String> fields = new ArrayList<>();
-        StringBuilder currentField = new StringBuilder();
-        boolean inQuotes = false;
-        char prevChar = 0;
-
-        for (char c : line.toCharArray()) {
-            if (c == '"' && prevChar != '\\') {
-                inQuotes = !inQuotes;
-            } else if (c == ',' && !inQuotes) {
-                fields.add(currentField.toString().trim().replaceAll("^\"|\"$", ""));
-                currentField = new StringBuilder();
-            } else {
-                currentField.append(c);
-            }
-            prevChar = c;
+        if (line == null || line.trim().isEmpty()) {
+            return new String[0];
         }
 
-        fields.add(currentField.toString().trim().replaceAll("^\"|\"$", ""));
-        return fields.toArray(new String[0]);
+        // Check if the line contains tabs - if so, use tab delimiter
+        if (line.contains("\t")) {
+            return parseTabDelimitedLine(line);
+        } else {
+            return parseCommaDelimitedLine(line);
+        }
     }
+
+    /**
+     * Parse a tab-delimited line
+     */
+    private String[] parseTabDelimitedLine(String line) {
+        String[] fields = line.split("\t", -1); // -1 to keep empty fields
+
+        // Trim each field and handle null values
+        for (int i = 0; i < fields.length; i++) {
+            fields[i] = fields[i].trim();
+            if (fields[i].equalsIgnoreCase("null") || fields[i].isEmpty()) {
+                fields[i] = "";
+            }
+        }
+
+        return fields;
+    }
+
+    /**
+     * Parse a comma-delimited line with proper handling of quoted fields
+     */
+    private String[] parseCommaDelimitedLine(String line) {
+        List<String> tokens = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                // If we're in quotes and the next char is also a quote, it's an escaped quote
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    sb.append('"');
+                    i++; // Skip the next quote
+                } else {
+                    // Toggle quote state
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                // End of field, add to list
+                tokens.add(sb.toString().trim());
+                sb = new StringBuilder();
+            } else {
+                // Regular character, append
+                sb.append(c);
+            }
+        }
+
+        // Add the last token
+        tokens.add(sb.toString().trim());
+
+        // Process each token to handle "null" values
+        for (int i = 0; i < tokens.size(); i++) {
+            if (tokens.get(i).equalsIgnoreCase("null")) {
+                tokens.set(i, "");
+            }
+        }
+
+        return tokens.toArray(new String[0]);
+    }
+
 
     private void startUptimeCounter() {
         // Cancel the existing scheduler if any

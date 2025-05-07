@@ -1,7 +1,7 @@
 package book_recommender.lab_b;
 
 import java.sql.*;
-import java.util.Random;
+
 
 /**
  * Singleton class for managing database connections.
@@ -46,7 +46,6 @@ public class DatabaseManager {
             // values that have been set externally before calling this constructor
             try {
                 connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                System.out.println("Successfully connected to remote database: " + DB_URL);
             } catch (SQLException e) {
                 throw new SQLException("Failed to connect to remote database: " + e.getMessage(), e);
             }
@@ -64,7 +63,6 @@ public class DatabaseManager {
         try {
             // Try to connect directly to the database PostgreSQL
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("Successfully connected to database using existing credentials");
         } catch (SQLException e) {
             try {
                 // Try to connect to the postgres database to create our database and user
@@ -74,13 +72,11 @@ public class DatabaseManager {
                 try {
                     // First, try to connect as superuser postgres (common default)
                     postgresConn = DriverManager.getConnection(POSTGRES_URL, "postgres", "postgres");
-                    System.out.println("Connected to PostgreSQL as postgres user");
                 } catch (SQLException postgresError) {
                     // If we can't connect as postgres, we'll try with the current OS user
                     String osUser = System.getProperty("user.name");
                     try {
                         postgresConn = DriverManager.getConnection(POSTGRES_URL, osUser, "");
-                        System.out.println("Connected to PostgreSQL as OS user: " + osUser);
                     } catch (SQLException osUserError) {
                         // If all else fails, throw the original error
                         throw new SQLException("Impossibile connettersi a PostgreSQL: " + e.getMessage() +
@@ -106,17 +102,13 @@ public class DatabaseManager {
                         // Create the database with the new user as an owner
                         try (Statement createStmt = postgresConn.createStatement()) {
                             createStmt.execute("CREATE DATABASE " + DEFAULT_DB_NAME + " WITH OWNER = " + DB_USER);
-                            System.out.println("Database " + DEFAULT_DB_NAME + " created with owner " + DB_USER);
                         }
                     } else {
-                        System.out.println("Database " + DEFAULT_DB_NAME + " already exists");
 
                         // Change ownership of the database if needed
                         try (Statement grantStmt = postgresConn.createStatement()) {
                             grantStmt.execute("ALTER DATABASE " + DEFAULT_DB_NAME + " OWNER TO " + DB_USER);
-                            System.out.println("Changed owner of " + DEFAULT_DB_NAME + " to " + DB_USER);
                         } catch (SQLException grantError) {
-                            System.err.println("Warning: Could not change database owner: " + grantError.getMessage());
                         }
                     }
 
@@ -125,7 +117,6 @@ public class DatabaseManager {
                     // Now try to connect to the database with our user
                     try {
                         connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                        System.out.println("Successfully connected to database " + DEFAULT_DB_NAME + " as user " + DB_USER);
                     } catch (SQLException connError) {
                         throw new SQLException("Created user and database, but couldn't connect with new credentials: " + connError.getMessage());
                     }
@@ -178,16 +169,13 @@ public class DatabaseManager {
                 stmt.execute("GRANT ALL PRIVILEGES ON DATABASE " + DEFAULT_DB_NAME + " TO " + DB_USER);
                 stmt.execute("ALTER USER " + DB_USER + " CONNECTION LIMIT -1"); // No connection limit
 
-                System.out.println("Created PostgreSQL user: " + DB_USER);
 
                 // Try to create a read-only user
                 try {
                     stmt.execute("CREATE ROLE book_reader WITH LOGIN PASSWORD 'reader2024' NOSUPERUSER INHERIT NOCREATEROLE NOREPLICATION");
                     stmt.execute("GRANT CONNECT ON DATABASE " + DEFAULT_DB_NAME + " TO book_reader");
-                    System.out.println("Created read-only PostgreSQL user: book_reader");
                 } catch (SQLException e) {
                     // Ignore if we can't create book_reader user
-                    System.out.println("Could not create read-only user book_reader: " + e.getMessage());
                 }
             } else {
                 // User exists, update password
@@ -198,7 +186,6 @@ public class DatabaseManager {
                 stmt.execute("GRANT ALL PRIVILEGES ON DATABASE " + DEFAULT_DB_NAME + " TO " + DB_USER);
                 stmt.execute("ALTER USER " + DB_USER + " CONNECTION LIMIT -1"); // No connection limit
 
-                System.out.println("Updated existing PostgreSQL user: " + DB_USER);
             }
         }
     }
@@ -231,7 +218,6 @@ public class DatabaseManager {
                             ")"
             );
         } catch (SQLException e) {
-            System.err.println("Error creating active_clients table: " + e.getMessage());
             // Continue anyway, as the table might already exist
         }
 
@@ -242,7 +228,6 @@ public class DatabaseManager {
                             "ON CONFLICT (client_id) DO UPDATE SET connect_time = NOW()")) {
                 pstmt.setString(1, clientId);
                 int rowsAffected = pstmt.executeUpdate();
-                System.out.println("Client registered: " + clientId + ", rows affected: " + rowsAffected);
             }
         } else {
             // Remove client from active_clients table
@@ -250,7 +235,6 @@ public class DatabaseManager {
                     "DELETE FROM active_clients WHERE client_id = ?")) {
                 pstmt.setString(1, clientId);
                 int rowsAffected = pstmt.executeUpdate();
-                System.out.println("Client unregistered: " + clientId + ", rows affected: " + rowsAffected);
             }
         }
     }
@@ -324,7 +308,6 @@ public class DatabaseManager {
             try {
                 connection.close();
             } catch (SQLException e) {
-                System.err.println("Error closing database connection: " + e.getMessage());
             }
         }
     }

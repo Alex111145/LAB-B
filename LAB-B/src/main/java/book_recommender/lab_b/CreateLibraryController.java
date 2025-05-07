@@ -37,7 +37,6 @@ public class CreateLibraryController implements Initializable {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
         errorLabel.setVisible(false);
     }
@@ -98,7 +97,6 @@ public class CreateLibraryController implements Initializable {
                 return rs.next(); // Ritorna true se esiste già
             }
         } catch (SQLException e) {
-            System.err.println("Error checking library existence: " + e.getMessage());
             return true; // In caso di errore, assumiamo che esista per sicurezza
         }
     }
@@ -117,7 +115,6 @@ public class CreateLibraryController implements Initializable {
                 return true;
             }
         } catch (SQLException e) {
-            System.err.println("Error creating library: " + e.getMessage());
             return false;
         }
     }
@@ -139,7 +136,6 @@ public class CreateLibraryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di aggiunta libri: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -169,7 +165,6 @@ public class CreateLibraryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -193,7 +188,6 @@ public class CreateLibraryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
