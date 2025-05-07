@@ -2,16 +2,22 @@ package book_recommender.lab_b;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.geometry.Insets;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-
+import java.io.IOException;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,18 +60,86 @@ public class Client extends Application {
             useNgrok = true;
 
             // Ask for database connection parameters (solo ngrok host e porta)
-            if (!getDatabaseConnectionParameters()) {
-                showServerErrorAlert(primaryStage, "Errore di connessione",
-                        "Parametri di connessione mancanti",
-                        "È necessario fornire i parametri di connessione al database. L'applicazione verrà chiusa.");
+            boolean parametersProvided = getDatabaseConnectionParameters();
+            if (!parametersProvided) {
+                Platform.exit();
                 return;
             }
 
-            // Then establish a database connection
-            dbManager = DatabaseManager.createRemoteInstance(dbUrl, dbUser, dbPassword);
+            // Creiamo un indicatore di caricamento mentre proviamo a connetterci
+            ProgressIndicator progress = new ProgressIndicator();
+            progress.setMaxSize(100, 100);
 
-            // Register client connection
-            registerClientConnection(true);
+            VBox loadingBox = new VBox(10);
+            loadingBox.setAlignment(Pos.CENTER);
+            loadingBox.getChildren().addAll(
+                    new Label("Tentativo di connessione al database..."),
+                    progress
+            );
+
+            Scene loadingScene = new Scene(loadingBox, 300, 200);
+            primaryStage.setScene(loadingScene);
+            primaryStage.show();
+
+            // Eseguiamo la connessione in un thread separato per non bloccare l'UI
+            Task<Boolean> connectionTask = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    try {
+                        // Establish database connection
+                        dbManager = DatabaseManager.createRemoteInstance(dbUrl, dbUser, dbPassword);
+
+                        // Register client connection
+                        registerClientConnection(true);
+                        return true;
+                    } catch (Exception e) {
+                        System.err.println("ERRORE: Impossibile connettersi al server. Assicurarsi che il server sia in esecuzione.");
+                        System.err.println("Dettagli: " + e.getMessage());
+                        return false;
+                    }
+                }
+            };
+
+            connectionTask.setOnSucceeded(event -> {
+                Boolean success = connectionTask.getValue();
+                if (success) {
+                    try {
+                        // Load the main page
+                        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/book_recommender/lab_b/homepage.fxml")));
+
+                        // Set the title and scene with initial dimensions
+                        primaryStage.setTitle("Book Recommender - Client");
+                        Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
+                        primaryStage.setScene(scene);
+
+                        // Set minimum window dimensions
+                        primaryStage.setMinWidth(MIN_WIDTH);
+                        primaryStage.setMinHeight(MIN_HEIGHT);
+
+                        // Allow window resizing
+                        primaryStage.setResizable(true);
+                    } catch (Exception e) {
+                        showServerErrorAlert(primaryStage, "Errore applicazione",
+                                "Errore durante il caricamento dell'interfaccia",
+                                "Si è verificato un errore durante il caricamento dell'interfaccia: " + e.getMessage());
+                    }
+                } else {
+                    showServerErrorAlert(primaryStage, "Errore di connessione",
+                            "Connessione al database fallita",
+                            "Impossibile connettersi al database. Verificare che il server sia in esecuzione e che i parametri di connessione siano corretti.");
+                }
+            });
+
+            connectionTask.setOnFailed(event -> {
+                Throwable exception = connectionTask.getException();
+                showServerErrorAlert(primaryStage, "Errore di connessione",
+                        "Connessione al database fallita",
+                        "Impossibile connettersi al database: " + exception.getMessage() +
+                                "\nL'applicazione verrà chiusa. Verificare i parametri di connessione.");
+            });
+
+            // Avvia il task di connessione
+            new Thread(connectionTask).start();
 
         } catch (Exception e) {
             System.err.println("ERRORE: Impossibile connettersi al server. Assicurarsi che il server sia in esecuzione.");
@@ -74,31 +148,13 @@ public class Client extends Application {
                     "Connessione al database fallita",
                     "Impossibile connettersi al database: " + e.getMessage() +
                             "\nL'applicazione verrà chiusa. Verificare i parametri di connessione.");
-            return;
         }
-
-        // Load the main page
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/book_recommender/lab_b/homepage.fxml")));
-
-        // Set the title and scene with initial dimensions
-        primaryStage.setTitle("Book Recommender - Client");
-        Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
-        primaryStage.setScene(scene);
-
-        // Set minimum window dimensions
-        primaryStage.setMinWidth(MIN_WIDTH);
-        primaryStage.setMinHeight(MIN_HEIGHT);
-
-        // Allow window resizing
-        primaryStage.setResizable(true);
-
-        // Show window
-        primaryStage.show();
     }
 
     /**
      * Chiedi all'utente i parametri di connessione al database (solo ngrok host e porta)
-     * @return true se i parametri sono stati forniti, false altrimenti
+     * e verifica che siano validi prima di procedere
+     * @return true se i parametri sono stati forniti e sono validi, false altrimenti
      */
     private boolean getDatabaseConnectionParameters() {
         // Creiamo un dialog personalizzato per i parametri di connessione
@@ -131,9 +187,6 @@ public class Client extends Application {
         // Aggiunge la griglia al dialog
         dialog.getDialogPane().setContent(grid);
 
-        // RIMUOVI QUESTA RIGA:
-        // Platform.runLater(hostField::requestFocus);
-
         // Mostra il dialog e aspetta che l'utente faccia una scelta
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -143,17 +196,52 @@ public class Client extends Application {
 
             // Verifica che i parametri non siano vuoti
             if (host.isEmpty() || port.isEmpty()) {
+                showConnectionParametersError();
+                return false;
+            }
+
+            // Verifica che la porta sia un numero valido
+            try {
+                int portNumber = Integer.parseInt(port);
+                if (portNumber <= 0 || portNumber > 65535) {
+                    showConnectionParametersError();
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showConnectionParametersError();
                 return false;
             }
 
             // Costruisci URL di connessione JDBC
             dbUrl = "jdbc:postgresql://" + host + ":" + port + "/book_recommender";
 
-            return true;
+            // Qui possiamo anche verificare preliminarmente se la connessione è possibile
+            // prima di procedere con la creazione dell'istanza DatabaseManager
+            try {
+                // Prova a fare un rapido test di connessione
+                Connection testConnection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                testConnection.close();
+                return true;
+            } catch (SQLException e) {
+                System.err.println("Test di connessione fallito: " + e.getMessage());
+                showConnectionParametersError();
+                return false;
+            }
         }
 
         // L'utente ha annullato
         return false;
+    }
+
+    /**
+     * Mostra una finestra di dialogo di errore quando i parametri di connessione sono mancanti o non validi
+     */
+    private void showConnectionParametersError() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore di connessione");
+        alert.setHeaderText("Parametri di connessione mancanti o errari ");
+        alert.setContentText("È necessario fornire i parametri di connessione correti al database. \nL'applicazione verrà chiusa.");
+        alert.showAndWait();
     }
 
     /**
@@ -191,9 +279,6 @@ public class Client extends Application {
     /**
      * Register client connection or disconnection in the database
      */
-    /**
-     * Register client connection or disconnection in the database
-     */
     private void registerClientConnection(boolean isConnecting) {
         try {
             // Create a shorter client ID (just UUID, without hostname and IP)
@@ -226,7 +311,7 @@ public class Client extends Application {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("Errore durante la chiusura della connessione: " + e.getMessage());
         }
     }
