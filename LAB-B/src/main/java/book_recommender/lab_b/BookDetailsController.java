@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -407,7 +408,6 @@ public class BookDetailsController implements Initializable {
         addReviewsToContainer(originalityReviews, originalityReviewsBox);
         addReviewsToContainer(editionReviews, editionReviewsBox);
     }
-
     private void addReviewsToContainer(List<Review> reviews, VBox container) {
         if (reviews.isEmpty()) {
             Label noReviewsLabel = new Label("Nessuna recensione disponibile.");
@@ -415,6 +415,10 @@ public class BookDetailsController implements Initializable {
             container.getChildren().add(noReviewsLabel);
             return;
         }
+
+        // Colori per le stelle
+        final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per le stelle piene e mezze stelle
+        final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
 
         for (Review review : reviews) {
             // Crea un box per la recensione
@@ -432,15 +436,41 @@ public class BookDetailsController implements Initializable {
             Label userLabel = new Label(review.userId);
             userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
 
-            // Aggiungi stelle per la valutazione
+            // Aggiungi stelle per la valutazione con supporto per mezze stelle
             HBox starsBox = new HBox(2);
+
+            // Valore del rating
+            double rating = review.rating;
+
             for (int i = 1; i <= 5; i++) {
-                Text star = new Text("★");
+                Text star = new Text();
                 star.setStyle("-fx-font-size: 14px;");
-                star.setFill(i <= review.rating ? Color.web("#ffc107") : Color.web("#dddddd"));
+
+                // Calcola la parte decimale del rating per questa posizione
+                double decimalPart = rating - (i - 1);
+
+                if (decimalPart >= 0.7) {
+                    // Arrotonda per eccesso - stella piena
+                    star.setText("★");
+                    star.setFill(goldStarColor);
+                } else if (decimalPart >= 0.3) {
+                    // Mezza stella - nel range 0.3-0.6
+                    star.setText("◐");
+                    star.setFill(goldStarColor);
+                } else if (decimalPart > 0) {
+                    // Arrotonda per difetto - stella piena
+                    star.setText("★");
+                    star.setFill(goldStarColor);
+                } else {
+                    // Stella vuota
+                    star.setText("★");
+                    star.setFill(grayStarColor);
+                }
+
                 starsBox.getChildren().add(star);
             }
 
+            // Aggiungi username e stelle all'header
             headerBox.getChildren().addAll(userLabel, starsBox);
 
             // Corpo della recensione
@@ -448,25 +478,103 @@ public class BookDetailsController implements Initializable {
             commentLabel.setWrapText(true);
             commentLabel.setStyle("-fx-padding: 5 0 0 0;");
 
+            // Aggiungi tutto al container della recensione
             reviewBox.getChildren().addAll(headerBox, commentLabel);
             container.getChildren().add(reviewBox);
         }
     }
 
     private void updateStars(Text star1, Text star2, Text star3, Text star4, Text star5, double rating) {
-        Color goldColor = Color.web("#ffc107");
-        Color grayColor = Color.web("#dddddd");
+        Color goldStarColor = Color.web("#FFD700");  // Colore giallo oro per le stelle
+        Color grayStarColor = Color.web("#dddddd");  // Colore grigio per stelle vuote
 
-        star1.setFill(rating >= 1 ? goldColor : grayColor);
-        star2.setFill(rating >= 2 ? goldColor : grayColor);
-        star3.setFill(rating >= 3 ? goldColor : grayColor);
-        star4.setFill(rating >= 4 ? goldColor : grayColor);
-        star5.setFill(rating >= 5 ? goldColor : grayColor);
+        // Logica per la prima stella
+        double decimal1 = rating;
+        if (decimal1 >= 0.7) {
+            star1.setText("★");
+            star1.setFill(goldStarColor);
+        } else if (decimal1 >= 0.3) {
+            star1.setText("◐");
+            star1.setFill(goldStarColor);
+        } else if (decimal1 > 0) {
+            star1.setText("★");
+            star1.setFill(goldStarColor);
+        } else {
+            star1.setText("★");
+            star1.setFill(grayStarColor);
+        }
+
+        // Logica per la seconda stella
+        double decimal2 = rating - 1;
+        if (decimal2 >= 0.7) {
+            star2.setText("★");
+            star2.setFill(goldStarColor);
+        } else if (decimal2 >= 0.3) {
+            star2.setText("◐");
+            star2.setFill(goldStarColor);
+        } else if (decimal2 > 0) {
+            star2.setText("★");
+            star2.setFill(goldStarColor);
+        } else {
+            star2.setText("★");
+            star2.setFill(grayStarColor);
+        }
+
+        // Logica per la terza stella
+        double decimal3 = rating - 2;
+        if (decimal3 >= 0.7) {
+            star3.setText("★");
+            star3.setFill(goldStarColor);
+        } else if (decimal3 >= 0.3) {
+            star3.setText("◐");
+            star3.setFill(goldStarColor);
+        } else if (decimal3 > 0) {
+            star3.setText("★");
+            star3.setFill(goldStarColor);
+        } else {
+            star3.setText("★");
+            star3.setFill(grayStarColor);
+        }
+
+        // Logica per la quarta stella
+        double decimal4 = rating - 3;
+        if (decimal4 >= 0.7) {
+            star4.setText("★");
+            star4.setFill(goldStarColor);
+        } else if (decimal4 >= 0.3) {
+            star4.setText("◐");
+            star4.setFill(goldStarColor);
+        } else if (decimal4 > 0) {
+            star4.setText("★");
+            star4.setFill(goldStarColor);
+        } else {
+            star4.setText("★");
+            star4.setFill(grayStarColor);
+        }
+
+        // Logica per la quinta stella
+        double decimal5 = rating - 4;
+        if (decimal5 >= 0.7) {
+            star5.setText("★");
+            star5.setFill(goldStarColor);
+        } else if (decimal5 >= 0.3) {
+            star5.setText("◐");
+            star5.setFill(goldStarColor);
+        } else if (decimal5 > 0) {
+            star5.setText("★");
+            star5.setFill(goldStarColor);
+        } else {
+            star5.setText("★");
+            star5.setFill(grayStarColor);
+        }
     }
-
     private void generateGeneralComment() {
         // Pulisci prima il container dei commenti generali
         generalCommentsLabel.setText("");
+
+        // Definisci i colori per le stelle
+        final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per stelle piene e mezze stelle
+        final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
 
         // Crea un container per i commenti se non esiste già
         VBox commentsContainer;
@@ -486,29 +594,79 @@ public class BookDetailsController implements Initializable {
             }
         }
 
-        // Aggiungi l'intestazione (correzione errore di battitura)
+        // Aggiungi l'intestazione
         Label headerLabel = new Label();
         headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         headerLabel.setText("Recensione generale");
         commentsContainer.getChildren().add(headerLabel);
 
-        // Aggiungi il sommario delle valutazioni con tutti i dettagli
-        Label summaryLabel = new Label();
+        // Aggiungi valutazione media totale con stelle se ci sono valutazioni
         if (numRaters > 0) {
-            StringBuilder summary = new StringBuilder();
-            summary.append("Basato su ").append(numRaters).append(" valutazioni\n");
-            summary.append("Stile: ").append(ratings.get("style")).append("/5\n");
-            summary.append("Contenuto: ").append(ratings.get("content")).append("/5\n");
-            summary.append("Gradevolezza: ").append(ratings.get("pleasantness")).append("/5\n");
-            summary.append("Originalità: ").append(ratings.get("originality")).append("/5\n");
-            summary.append("Edizione: ").append(ratings.get("edition")).append("/5\n");
-            summary.append("Media totale: ").append(ratings.get("total")).append("/5");
-            summaryLabel.setText(summary.toString());
-        } else {
+            HBox ratingBox = new HBox(10);
+            ratingBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // Etichetta per la valutazione media
+            Label avgRatingLabel = new Label("Valutazione media: " + ratings.get("total"));
+            avgRatingLabel.setStyle("-fx-font-weight: bold;");
+            ratingBox.getChildren().add(avgRatingLabel);
+
+            // Aggiungi le stelle per la valutazione media
+            HBox starsBox = new HBox(2);
+            double totalRating = ratings.get("total");
+
+            for (int i = 1; i <= 5; i++) {
+                Text star = new Text();
+                star.setStyle("-fx-font-size: 16px;");
+
+                // Calcola la parte decimale del rating per questa posizione
+                double decimalPart = totalRating - (i - 1);
+
+                if (decimalPart >= 0.7) {
+                    // Arrotonda per eccesso - stella piena
+                    star.setText("★");
+                    star.setFill(goldStarColor);
+                } else if (decimalPart >= 0.3) {
+                    // Mezza stella - nel range 0.3-0.6
+                    star.setText("◐");
+                    star.setFill(goldStarColor);
+                } else if (decimalPart > 0) {
+                    // Arrotonda per difetto - stella piena
+                    star.setText("★");
+                    star.setFill(goldStarColor);
+                } else {
+                    // Stella vuota
+                    star.setText("★");
+                    star.setFill(grayStarColor);
+                }
+
+                starsBox.getChildren().add(star);
+            }
+
+            ratingBox.getChildren().add(starsBox);
+            commentsContainer.getChildren().add(ratingBox);
+        }
+
+        // Aggiungi il sommario delle valutazioni
+        Label summaryLabel = new Label();
+        if (numRaters <= 0) {
             summaryLabel.setText("Nessuna valutazione disponibile per questo libro.");
+        } else {
+            summaryLabel.setText("Basato su " + numRaters + " valutazioni");
         }
         summaryLabel.setWrapText(true);
         commentsContainer.getChildren().add(summaryLabel);
+
+        // Aggiungi un separatore se ci sono commenti
+        if (numRaters > 0) {
+            Separator separator = new Separator();
+            separator.setPadding(new Insets(5, 0, 5, 0));
+            commentsContainer.getChildren().add(separator);
+
+            // Aggiungi label per i commenti degli utenti
+            Label commentsHeader = new Label("Commenti degli utenti:");
+            commentsHeader.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+            commentsContainer.getChildren().add(commentsHeader);
+        }
 
         // Aggiungi i commenti degli utenti
         if (numRaters > 0) {
@@ -516,32 +674,96 @@ public class BookDetailsController implements Initializable {
             List<Comment> userComments = getUserComments(currentBookId);
 
             if (!userComments.isEmpty()) {
-                Label reviewsHeader = new Label("Recensioni degli utenti:");
-                reviewsHeader.setStyle("-fx-font-weight: bold; -fx-padding: 10 0 5 0;");
-                commentsContainer.getChildren().add(reviewsHeader);
-
                 // Aggiungi ogni commento colorato al container
                 for (Comment comment : userComments) {
+                    // Ottieni la valutazione media dell'utente per questo libro
+                    double userRating = getUserRatingForBook(comment.userId, currentBookId);
+
                     // Crea un box per ogni commento
                     VBox commentBox = new VBox(5);
-                    commentBox.setStyle("-fx-padding: 5; -fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5;");
+                    commentBox.setPadding(new Insets(10));
+                    commentBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
                     // Usa il colore assegnato all'utente
                     String userColor = userColors.getOrDefault(comment.userId, "#333333");
 
-                    // Crea etichette separate per utente e commento
-                    Label userLabel = new Label(comment.userId + ":");
-                    userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
+                    // Crea un HBox per contenere l'ID utente e le stelle
+                    HBox userHeader = new HBox(10);
+                    userHeader.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+                    // Crea etichetta per l'utente
+                    Label userLabel = new Label(comment.userId);
+                    userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
+                    userHeader.getChildren().add(userLabel);
+
+                    // Aggiungi stelle per la valutazione con supporto per mezze stelle
+                    if (userRating > 0) {
+                        HBox starsBox = new HBox(2);
+
+                        for (int i = 1; i <= 5; i++) {
+                            Text star = new Text();
+                            star.setStyle("-fx-font-size: 14px;");
+
+                            // Calcola la parte decimale del rating per questa posizione
+                            double decimalPart = userRating - (i - 1);
+
+                            if (decimalPart >= 0.7) {
+                                // Arrotonda per eccesso - stella piena
+                                star.setText("★");
+                                star.setFill(goldStarColor);
+                            } else if (decimalPart >= 0.3) {
+                                // Mezza stella - nel range 0.3-0.6
+                                star.setText("◐");
+                                star.setFill(goldStarColor);
+                            } else if (decimalPart > 0) {
+                                // Arrotonda per difetto - stella piena
+                                star.setText("★");
+                                star.setFill(goldStarColor);
+                            } else {
+                                // Stella vuota
+                                star.setText("★");
+                                star.setFill(grayStarColor);
+                            }
+
+                            starsBox.getChildren().add(star);
+                        }
+
+                        userHeader.getChildren().add(starsBox);
+                    }
+
+                    // Crea etichetta per il commento
                     Label textLabel = new Label(comment.text);
                     textLabel.setWrapText(true);
                     textLabel.setStyle("-fx-font-style: italic;");
 
-                    commentBox.getChildren().addAll(userLabel, textLabel);
+                    commentBox.getChildren().addAll(userHeader, textLabel);
                     commentsContainer.getChildren().add(commentBox);
                 }
+            } else {
+                Label noCommentsLabel = new Label("Nessun commento disponibile.");
+                noCommentsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777777;");
+                commentsContainer.getChildren().add(noCommentsLabel);
             }
         }
+    }
+    // Metodo ausiliario per ottenere la valutazione media di un utente per un libro
+    private double getUserRatingForBook(String userId, int bookId) {
+        try (Connection conn = dbManager.getConnection()) {
+            String sql = "SELECT average_rating FROM book_ratings WHERE user_id = ? AND book_id = ?";
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, userId);
+                pstmt.setInt(2, bookId);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getDouble("average_rating");
+                }
+            }
+        } catch (SQLException e) {
+            // Gestione errore
+        }
+        return 0.0; // Valore predefinito se non trovato
     }
     private List<Comment> getUserComments(int bookId) {
         List<Comment> comments = new ArrayList<>();
@@ -601,7 +823,7 @@ public class BookDetailsController implements Initializable {
             VBox recommendationsContainer = new VBox(10);
             recommendationsContainer.setPadding(new Insets(10));
 
-            Label headerLabel = new Label("Libri consigliati specificamente per questo libro:");
+            Label headerLabel = new Label("Libri consigliati dagli utenti:");
             headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             recommendationsContainer.getChildren().add(headerLabel);
 
@@ -699,7 +921,7 @@ public class BookDetailsController implements Initializable {
             VBox similarBooksContainer = new VBox(10);
             similarBooksContainer.setPadding(new Insets(10));
 
-            Label headerLabel = new Label("Libri consigliati basati sulla categoria:");
+            Label headerLabel = new Label("Libri consigliati automaticamente secondo la categoria:");
             headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             similarBooksContainer.getChildren().add(headerLabel);
 

@@ -2247,6 +2247,7 @@ public class ServerInterfaceController {
             }
         }
     }
+
     private void startSocketServer() {
         int[] portsToTry = {8888, 8889, 8890, 8891, 8892};
         boolean success = false;
