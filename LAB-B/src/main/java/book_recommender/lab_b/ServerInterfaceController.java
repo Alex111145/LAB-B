@@ -2027,8 +2027,6 @@ public class ServerInterfaceController {
    }
 
     private void importRatings(Connection conn) throws SQLException, IOException {
-        // Log informativo
-
         String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
 
         String insertRatingSql = "INSERT INTO book_ratings " +
@@ -2054,7 +2052,7 @@ public class ServerInterfaceController {
             while ((line = reader.readLine()) != null) {
                 lineNum++;
                 try {
-                    // Per file CSV con valori delimitati da virgolette e virgole come separatori
+                    // Parse CSV line handling quoted values
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 5) {
@@ -2090,7 +2088,6 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-
                             // Try to create the user
                             try {
                                 String createUserSql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
@@ -2103,8 +2100,7 @@ public class ServerInterfaceController {
                                     pstmtCreateUser.setString(5, "password");
 
                                     int created = pstmtCreateUser.executeUpdate();
-                                    if (created > 0) {
-                                    } else {
+                                    if (created <= 0) {
                                         continue; // Skip if we can't create the user
                                     }
                                 }
@@ -2134,7 +2130,6 @@ public class ServerInterfaceController {
 
                             if (newBookRs.next()) {
                                 bookId = newBookRs.getInt(1);
-                            } else {
                             }
                         } catch (SQLException e) {
                             continue;
@@ -2145,37 +2140,46 @@ public class ServerInterfaceController {
                         continue;
                     }
 
+                    // Set user_id and book_id - parametri 1 e 2
                     pstmtRating.setString(1, userId);
                     pstmtRating.setInt(2, bookId);
 
                     // Process ratings from fields
                     if (fields.length >= startIndexForRatings + 5) {
                         try {
-                            // Parse the ratings
+                            // Parse the ratings (indexes 3-7 for numeric format, or 2-6 for standard format)
                             int styleRating = parseInt(fields[startIndexForRatings], 3);
                             int contentRating = parseInt(fields[startIndexForRatings + 1], 3);
                             int pleasantnessRating = parseInt(fields[startIndexForRatings + 2], 3);
                             int originalityRating = parseInt(fields[startIndexForRatings + 3], 3);
                             int editionRating = parseInt(fields[startIndexForRatings + 4], 3);
 
+                            // Set the ratings - parametri 3-7
                             pstmtRating.setInt(3, styleRating);
                             pstmtRating.setInt(4, contentRating);
                             pstmtRating.setInt(5, pleasantnessRating);
                             pstmtRating.setInt(6, originalityRating);
                             pstmtRating.setInt(7, editionRating);
 
-                            // Calculate average
+                            // Calculate average rating - parametro 8
                             float avgRating = (styleRating + contentRating + pleasantnessRating +
                                     originalityRating + editionRating) / 5.0f;
-                            // Arrotonda a un decimale
+                            // Round to one decimal place
                             avgRating = Math.round(avgRating * 10) / 10.0f;
                             pstmtRating.setFloat(8, avgRating);
 
-                            // Imposta i commenti in base all'ordine specificato:
-                            // general_comment, style_comment, content_comment, pleasantness_comment, originality_comment, edition_comment
-                            int commentIndex = startIndexForRatings + 5;
+                            // L'indice per accedere all'array fields
+                            int commentIndex = startIndexForRatings + 6;
 
-                            // Commento generale (general_comment)
+                            // CORRISPONDENZA TRA INDICI DELL'ARRAY E PARAMETRI JDBC:
+                            // fields[commentIndex] -> parametro 9 (general_comment)
+                            // fields[commentIndex+1] -> parametro 10 (style_comment)
+                            // fields[commentIndex+2] -> parametro 11 (content_comment)
+                            // fields[commentIndex+3] -> parametro 12 (pleasantness_comment)
+                            // fields[commentIndex+4] -> parametro 13 (originality_comment)
+                            // fields[commentIndex+5] -> parametro 14 (edition_comment)
+
+                            // Set general_comment (parametro 9, indice array: commentIndex)
                             if (fields.length > commentIndex) {
                                 String comment = fields[commentIndex].trim();
                                 pstmtRating.setString(9, comment.isEmpty() ? null : comment);
@@ -2183,7 +2187,7 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(9, Types.VARCHAR);
                             }
 
-                            // Commento sullo stile (style_comment)
+                            // Set style_comment (parametro 10, indice array: commentIndex+1)
                             if (fields.length > commentIndex + 1) {
                                 String comment = fields[commentIndex + 1].trim();
                                 pstmtRating.setString(10, comment.isEmpty() ? null : comment);
@@ -2191,7 +2195,7 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(10, Types.VARCHAR);
                             }
 
-                            // Commento sul contenuto (content_comment)
+                            // Set content_comment (parametro 11, indice array: commentIndex+2)
                             if (fields.length > commentIndex + 2) {
                                 String comment = fields[commentIndex + 2].trim();
                                 pstmtRating.setString(11, comment.isEmpty() ? null : comment);
@@ -2199,7 +2203,7 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(11, Types.VARCHAR);
                             }
 
-                            // Commento sulla gradevolezza (pleasantness_comment)
+                            // Set pleasantness_comment (parametro 12, indice array: commentIndex+3)
                             if (fields.length > commentIndex + 3) {
                                 String comment = fields[commentIndex + 3].trim();
                                 pstmtRating.setString(12, comment.isEmpty() ? null : comment);
@@ -2207,7 +2211,7 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(12, Types.VARCHAR);
                             }
 
-                            // Commento sull'originalità (originality_comment)
+                            // Set originality_comment (parametro 13, indice array: commentIndex+4)
                             if (fields.length > commentIndex + 4) {
                                 String comment = fields[commentIndex + 4].trim();
                                 pstmtRating.setString(13, comment.isEmpty() ? null : comment);
@@ -2215,7 +2219,7 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(13, Types.VARCHAR);
                             }
 
-                            // Commento sull'edizione (edition_comment)
+                            // Set edition_comment (parametro 14, indice array: commentIndex+5)
                             if (fields.length > commentIndex + 5) {
                                 String comment = fields[commentIndex + 5].trim();
                                 pstmtRating.setString(14, comment.isEmpty() ? null : comment);
@@ -2223,12 +2227,13 @@ public class ServerInterfaceController {
                                 pstmtRating.setNull(14, Types.VARCHAR);
                             }
 
+                            // Execute the query
                             int rowsAffected = pstmtRating.executeUpdate();
                             if (rowsAffected > 0) {
                                 ratingCount++;
                                 if (ratingCount % 50 == 0) {
+                                    // Optional logging if needed
                                 }
-                            } else {
                             }
                         } catch (NumberFormatException e) {
                             errorCount++;
@@ -2241,7 +2246,6 @@ public class ServerInterfaceController {
                 }
             }
         }
-
     }
     private void startSocketServer() {
         int[] portsToTry = {8888, 8889, 8890, 8891, 8892};
