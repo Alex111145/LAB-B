@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="book_recommender.lab_b.ServerInterfaceController">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <!-- Header con logo -->
+                <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" style="-fx-background-color: #4054B2; -fx-padding: 10px;">
+                    <children>
+                        <Label style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="Book Recommender Server" />
+                    </children>
+                </HBox>
+
+                <!-- Main content -->
+                <VBox spacing="15.0" VBox.vgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Ngrok Settings -->
+                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 5;">
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Ngrok Remote Access">
+                                    <VBox.margin>
+                                        <Insets bottom="5.0" />
+                                    </VBox.margin>
+                                </Label>
+                                <Separator />
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Ngrok Status:" />
+                                        <Label fx:id="ngrokStatusLabel" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="Inactive" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Host Ngrok:" />
+                                        <TextField fx:id="ngrokHostField" editable="false" promptText="Ngrok host will appear here" HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="copyHostButton" mnemonicParsing="false" onAction="#onCopyNgrokHost" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Porta Ngrok:" />
+                                        <TextField fx:id="ngrokPortField" editable="false" promptText="Ngrok port will appear here" HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="copyPortButton" mnemonicParsing="false" onAction="#onCopyNgrokPort" prefHeight="30.0" style="-fx-background-color: #4054B2; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Copy" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <VBox.margin>
+                                        <Insets top="15.0" />
+                                    </VBox.margin>
+                                    <children>
+                                        <Button fx:id="startNgrokButton" mnemonicParsing="false" onAction="#onStartNgrok" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Start Ngrok" />
+                                        <Button fx:id="stopNgrokButton" disable="true" mnemonicParsing="false" onAction="#onStopNgrok" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5px;" text="Stop Ngrok" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Server Status -->
+                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Server Status">
+                                    <VBox.margin>
+                                        <Insets bottom="5.0" />
+                                    </VBox.margin>
+                                </Label>
+                                <Separator />
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Status:" />
+                                        <Label fx:id="serverStatusLabel" style="-fx-text-fill: #d32f2f; -fx-font-weight: bold;" text="Stopped" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Connected Clients:" />
+                                        <Label fx:id="clientCountLabel" style="-fx-font-weight: bold;" text="0" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Server Start Time:" />
+                                        <Label fx:id="startTimeLabel" text="-" />
+                                    </children>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label prefWidth="120.0" text="Uptime:" />
+                                        <Label fx:id="uptimeLabel" text="-" />
+                                    </children>
+                                </HBox>
+
+                                <Label text="Server Initialization Progress:" />
+                                <ProgressBar fx:id="initProgressBar" prefWidth="Infinity" progress="0.0" />
+
+                            </children>
+                        </VBox>
+
+                        <!-- Pulsanti Start/Stop centrati in basso -->
+                        <HBox alignment="CENTER" spacing="30.0">
+                            <children>
+                                <Button fx:id="startButton" mnemonicParsing="false" onAction="#onStartServer" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 5px;" text="Start" />
+                                <Button fx:id="stopButton" disable="true" mnemonicParsing="false" onAction="#onStopServer" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 5px;" text="Stop" />
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" top="10.0" />
+                            </padding>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
