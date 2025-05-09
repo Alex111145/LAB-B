@@ -455,7 +455,7 @@ public class BookDetailsController implements Initializable {
                     star.setFill(goldStarColor);
                 } else if (decimalPart >= 0.3) {
                     // Mezza stella - nel range 0.3-0.6
-                    star.setText("◐");
+                    star.setText("☆");
                     star.setFill(goldStarColor);
                 } else if (decimalPart > 0) {
                     // Arrotonda per difetto - stella piena
@@ -494,7 +494,7 @@ public class BookDetailsController implements Initializable {
             star1.setText("★");
             star1.setFill(goldStarColor);
         } else if (decimal1 >= 0.3) {
-            star1.setText("◐");
+            star1.setText("☆");
             star1.setFill(goldStarColor);
         } else if (decimal1 > 0) {
             star1.setText("★");
@@ -510,7 +510,7 @@ public class BookDetailsController implements Initializable {
             star2.setText("★");
             star2.setFill(goldStarColor);
         } else if (decimal2 >= 0.3) {
-            star2.setText("◐");
+            star2.setText("☆");
             star2.setFill(goldStarColor);
         } else if (decimal2 > 0) {
             star2.setText("★");
@@ -526,7 +526,7 @@ public class BookDetailsController implements Initializable {
             star3.setText("★");
             star3.setFill(goldStarColor);
         } else if (decimal3 >= 0.3) {
-            star3.setText("◐");
+            star3.setText("☆");
             star3.setFill(goldStarColor);
         } else if (decimal3 > 0) {
             star3.setText("★");
@@ -542,7 +542,7 @@ public class BookDetailsController implements Initializable {
             star4.setText("★");
             star4.setFill(goldStarColor);
         } else if (decimal4 >= 0.3) {
-            star4.setText("◐");
+            star4.setText("☆");
             star4.setFill(goldStarColor);
         } else if (decimal4 > 0) {
             star4.setText("★");
@@ -558,7 +558,7 @@ public class BookDetailsController implements Initializable {
             star5.setText("★");
             star5.setFill(goldStarColor);
         } else if (decimal5 >= 0.3) {
-            star5.setText("◐");
+            star5.setText("☆");
             star5.setFill(goldStarColor);
         } else if (decimal5 > 0) {
             star5.setText("★");
@@ -597,76 +597,20 @@ public class BookDetailsController implements Initializable {
         // Aggiungi l'intestazione
         Label headerLabel = new Label();
         headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        headerLabel.setText("Recensione generale");
+        headerLabel.setText("Commenti degli utenti:");
         commentsContainer.getChildren().add(headerLabel);
 
-        // Aggiungi valutazione media totale con stelle se ci sono valutazioni
-        if (numRaters > 0) {
-            HBox ratingBox = new HBox(10);
-            ratingBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-
-            // Etichetta per la valutazione media
-            Label avgRatingLabel = new Label("Valutazione media: " + ratings.get("total"));
-            avgRatingLabel.setStyle("-fx-font-weight: bold;");
-            ratingBox.getChildren().add(avgRatingLabel);
-
-            // Aggiungi le stelle per la valutazione media
-            HBox starsBox = new HBox(2);
-            double totalRating = ratings.get("total");
-
-            for (int i = 1; i <= 5; i++) {
-                Text star = new Text();
-                star.setStyle("-fx-font-size: 16px;");
-
-                // Calcola la parte decimale del rating per questa posizione
-                double decimalPart = totalRating - (i - 1);
-
-                if (decimalPart >= 0.7) {
-                    // Arrotonda per eccesso - stella piena
-                    star.setText("★");
-                    star.setFill(goldStarColor);
-                } else if (decimalPart >= 0.3) {
-                    // Mezza stella - nel range 0.3-0.6
-                    star.setText("◐");
-                    star.setFill(goldStarColor);
-                } else if (decimalPart > 0) {
-                    // Arrotonda per difetto - stella piena
-                    star.setText("★");
-                    star.setFill(goldStarColor);
-                } else {
-                    // Stella vuota
-                    star.setText("★");
-                    star.setFill(grayStarColor);
-                }
-
-                starsBox.getChildren().add(star);
-            }
-
-            ratingBox.getChildren().add(starsBox);
-            commentsContainer.getChildren().add(ratingBox);
-        }
 
         // Aggiungi il sommario delle valutazioni
         Label summaryLabel = new Label();
         if (numRaters <= 0) {
-            summaryLabel.setText("Nessuna valutazione disponibile per questo libro.");
-        } else {
-            summaryLabel.setText("Basato su " + numRaters + " valutazioni");
+            summaryLabel.setText("Nessuna recensione disponibile per questo libro.");
+
         }
         summaryLabel.setWrapText(true);
         commentsContainer.getChildren().add(summaryLabel);
 
-        // Aggiungi un separatore se ci sono commenti
-        if (numRaters > 0) {
-            Separator separator = new Separator();
-            separator.setPadding(new Insets(5, 0, 5, 0));
-            commentsContainer.getChildren().add(separator);
 
-            // Aggiungi label per i commenti degli utenti
-            Label commentsHeader = new Label("Commenti degli utenti:");
-            commentsHeader.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-            commentsContainer.getChildren().add(commentsHeader);
-        }
 
         // Aggiungi i commenti degli utenti
         if (numRaters > 0) {
@@ -713,7 +657,7 @@ public class BookDetailsController implements Initializable {
                                 star.setFill(goldStarColor);
                             } else if (decimalPart >= 0.3) {
                                 // Mezza stella - nel range 0.3-0.6
-                                star.setText("◐");
+                                star.setText("☆");
                                 star.setFill(goldStarColor);
                             } else if (decimalPart > 0) {
                                 // Arrotonda per difetto - stella piena
