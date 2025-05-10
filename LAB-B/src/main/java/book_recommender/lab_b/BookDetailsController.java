@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -179,6 +180,8 @@ public class BookDetailsController implements Initializable {
         );
     }
 
+
+
     private void setupExampleRatings() {
         ratings.put("style", 0.0);
         ratings.put("content", 0.0);
@@ -341,15 +344,12 @@ public class BookDetailsController implements Initializable {
         }
     }
 
-    private void updateUI() {
-        // Imposta i dati del libro
-        bookTitleLabel.setText(currentBook.getTitle());
-        authorsLabel.setText(currentBook.getAuthors());
-        categoryLabel.setText(currentBook.getCategory());
-        publisherLabel.setText(currentBook.getPublisher());
-        yearLabel.setText(String.valueOf(currentBook.getPublishYear()));
-
-        // Imposta le valutazioni
+    /**
+     * Metodo per aggiornare la visualizzazione delle valutazioni nel riepilogo
+     * Questo metodo deve essere chiamato dal metodo updateUI()
+     */
+    private void updateRatingSummary() {
+        // Imposta le valutazioni numeriche
         styleRatingLabel.setText(String.valueOf(ratings.get("style")));
         contentRatingLabel.setText(String.valueOf(ratings.get("content")));
         pleasantnessRatingLabel.setText(String.valueOf(ratings.get("pleasantness")));
@@ -367,6 +367,271 @@ public class BookDetailsController implements Initializable {
         updateStars(originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5, ratings.get("originality"));
         updateStars(editionStar1, editionStar2, editionStar3, editionStar4, editionStar5, ratings.get("edition"));
         updateStars(totalStar1, totalStar2, totalStar3, totalStar4, totalStar5, ratings.get("total"));
+    }
+
+
+    /**
+     * Metodo per aggiornare l'aspetto di una singola stella in base al valore della valutazione
+     * La logica è stata rivista per gestire correttamente le mezze stelle
+     */
+    private void updateSingleStar(Text star, double rating, int position) {
+        Color goldStarColor = Color.web("#FFD700");  // Colore giallo oro per le stelle
+        Color grayStarColor = Color.web("#dddddd");  // Colore grigio per stelle vuote
+
+        // Calcola la parte decimale del rating per questa posizione
+        double decimalPart = rating - (position - 1);
+
+        if (decimalPart >= 1.0) {
+            // Stella piena
+            star.setText("★");
+            star.setFill(goldStarColor);
+        } else if (decimalPart >= 0.5) {
+            // Mezza stella - per valori tra 0.5 e 0.9
+            star.setText("☆");
+            star.setFill(goldStarColor);
+        } else if (decimalPart > 0) {
+            // Stella vuota con colore dorato per valori tra 0.1 e 0.4
+            star.setText("★");
+            star.setFill(grayStarColor);
+        } else {
+            // Stella vuota con colore grigio
+            star.setText("★");
+            star.setFill(grayStarColor);
+        }
+    }
+
+    /**
+     * Metodo migliorato per aggiornare le stelle nella valutazione
+     */
+    private void updateStars(Text star1, Text star2, Text star3, Text star4, Text star5, double rating) {
+        // Aggiorna ogni stella in base alla posizione
+        updateSingleStar(star1, rating, 1);
+        updateSingleStar(star2, rating, 2);
+        updateSingleStar(star3, rating, 3);
+        updateSingleStar(star4, rating, 4);
+        updateSingleStar(star5, rating, 5);
+    }
+
+    /**
+     * Metodo per l'aggiornamento di tutte le stelle nel riepilogo valutazioni
+     */
+    private void updateAllRatingStars() {
+        // Aggiorna tutte le stelle per ciascuna categoria
+        updateStars(styleStar1, styleStar2, styleStar3, styleStar4, styleStar5, ratings.get("style"));
+        updateStars(contentStar1, contentStar2, contentStar3, contentStar4, contentStar5, ratings.get("content"));
+        updateStars(pleasantnessStar1, pleasantnessStar2, pleasantnessStar3, pleasantnessStar4, pleasantnessStar5,
+                ratings.get("pleasantness"));
+        updateStars(originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5,
+                ratings.get("originality"));
+        updateStars(editionStar1, editionStar2, editionStar3, editionStar4, editionStar5, ratings.get("edition"));
+        updateStars(totalStar1, totalStar2, totalStar3, totalStar4, totalStar5, ratings.get("total"));
+    }
+
+    /**
+     * Metodo da aggiungere alla classe per generare stelle per le recensioni individuali
+     * Da utilizzare nel metodo addReviewsToContainer
+     */
+    private void addStarsToReviewHeader(HBox starsBox, double rating) {
+        // Colori per le stelle
+        final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per le stelle piene e mezze stelle
+        final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
+
+        for (int i = 1; i <= 5; i++) {
+            Text star = new Text();
+            star.setStyle("-fx-font-size: 14px;");
+
+            // Calcola la parte decimale del rating per questa posizione
+            double decimalPart = rating - (i - 1);
+
+            if (decimalPart >= 1.0) {
+                // Stella piena
+                star.setText("★");
+                star.setFill(goldStarColor);
+            } else if (decimalPart >= 0.5) {
+                // Mezza stella
+                star.setText("☆");
+                star.setFill(goldStarColor);
+            } else if (decimalPart > 0) {
+                // Stella vuota ma colorata
+                star.setText("★");
+                star.setFill(grayStarColor);
+            } else {
+                // Stella vuota
+                star.setText("★");
+                star.setFill(grayStarColor);
+            }
+
+            starsBox.getChildren().add(star);
+        }
+    }
+
+    /**
+     * Versione modificata del metodo addReviewsToContainer che mostra
+     * sempre i commenti completi senza pulsante "Mostra altro"
+     */
+    private void addReviewsToContainer(List<Review> reviews, VBox container) {
+        if (reviews.isEmpty()) {
+            Label noReviewsLabel = new Label("Nessuna recensione disponibile.");
+            noReviewsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777777;");
+            container.getChildren().add(noReviewsLabel);
+            return;
+        }
+
+        for (Review review : reviews) {
+            // Crea un box per la recensione
+            VBox reviewBox = new VBox(5);
+            reviewBox.setPadding(new Insets(10));
+            reviewBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
+
+            // Intestazione con utente e valutazione
+            HBox headerBox = new HBox(10);
+            headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // Usa il colore assegnato all'utente
+            String userColor = userColors.getOrDefault(review.userId, "#333333");
+
+            Label userLabel = new Label(review.userId);
+            userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
+
+            // Aggiungi stelle per la valutazione con supporto per mezze stelle
+            HBox starsBox = new HBox(2);
+
+            // Utilizza il metodo per aggiungere le stelle
+            addStarsToReviewHeader(starsBox, review.rating);
+
+            // Aggiungi username e stelle all'header
+            headerBox.getChildren().addAll(userLabel, starsBox);
+
+            // Corpo della recensione - mostra sempre il commento completo
+            Label commentLabel = new Label(review.comment);
+            commentLabel.setWrapText(true);
+            commentLabel.setStyle("-fx-padding: 5 0 0 0;");
+
+            // Aggiungi tutto al container della recensione
+            reviewBox.getChildren().addAll(headerBox, commentLabel);
+            container.getChildren().add(reviewBox);
+        }
+    }
+
+    /**
+     * Versione modificata del metodo generateGeneralComment che mostra
+     * sempre i commenti generali completi, senza pulsante "Mostra altro"
+     */
+    private void generateGeneralComment() {
+        // Pulisci prima il container dei commenti generali
+        generalCommentsLabel.setText("");
+
+        // Definisci i colori per le stelle
+        final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per stelle piene e mezze stelle
+        final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
+
+        // Crea un container per i commenti se non esiste già
+        VBox commentsContainer;
+        if (generalCommentsLabel.getParent() instanceof VBox) {
+            commentsContainer = (VBox) generalCommentsLabel.getParent();
+            commentsContainer.getChildren().clear();
+        } else {
+            // Crea un nuovo container e sostituisci l'etichetta originale
+            commentsContainer = new VBox(10);
+            commentsContainer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // Sostituisci l'etichetta originale con il container nel layout
+            VBox parentContainer = (VBox) generalCommentsLabel.getParent();
+            int index = parentContainer.getChildren().indexOf(generalCommentsLabel);
+            if (index >= 0) {
+                parentContainer.getChildren().set(index, commentsContainer);
+            }
+        }
+
+        // Aggiungi l'intestazione
+        Label headerLabel = new Label();
+        headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        headerLabel.setText("Commenti degli utenti:");
+        commentsContainer.getChildren().add(headerLabel);
+
+        // Aggiungi il sommario delle valutazioni
+        Label summaryLabel = new Label();
+        if (numRaters <= 0) {
+            summaryLabel.setText("Nessuna recensione disponibile per questo libro.");
+        }
+        summaryLabel.setWrapText(true);
+        commentsContainer.getChildren().add(summaryLabel);
+
+        // Aggiungi i commenti degli utenti
+        if (numRaters > 0) {
+            // Recupera i commenti generali dal database
+            List<Comment> userComments = getUserComments(currentBookId);
+
+            if (!userComments.isEmpty()) {
+                // Aggiungi ogni commento colorato al container
+                for (Comment comment : userComments) {
+                    // Ottieni la valutazione media dell'utente per questo libro
+                    double userRating = getUserRatingForBook(comment.userId, currentBookId);
+
+                    // Crea un box per ogni commento
+                    VBox commentBox = new VBox(5);
+                    commentBox.setPadding(new Insets(10));
+                    commentBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
+
+                    // Usa il colore assegnato all'utente
+                    String userColor = userColors.getOrDefault(comment.userId, "#333333");
+
+                    // Crea un HBox per contenere l'ID utente e le stelle
+                    HBox userHeader = new HBox(10);
+                    userHeader.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+                    // Crea etichetta per l'utente
+                    Label userLabel = new Label(comment.userId);
+                    userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
+                    userHeader.getChildren().add(userLabel);
+
+                    // Aggiungi stelle per la valutazione con supporto per mezze stelle
+                    if (userRating > 0) {
+                        HBox starsBox = new HBox(2);
+                        addStarsToReviewHeader(starsBox, userRating);
+                        userHeader.getChildren().add(starsBox);
+                    }
+
+                    // Crea etichetta per il commento - mostra sempre il commento completo
+                    Label textLabel = new Label(comment.text);
+                    textLabel.setWrapText(true);
+                    textLabel.setStyle("-fx-font-style: italic;");
+
+                    commentBox.getChildren().addAll(userHeader, textLabel);
+                    commentsContainer.getChildren().add(commentBox);
+                }
+            } else {
+                Label noCommentsLabel = new Label("Nessun commento disponibile.");
+                noCommentsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777777;");
+                commentsContainer.getChildren().add(noCommentsLabel);
+            }
+        }
+    }
+
+    /**
+     * Modifica al metodo updateUI() per utilizzare l'implementazione aggiornata
+     */
+    private void updateUI() {
+        // Imposta i dati del libro
+        bookTitleLabel.setText(currentBook.getTitle());
+        authorsLabel.setText(currentBook.getAuthors());
+        categoryLabel.setText(currentBook.getCategory());
+        publisherLabel.setText(currentBook.getPublisher());
+        yearLabel.setText(String.valueOf(currentBook.getPublishYear()));
+
+        // Imposta le valutazioni numeriche
+        styleRatingLabel.setText(String.valueOf(ratings.get("style")));
+        contentRatingLabel.setText(String.valueOf(ratings.get("content")));
+        pleasantnessRatingLabel.setText(String.valueOf(ratings.get("pleasantness")));
+        originalityRatingLabel.setText(String.valueOf(ratings.get("originality")));
+        editionRatingLabel.setText(String.valueOf(ratings.get("edition")));
+        totalRatingLabel.setText(String.valueOf(ratings.get("total")));
+
+        // Aggiorna il numero di valutatori
+        usersCountLabel.setText(String.valueOf(numRaters));
+
+        // Aggiorna tutte le stelle
+        updateAllRatingStars();
 
         // Genera un commento generale basato sulle valutazioni
         generateGeneralComment();
@@ -377,7 +642,6 @@ public class BookDetailsController implements Initializable {
         // Genera libri consigliati basati sulla categoria del libro attuale
         generateRecommendedBooks();
     }
-
     private void updateReviewContainers() {
         // Pulisci i container
         styleReviewsBox.getChildren().clear();
@@ -408,140 +672,26 @@ public class BookDetailsController implements Initializable {
         addReviewsToContainer(editionReviews, editionReviewsBox);
     }
 
-    private void addReviewsToContainer(List<Review> reviews, VBox container) {
-        if (reviews.isEmpty()) {
-            Label noReviewsLabel = new Label("Nessuna recensione disponibile.");
-            noReviewsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777777;");
-            container.getChildren().add(noReviewsLabel);
-            return;
-        }
 
-        for (Review review : reviews) {
-            // Crea un box per la recensione
-            VBox reviewBox = new VBox(5);
-            reviewBox.setPadding(new Insets(10));
-            reviewBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
-            // Intestazione con utente e valutazione
-            HBox headerBox = new HBox(10);
-            headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+    // Metodo ausiliario per ottenere la valutazione media di un utente per un libro
+    private double getUserRatingForBook(String userId, int bookId) {
+        try (Connection conn = dbManager.getConnection()) {
+            String sql = "SELECT average_rating FROM book_ratings WHERE user_id = ? AND book_id = ?";
 
-            // Usa il colore assegnato all'utente
-            String userColor = userColors.getOrDefault(review.userId, "#333333");
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, userId);
+                pstmt.setInt(2, bookId);
+                ResultSet rs = pstmt.executeQuery();
 
-            Label userLabel = new Label(review.userId);
-            userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
-
-            // Aggiungi stelle per la valutazione
-            HBox starsBox = new HBox(2);
-            for (int i = 1; i <= 5; i++) {
-                Text star = new Text("★");
-                star.setStyle("-fx-font-size: 14px;");
-                star.setFill(i <= review.rating ? Color.web("#ffc107") : Color.web("#dddddd"));
-                starsBox.getChildren().add(star);
-            }
-
-            headerBox.getChildren().addAll(userLabel, starsBox);
-
-            // Corpo della recensione
-            Label commentLabel = new Label(review.comment);
-            commentLabel.setWrapText(true);
-            commentLabel.setStyle("-fx-padding: 5 0 0 0;");
-
-            reviewBox.getChildren().addAll(headerBox, commentLabel);
-            container.getChildren().add(reviewBox);
-        }
-    }
-
-    private void updateStars(Text star1, Text star2, Text star3, Text star4, Text star5, double rating) {
-        Color goldColor = Color.web("#ffc107");
-        Color grayColor = Color.web("#dddddd");
-
-        star1.setFill(rating >= 1 ? goldColor : grayColor);
-        star2.setFill(rating >= 2 ? goldColor : grayColor);
-        star3.setFill(rating >= 3 ? goldColor : grayColor);
-        star4.setFill(rating >= 4 ? goldColor : grayColor);
-        star5.setFill(rating >= 5 ? goldColor : grayColor);
-    }
-
-    private void generateGeneralComment() {
-        // Pulisci prima il container dei commenti generali
-        generalCommentsLabel.setText("");
-
-        // Crea un container per i commenti se non esiste già
-        VBox commentsContainer;
-        if (generalCommentsLabel.getParent() instanceof VBox) {
-            commentsContainer = (VBox) generalCommentsLabel.getParent();
-            commentsContainer.getChildren().clear();
-        } else {
-            // Crea un nuovo container e sostituisci l'etichetta originale
-            commentsContainer = new VBox(10);
-            commentsContainer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-
-            // Sostituisci l'etichetta originale con il container nel layout
-            VBox parentContainer = (VBox) generalCommentsLabel.getParent();
-            int index = parentContainer.getChildren().indexOf(generalCommentsLabel);
-            if (index >= 0) {
-                parentContainer.getChildren().set(index, commentsContainer);
-            }
-        }
-
-        // Aggiungi l'intestazione (correzione errore di battitura)
-        Label headerLabel = new Label();
-        headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        headerLabel.setText("Recensione generale");
-        commentsContainer.getChildren().add(headerLabel);
-
-        // Aggiungi il sommario delle valutazioni con tutti i dettagli
-        Label summaryLabel = new Label();
-        if (numRaters > 0) {
-            StringBuilder summary = new StringBuilder();
-            summary.append("Basato su ").append(numRaters).append(" valutazioni\n");
-            summary.append("Stile: ").append(ratings.get("style")).append("/5\n");
-            summary.append("Contenuto: ").append(ratings.get("content")).append("/5\n");
-            summary.append("Gradevolezza: ").append(ratings.get("pleasantness")).append("/5\n");
-            summary.append("Originalità: ").append(ratings.get("originality")).append("/5\n");
-            summary.append("Edizione: ").append(ratings.get("edition")).append("/5\n");
-            summary.append("Media totale: ").append(ratings.get("total")).append("/5");
-            summaryLabel.setText(summary.toString());
-        } else {
-            summaryLabel.setText("Nessuna valutazione disponibile per questo libro.");
-        }
-        summaryLabel.setWrapText(true);
-        commentsContainer.getChildren().add(summaryLabel);
-
-        // Aggiungi i commenti degli utenti
-        if (numRaters > 0) {
-            // Recupera i commenti generali dal database
-            List<Comment> userComments = getUserComments(currentBookId);
-
-            if (!userComments.isEmpty()) {
-                Label reviewsHeader = new Label("Recensioni degli utenti:");
-                reviewsHeader.setStyle("-fx-font-weight: bold; -fx-padding: 10 0 5 0;");
-                commentsContainer.getChildren().add(reviewsHeader);
-
-                // Aggiungi ogni commento colorato al container
-                for (Comment comment : userComments) {
-                    // Crea un box per ogni commento
-                    VBox commentBox = new VBox(5);
-                    commentBox.setStyle("-fx-padding: 5; -fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5;");
-
-                    // Usa il colore assegnato all'utente
-                    String userColor = userColors.getOrDefault(comment.userId, "#333333");
-
-                    // Crea etichette separate per utente e commento
-                    Label userLabel = new Label(comment.userId + ":");
-                    userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
-
-                    Label textLabel = new Label(comment.text);
-                    textLabel.setWrapText(true);
-                    textLabel.setStyle("-fx-font-style: italic;");
-
-                    commentBox.getChildren().addAll(userLabel, textLabel);
-                    commentsContainer.getChildren().add(commentBox);
+                if (rs.next()) {
+                    return rs.getDouble("average_rating");
                 }
             }
+        } catch (SQLException e) {
+            // Gestione errore
         }
+        return 0.0; // Valore predefinito se non trovato
     }
     private List<Comment> getUserComments(int bookId) {
         List<Comment> comments = new ArrayList<>();
@@ -564,6 +714,7 @@ public class BookDetailsController implements Initializable {
 
         return comments;
     }
+
 
     private void generateRecommendedBooks() {
         // Prima cerca se esistono consigli personalizzati dal database
@@ -601,7 +752,7 @@ public class BookDetailsController implements Initializable {
             VBox recommendationsContainer = new VBox(10);
             recommendationsContainer.setPadding(new Insets(10));
 
-            Label headerLabel = new Label("Libri consigliati specificamente per questo libro:");
+            Label headerLabel = new Label("Libri consigliati dagli utenti:");
             headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             recommendationsContainer.getChildren().add(headerLabel);
 
@@ -699,7 +850,7 @@ public class BookDetailsController implements Initializable {
             VBox similarBooksContainer = new VBox(10);
             similarBooksContainer.setPadding(new Insets(10));
 
-            Label headerLabel = new Label("Libri consigliati basati sulla categoria:");
+            Label headerLabel = new Label("Libri consigliati automaticamente secondo la categoria:");
             headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             similarBooksContainer.getChildren().add(headerLabel);
 
