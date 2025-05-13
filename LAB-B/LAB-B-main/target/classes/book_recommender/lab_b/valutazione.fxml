@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="book_recommender.lab_b.RateBookController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #4054B2; -fx-padding: 10px;">
+               <children>
+                  <Label style="-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;" text="Book Recommender" />
+                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="userIdLabel" style="-fx-text-fill: white; -fx-font-size: 16px;" text="UserID">
+                           <HBox.margin>
+                              <Insets right="15.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: red; -fx-text-fill: white; -fx-background-radius: 50px; -fx-padding: 10px 20px;" text="Torna al menu" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <ScrollPane fitToWidth="true" prefHeight="640.0" prefWidth="800.0" style="-fx-background-color: white; -fx-background: white;">
+               <content>
+                  <VBox alignment="CENTER" prefWidth="780.0" spacing="20.0" style="-fx-background-color: white;">
+                     <children>
+                        <Label style="-fx-font-size: 24px; -fx-text-fill: #4054B2;" text="Valutazione Libro">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="bookTitleLabel" style="-fx-font-size: 20px; -fx-text-fill: #000000; -fx-font-weight: bold;" text="Titolo del Libro">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Label>
+
+                        <!-- Valutazione Stile -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 10 0 15 0;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="1. Valutazione per lo stile">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox fx:id="styleStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <StackPane fx:id="styleStar1Container" onMouseClicked="#handleStyleStarClick">
+                                             <children>
+                                                <Text fx:id="styleStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="styleStar2Container" onMouseClicked="#handleStyleStarClick">
+                                             <children>
+                                                <Text fx:id="styleStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="styleStar3Container" onMouseClicked="#handleStyleStarClick">
+                                             <children>
+                                                <Text fx:id="styleStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="styleStar4Container" onMouseClicked="#handleStyleStarClick">
+                                             <children>
+                                                <Text fx:id="styleStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="styleStar5Container" onMouseClicked="#handleStyleStarClick">
+                                             <children>
+                                                <Text fx:id="styleStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label text="Commento per lo stile (max 256 caratteri):" />
+                              <TextArea fx:id="styleCommentArea" prefHeight="70.0" prefWidth="700.0" promptText="Inserisci un commento per lo stile..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Valutazione Contenuto -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 10 0 15 0;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="2. Valutazione per il contenuto">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox fx:id="contentStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <StackPane fx:id="contentStar1Container" onMouseClicked="#handleContentStarClick">
+                                             <children>
+                                                <Text fx:id="contentStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="contentStar2Container" onMouseClicked="#handleContentStarClick">
+                                             <children>
+                                                <Text fx:id="contentStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="contentStar3Container" onMouseClicked="#handleContentStarClick">
+                                             <children>
+                                                <Text fx:id="contentStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="contentStar4Container" onMouseClicked="#handleContentStarClick">
+                                             <children>
+                                                <Text fx:id="contentStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="contentStar5Container" onMouseClicked="#handleContentStarClick">
+                                             <children>
+                                                <Text fx:id="contentStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label text="Commento per il contenuto (max 256 caratteri):" />
+                              <TextArea fx:id="contentCommentArea" prefHeight="70.0" prefWidth="700.0" promptText="Inserisci un commento per il contenuto..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Valutazione Gradevolezza -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 10 0 15 0;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="3. Valutazione per la gradevolezza">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox fx:id="pleasantnessStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <StackPane fx:id="pleasantnessStar1Container" onMouseClicked="#handlePleasantnessStarClick">
+                                             <children>
+                                                <Text fx:id="pleasantnessStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="pleasantnessStar2Container" onMouseClicked="#handlePleasantnessStarClick">
+                                             <children>
+                                                <Text fx:id="pleasantnessStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="pleasantnessStar3Container" onMouseClicked="#handlePleasantnessStarClick">
+                                             <children>
+                                                <Text fx:id="pleasantnessStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="pleasantnessStar4Container" onMouseClicked="#handlePleasantnessStarClick">
+                                             <children>
+                                                <Text fx:id="pleasantnessStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="pleasantnessStar5Container" onMouseClicked="#handlePleasantnessStarClick">
+                                             <children>
+                                                <Text fx:id="pleasantnessStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label text="Commento per la gradevolezza (max 256 caratteri):" />
+                              <TextArea fx:id="pleasantnessCommentArea" prefHeight="70.0" prefWidth="700.0" promptText="Inserisci un commento per la gradevolezza..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Valutazione Originalità -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 10 0 15 0;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="4. Valutazione per l'originalità">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox fx:id="originalityStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <StackPane fx:id="originalityStar1Container" onMouseClicked="#handleOriginalityStarClick">
+                                             <children>
+                                                <Text fx:id="originalityStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="originalityStar2Container" onMouseClicked="#handleOriginalityStarClick">
+                                             <children>
+                                                <Text fx:id="originalityStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="originalityStar3Container" onMouseClicked="#handleOriginalityStarClick">
+                                             <children>
+                                                <Text fx:id="originalityStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="originalityStar4Container" onMouseClicked="#handleOriginalityStarClick">
+                                             <children>
+                                                <Text fx:id="originalityStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="originalityStar5Container" onMouseClicked="#handleOriginalityStarClick">
+                                             <children>
+                                                <Text fx:id="originalityStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label text="Commento per l'originalità (max 256 caratteri):" />
+                              <TextArea fx:id="originalityCommentArea" prefHeight="70.0" prefWidth="700.0" promptText="Inserisci un commento per l'originalità..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Valutazione Edizione -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 10 0 15 0;">
+                           <children>
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="5. Valutazione per l'edizione">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                 <children>
+                                    <HBox fx:id="editionStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <StackPane fx:id="editionStar1Container" onMouseClicked="#handleEditionStarClick">
+                                             <children>
+                                                <Text fx:id="editionStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="editionStar2Container" onMouseClicked="#handleEditionStarClick">
+                                             <children>
+                                                <Text fx:id="editionStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="editionStar3Container" onMouseClicked="#handleEditionStarClick">
+                                             <children>
+                                                <Text fx:id="editionStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="editionStar4Container" onMouseClicked="#handleEditionStarClick">
+                                             <children>
+                                                <Text fx:id="editionStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                          <StackPane fx:id="editionStar5Container" onMouseClicked="#handleEditionStarClick">
+                                             <children>
+                                                <Text fx:id="editionStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label text="Commento per l'edizione (max 256 caratteri):" />
+                              <TextArea fx:id="editionCommentArea" prefHeight="70.0" prefWidth="700.0" promptText="Inserisci un commento per l'edizione..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Media e Commento finale -->
+                        <VBox maxWidth="700.0" spacing="10.0" style="-fx-padding: 10 0 15 0;">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                 <children>
+                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Media delle valutazioni:">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="averageRatingLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4054B2;" text="0.0" />
+                                    <HBox fx:id="averageStarsContainer" alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Text fx:id="averageStar1" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                          <Text fx:id="averageStar2" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                          <Text fx:id="averageStar3" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                          <Text fx:id="averageStar4" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                          <Text fx:id="averageStar5" fill="#f2e485" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 30px;" text="★" />
+                                       </children>
+                                       <HBox.margin>
+                                          <Insets left="10.0" />
+                                       </HBox.margin>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+
+                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="6. Commento finale">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label text="Commento finale (max 256 caratteri):" />
+                              <TextArea fx:id="finalCommentArea" prefHeight="100.0" prefWidth="700.0" promptText="Inserisci un commento finale..." wrapText="true" />
+                           </children>
+                        </VBox>
+
+                        <!-- Validazione errori -->
+                        <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 14px;" text="Devi assegnare un voto a tutte le caratteristiche prima di inviare." visible="false">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </Label>
+
+                        <!-- Pulsanti di azione -->
+                        <HBox alignment="CENTER" spacing="20.0">
+                           <children>
+                              <Button fx:id="submitButton" mnemonicParsing="false" onAction="#handleSubmit" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 50px;" text="Invia Valutazione" />
+                              <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 50px;" text="Annulla" />
+                           </children>
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="30.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

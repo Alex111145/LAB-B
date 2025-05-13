@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="57b1fd5a-d5da-46c4-a7ef-9ded1bf58594" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../../../../Autori.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/dictionaries/project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.mvn/wrapper/maven-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/Autori.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/README.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/db_credentials.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/doc/Manuale Utente Def.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/ngrok/ngrok" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/ngrok/ngrok.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/ngrok/ngrok.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/AddBooksToLibraryController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/Book.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/BookDetailsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/BookSelectionController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/BookService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/CreateLibraryController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/DatabaseManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/HomepageController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/LibrarySelectionController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/LoginController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/NgrokManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/RateBookController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/RecommendBookController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/RegistrationController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/Server.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/ServerDisconnectedController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/ServerInterfaceController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/book_recommender/lab_b/UserMenuController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/java/module-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/Server_interface.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/aggiungilibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/bookitem.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/consigli.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/crealibreria.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/homepage.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/login.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/registrazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/selezionalib.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/selezionalibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/server_disconnected.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/stampadettaglinologin.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/userMenu.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/LAB-B-main/src/main/resources/book_recommender/lab_b/valutazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/ngrok/ngrok" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/ngrok/ngrok.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sviluppo/LAB-B-main/ngrok/ngrok.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../Progconcorrente" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../../Progconcorrente" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../README.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../db_credentials.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../doc/Manuale Utente.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../doc/Manuale_Tecnico_Definitivo.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../doc/~$nuale Utente.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../doc/~$nuale_Tecnico_Definitivo.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../ngrok/ngrok" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/AddBooksToLibraryController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/Book.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/BookDetailsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/BookSelectionController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/BookService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/CreateLibraryController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/DatabaseManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/HomepageController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/LibrarySelectionController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/LoginController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/NgrokManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/RateBookController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/RecommendBookController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/RecommendedBook.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/RegistrationController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/Server.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/ServerDisconnectedController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/ServerInterfaceController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/book_recommender/lab_b/UserMenuController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/java/module-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/Server_interface.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/aggiungilibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/bookitem.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/consigli.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/crealibreria.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/homepage.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/login.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/registrazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/selezionalib.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/selezionalibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/server_disconnected.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/stampadettaglinologin.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/userMenu.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../src/main/resources/book_recommender/lab_b/valutazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/AddBooksToLibraryController$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/AddBooksToLibraryController$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/AddBooksToLibraryController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/Book.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookDetailsController$Comment.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookDetailsController$RecommendedBook.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookDetailsController$Review.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookDetailsController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookSelectionController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/BookService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/Client$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/Client.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/CreateLibraryController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/DatabaseManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/HomepageController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/LibrarySelectionController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/LoginController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/NgrokManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RateBookController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RecommendBookController$1$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RecommendBookController$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RecommendBookController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RecommendedBook.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/RegistrationController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/Server.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/ServerDisconnectedController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/ServerInterfaceController$LogType.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/ServerInterfaceController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/Server_interface.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/UserMenuController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/aggiungilibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/bookitem.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/consigli.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/crealibreria.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/homepage.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/login.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/registrazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/selezionalib.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/selezionalibro.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/server_disconnected.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/stampadettaglinologin.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/userMenu.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/book_recommender/lab_b/valutazione.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../target/classes/module-info.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/ConsigliLibri.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/Data.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/Librerie.dati.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/Libri.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/UtentiRegistrati.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../temp_data/ValutazioniLibri.csv" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../../.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Alex111145"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Alex111145/lab_bb.git",
+    "accountId": "2f3dad3a-bfeb-4c30-bf63-c11d91c62706"
+  }
+}]]></component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2x3HWOHO9m4j64x7uTuiCupNRD5" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Client.executor": "Run",
+    "Application.Server.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Rebasing main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/alessio/Desktop/Uni/Triennale/2_Anno/Lab_b_6cfu/lab_b versioni/versioni /52/LAB-B-main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="57b1fd5a-d5da-46c4-a7ef-9ded1bf58594" name="Changes" comment="" />
+      <created>1747159868084</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747159868084</updated>
+      <workItem from="1747159869254" duration="5579000" />
+      <workItem from="1747991474115" duration="288000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
