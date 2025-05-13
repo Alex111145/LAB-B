@@ -27,78 +27,43 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * Controller per la visualizzazione dettagliata di un libro.
- * Gestisce la visualizzazione delle informazioni del libro, le valutazioni, le recensioni degli utenti,
- * e i libri consigliati correlati al libro visualizzato.
- * <p>
- * Questa classe implementa {@link Initializable} per inizializzare i componenti JavaFX
- * e gestisce l'interazione con il database per recuperare e visualizzare i dati.
- * </p>
- *
- * @author Book Recommender Team
- * @version 1.0
+ * Controller per la visualizzazione dei dettagli di un libro.
  */
 public class BookDetailsController implements Initializable {
 
-    /** Label per il titolo del libro */
     @FXML private Label bookTitleLabel;
-    /** Label per gli autori del libro */
     @FXML private Label authorsLabel;
-    /** Label per la categoria del libro */
     @FXML private Label categoryLabel;
-    /** Label per l'editore del libro */
     @FXML private Label publisherLabel;
-    /** Label per l'anno di pubblicazione */
     @FXML private Label yearLabel;
-    /** Label per la valutazione dello stile */
     @FXML private Label styleRatingLabel;
-    /** Label per la valutazione del contenuto */
     @FXML private Label contentRatingLabel;
-    /** Label per la valutazione della gradevolezza */
     @FXML private Label pleasantnessRatingLabel;
-    /** Label per la valutazione dell'originalità */
     @FXML private Label originalityRatingLabel;
-    /** Label per la valutazione dell'edizione */
     @FXML private Label editionRatingLabel;
-    /** Label per la valutazione totale */
     @FXML private Label totalRatingLabel;
-    /** Label per il numero di utenti che hanno valutato */
     @FXML private Label usersCountLabel;
-    /** Label per i commenti generali */
     @FXML private Label generalCommentsLabel;
-    /** Label per i libri consigliati */
     @FXML private Label recommendedBooksLabel;
-    /** Pulsante per tornare alla pagina precedente */
     @FXML private Button backButton;
 
-    /** Container per le recensioni sullo stile */
+    // Container per le recensioni per ogni categoria
     @FXML private VBox styleReviewsBox;
-    /** Container per le recensioni sul contenuto */
     @FXML private VBox contentReviewsBox;
-    /** Container per le recensioni sulla gradevolezza */
     @FXML private VBox pleasantnessReviewsBox;
-    /** Container per le recensioni sull'originalità */
     @FXML private VBox originalityReviewsBox;
-    /** Container per le recensioni sull'edizione */
     @FXML private VBox editionReviewsBox;
 
-    /** Riferimenti alle stelle per la valutazione dello stile */
+    // Riferimenti alle stelle per le valutazioni
     @FXML private Text styleStar1, styleStar2, styleStar3, styleStar4, styleStar5;
-    /** Riferimenti alle stelle per la valutazione del contenuto */
     @FXML private Text contentStar1, contentStar2, contentStar3, contentStar4, contentStar5;
-    /** Riferimenti alle stelle per la valutazione della gradevolezza */
     @FXML private Text pleasantnessStar1, pleasantnessStar2, pleasantnessStar3, pleasantnessStar4, pleasantnessStar5;
-    /** Riferimenti alle stelle per la valutazione dell'originalità */
     @FXML private Text originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5;
-    /** Riferimenti alle stelle per la valutazione dell'edizione */
     @FXML private Text editionStar1, editionStar2, editionStar3, editionStar4, editionStar5;
-    /** Riferimenti alle stelle per la valutazione totale */
     @FXML private Text totalStar1, totalStar2, totalStar3, totalStar4, totalStar5;
 
-    /** Mappa dei colori assegnati a ciascun utente per la visualizzazione coerente */
+    // Mappa dei colori assegnati a ciascun utente
     private final Map<String, String> userColors = new HashMap<>();
-
-    /** Palette di colori utilizzata per assegnare colori agli utenti */
     private final String[] colorPalette = {
             "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c", "#d35400",
             "#27ae60", "#2980b9", "#8e44ad", "#f1c40f", "#16a085", "#2c3e50", "#f39c12",
@@ -106,26 +71,20 @@ public class BookDetailsController implements Initializable {
             "#f5b041", "#58d68d", "#5dade2", "#f1948a", "#d6eaf8", "#f7b7a3", "#e8daef", "#c39bd3"
     };
 
+    public Button getBackButton() {
+        return backButton;
+    }
 
-    /**
-     * Classe interna per rappresentare una recensione di un libro.
-     * Contiene l'ID dell'utente, la valutazione e il commento.
-     */
+    public void setBackButton(Button backButton) {
+        this.backButton = backButton;
+    }
+
+    // Struttura per memorizzare recensioni
     private static class Review {
-        /** ID dell'utente che ha lasciato la recensione */
         public String userId;
-        /** Valutazione numerica (da 1 a 5) */
         public int rating;
-        /** Testo del commento */
         public String comment;
 
-        /**
-         * Costruttore per una recensione.
-         *
-         * @param userId ID dell'utente che ha scritto la recensione
-         * @param rating Valutazione numerica del libro (1-5)
-         * @param comment Testo del commento
-         */
         public Review(String userId, int rating, String comment) {
             this.userId = userId;
             this.rating = rating;
@@ -133,88 +92,55 @@ public class BookDetailsController implements Initializable {
         }
     }
 
-    /**
-     * Classe interna per rappresentare un commento generale sul libro.
-     * Contiene l'ID dell'utente e il testo del commento.
-     */
+    // Struttura per memorizzare i commenti generali
     private static class Comment {
-        /** ID dell'utente che ha lasciato il commento */
         public String userId;
-        /** Testo del commento */
         public String text;
 
-        /**
-         * Costruttore per un commento generale.
-         *
-         * @param userId ID dell'utente che ha scritto il commento
-         * @param text Testo del commento
-         */
         public Comment(String userId, String text) {
             this.userId = userId;
             this.text = text;
         }
     }
 
-    /**
-     * Classe interna per rappresentare un libro consigliato.
-     * Contiene l'ID dell'utente che ha fatto la raccomandazione e il titolo del libro consigliato.
-     */
+    // Struttura per memorizzare i libri consigliati
     private static class RecommendedBook {
-        /** ID dell'utente che ha consigliato il libro */
         public String userId;
-        /** Titolo del libro consigliato */
         public String bookTitle;
 
-        /**
-         * Costruttore per un libro consigliato.
-         *
-         * @param userId ID dell'utente che ha consigliato il libro
-         * @param bookTitle Titolo del libro consigliato
-         */
         public RecommendedBook(String userId, String bookTitle) {
             this.userId = userId;
             this.bookTitle = bookTitle;
         }
     }
 
-    /** Liste per memorizzare le recensioni per ogni caratteristica del libro */
+    // Liste per memorizzare le recensioni per ogni caratteristica
     private final List<Review> styleReviews = new ArrayList<>();
     private final List<Review> contentReviews = new ArrayList<>();
     private final List<Review> pleasantnessReviews = new ArrayList<>();
     private final List<Review> originalityReviews = new ArrayList<>();
     private final List<Review> editionReviews = new ArrayList<>();
 
-    /** Dati del libro corrente */
+    // Dati del libro corrente
     private Book currentBook;
-
-    /** ID del libro corrente nel database */
     private int currentBookId;
 
-    /** Mappa per memorizzare le valutazioni del libro per ciascuna categoria */
+    // Mappa per memorizzare le valutazioni del libro
     private final Map<String, Double> ratings = new HashMap<>();
 
-    /** Numero di utenti che hanno valutato il libro */
+    // Numero di utenti che hanno valutato il libro
     private int numRaters = 0;
 
-    /** Manager per la connessione al database */
     private DatabaseManager dbManager;
 
-    /**
-     * Inizializza il controller. Questo metodo viene chiamato automaticamente dopo che
-     * il file FXML è stato caricato.
-     *
-     * @param location La posizione utilizzata per risolvere percorsi relativi per l'oggetto root
-     * @param resources Le risorse utilizzate per localizzare l'oggetto root
-     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            // Silenziosamente ignorato - il database potrebbe non essere disponibile
         }
 
-        // Inizializza i container delle recensioni con spaziatura
+        // Inizializza i container delle recensioni
         styleReviewsBox.setSpacing(10);
         contentReviewsBox.setSpacing(10);
         pleasantnessReviewsBox.setSpacing(10);
@@ -222,13 +148,6 @@ public class BookDetailsController implements Initializable {
         editionReviewsBox.setSpacing(10);
     }
 
-    /**
-     * Imposta i dati del libro da visualizzare e carica tutte le informazioni correlate.
-     * Cerca il libro nel database e, se trovato, carica le valutazioni e le recensioni.
-     * Se il libro non viene trovato, utilizza un libro di esempio con dati predefiniti.
-     *
-     * @param bookTitle Il titolo del libro da visualizzare
-     */
     public void setBookData(String bookTitle) {
         // Cerca il libro nel database
         this.currentBook = findBookByTitle(bookTitle);
@@ -251,13 +170,6 @@ public class BookDetailsController implements Initializable {
         }
     }
 
-    /**
-     * Crea un oggetto libro di esempio quando il libro richiesto non viene trovato nel database.
-     * Utilizza valori predefiniti per gli attributi mancanti.
-     *
-     * @param title Il titolo del libro da creare
-     * @return Un oggetto Book con valori predefiniti
-     */
     private Book createExampleBook(String title) {
         return new Book(
                 title,
@@ -268,10 +180,8 @@ public class BookDetailsController implements Initializable {
         );
     }
 
-    /**
-     * Inizializza le valutazioni di esempio con valori predefiniti (zero) e pulisce
-     * tutte le liste di recensioni. Utilizzato quando il libro non è presente nel database.
-     */
+
+
     private void setupExampleRatings() {
         ratings.put("style", 0.0);
         ratings.put("content", 0.0);
@@ -289,13 +199,6 @@ public class BookDetailsController implements Initializable {
         editionReviews.clear();
     }
 
-    /**
-     * Cerca un libro nel database in base al titolo.
-     * Se trovato, memorizza l'ID del libro e restituisce un oggetto Book con i dettagli.
-     *
-     * @param title Il titolo del libro da cercare
-     * @return Un oggetto Book se trovato, altrimenti null
-     */
     private Book findBookByTitle(String title) {
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT id, title, authors, category, publisher, publish_year FROM books WHERE title = ?";
@@ -316,18 +219,10 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            // Gestione errore silenziosa
         }
 
         return null;
     }
-
-    /**
-     * Carica dal database le valutazioni e le recensioni associate al libro specificato.
-     * Calcola la media delle valutazioni e organizza le recensioni per categoria.
-     *
-     * @param bookId L'ID del libro di cui caricare valutazioni e recensioni
-     */
     private void loadRatingsAndReviews(int bookId) {
         // Inizializza le valutazioni con valori predefiniti
         ratings.put("style", 0.0);
@@ -445,18 +340,39 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            // In caso di errore, imposta valutazioni di esempio
             setupExampleRatings();
         }
     }
 
     /**
-     * Aggiorna l'aspetto di una singola stella in base al valore della valutazione.
-     * Gestisce le mezze stelle per visualizzare valutazioni con decimali.
-     *
-     * @param star Il controllo Text della stella da aggiornare
-     * @param rating Il valore della valutazione
-     * @param position La posizione della stella (da 1 a 5)
+     * Metodo per aggiornare la visualizzazione delle valutazioni nel riepilogo
+     * Questo metodo deve essere chiamato dal metodo updateUI()
+     */
+    private void updateRatingSummary() {
+        // Imposta le valutazioni numeriche
+        styleRatingLabel.setText(String.valueOf(ratings.get("style")));
+        contentRatingLabel.setText(String.valueOf(ratings.get("content")));
+        pleasantnessRatingLabel.setText(String.valueOf(ratings.get("pleasantness")));
+        originalityRatingLabel.setText(String.valueOf(ratings.get("originality")));
+        editionRatingLabel.setText(String.valueOf(ratings.get("edition")));
+        totalRatingLabel.setText(String.valueOf(ratings.get("total")));
+
+        // Aggiorna il numero di valutatori
+        usersCountLabel.setText(String.valueOf(numRaters));
+
+        // Colora le stelle in base alle valutazioni
+        updateStars(styleStar1, styleStar2, styleStar3, styleStar4, styleStar5, ratings.get("style"));
+        updateStars(contentStar1, contentStar2, contentStar3, contentStar4, contentStar5, ratings.get("content"));
+        updateStars(pleasantnessStar1, pleasantnessStar2, pleasantnessStar3, pleasantnessStar4, pleasantnessStar5, ratings.get("pleasantness"));
+        updateStars(originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5, ratings.get("originality"));
+        updateStars(editionStar1, editionStar2, editionStar3, editionStar4, editionStar5, ratings.get("edition"));
+        updateStars(totalStar1, totalStar2, totalStar3, totalStar4, totalStar5, ratings.get("total"));
+    }
+
+
+    /**
+     * Metodo per aggiornare l'aspetto di una singola stella in base al valore della valutazione
+     * La logica è stata rivista per gestire correttamente le mezze stelle
      */
     private void updateSingleStar(Text star, double rating, int position) {
         Color goldStarColor = Color.web("#FFD700");  // Colore giallo oro per le stelle
@@ -485,15 +401,7 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Aggiorna l'aspetto di un gruppo di stelle per visualizzare una valutazione.
-     * Utilizza il metodo updateSingleStar per aggiornare ogni stella individualmente.
-     *
-     * @param star1 Prima stella del gruppo
-     * @param star2 Seconda stella del gruppo
-     * @param star3 Terza stella del gruppo
-     * @param star4 Quarta stella del gruppo
-     * @param star5 Quinta stella del gruppo
-     * @param rating Valore della valutazione da visualizzare
+     * Metodo migliorato per aggiornare le stelle nella valutazione
      */
     private void updateStars(Text star1, Text star2, Text star3, Text star4, Text star5, double rating) {
         // Aggiorna ogni stella in base alla posizione
@@ -505,8 +413,7 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Aggiorna tutte le stelle nel riepilogo valutazioni.
-     * Richiama il metodo updateStars per ciascun gruppo di stelle.
+     * Metodo per l'aggiornamento di tutte le stelle nel riepilogo valutazioni
      */
     private void updateAllRatingStars() {
         // Aggiorna tutte le stelle per ciascuna categoria
@@ -521,10 +428,8 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Aggiunge stelle a un HBox per visualizzare la valutazione nelle recensioni individuali.
-     *
-     * @param starsBox Il contenitore HBox in cui aggiungere le stelle
-     * @param rating Il valore della valutazione da visualizzare
+     * Metodo da aggiungere alla classe per generare stelle per le recensioni individuali
+     * Da utilizzare nel metodo addReviewsToContainer
      */
     private void addStarsToReviewHeader(HBox starsBox, double rating) {
         // Colori per le stelle
@@ -561,13 +466,8 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Aggiunge le recensioni degli utenti al container specificato.
-     * Visualizza tutte le recensioni per una specifica caratteristica del libro, mostrando
-     * l'utente che ha scritto la recensione, la valutazione in stelle e il testo completo del commento.
-     * Se non ci sono recensioni disponibili, viene mostrato un messaggio appropriato.
-     *
-     * @param reviews La lista di recensioni da visualizzare
-     * @param container Il contenitore VBox in cui aggiungere le recensioni
+     * Versione migliorata del metodo addReviewsToContainer che aggiunge
+     * il pulsante "Mostra altro" per i commenti lunghi
      */
     private void addReviewsToContainer(List<Review> reviews, VBox container) {
         if (reviews.isEmpty()) {
@@ -576,6 +476,9 @@ public class BookDetailsController implements Initializable {
             container.getChildren().add(noReviewsLabel);
             return;
         }
+
+        // Lunghezza limite dei caratteri prima di mostrare il pulsante "Mostra altro"
+        final int COMMENT_LENGTH_LIMIT = 100;
 
         for (Review review : reviews) {
             // Crea un box per la recensione
@@ -602,23 +505,57 @@ public class BookDetailsController implements Initializable {
             // Aggiungi username e stelle all'header
             headerBox.getChildren().addAll(userLabel, starsBox);
 
-            // Corpo della recensione - mostra sempre il commento completo
-            Label commentLabel = new Label(review.comment);
+            // Corpo della recensione
+            Label commentLabel = new Label();
             commentLabel.setWrapText(true);
             commentLabel.setStyle("-fx-padding: 5 0 0 0;");
 
-            // Aggiungi tutto al container della recensione
-            reviewBox.getChildren().addAll(headerBox, commentLabel);
+            // Verifica se il commento supera il limite di caratteri
+            boolean isLongComment = review.comment.length() > COMMENT_LENGTH_LIMIT;
+
+            if (isLongComment) {
+                // Se il commento è lungo, mostra solo i primi caratteri
+                commentLabel.setText(review.comment.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+
+                // Crea il pulsante "Mostra altro"
+                Button showMoreButton = new Button("Mostra altro");
+                showMoreButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #3498db; -fx-font-size: 11px; -fx-underline: true;");
+                showMoreButton.setCursor(javafx.scene.Cursor.HAND);
+
+                // Flag per tenere traccia dello stato del commento (espanso o contratto)
+                final boolean[] isExpanded = {false};
+
+                // Aggiungi l'event handler al pulsante
+                showMoreButton.setOnAction(event -> {
+                    if (!isExpanded[0]) {
+                        // Espandi il commento
+                        commentLabel.setText(review.comment);
+                        showMoreButton.setText("Mostra meno");
+                    } else {
+                        // Contrai il commento
+                        commentLabel.setText(review.comment.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+                        showMoreButton.setText("Mostra altro");
+                    }
+                    isExpanded[0] = !isExpanded[0];
+                });
+
+                // Aggiungi tutto al container della recensione
+                reviewBox.getChildren().addAll(headerBox, commentLabel, showMoreButton);
+            } else {
+                // Se il commento è breve, mostralo completamente
+                commentLabel.setText(review.comment);
+
+                // Aggiungi tutto al container della recensione
+                reviewBox.getChildren().addAll(headerBox, commentLabel);
+            }
+
             container.getChildren().add(reviewBox);
         }
     }
 
     /**
-     * Genera e visualizza i commenti generali degli utenti sul libro.
-     * Questo metodo crea un contenitore che mostra tutti i commenti generali lasciati dagli utenti,
-     * con l'indicazione dell'autore del commento e la sua valutazione media del libro.
-     * Ogni commento è colorato in base all'utente per una facile identificazione visiva.
-     * Se non ci sono commenti disponibili, viene mostrato un messaggio appropriato.
+     * Versione migliorata del metodo generateGeneralComment che aggiunge
+     * il pulsante "Mostra altro" per i commenti generali lunghi
      */
     private void generateGeneralComment() {
         // Pulisci prima il container dei commenti generali
@@ -627,6 +564,9 @@ public class BookDetailsController implements Initializable {
         // Definisci i colori per le stelle
         final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per stelle piene e mezze stelle
         final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
+
+        // Lunghezza limite dei caratteri prima di mostrare il pulsante "Mostra altro"
+        final int COMMENT_LENGTH_LIMIT = 100;
 
         // Crea un container per i commenti se non esiste già
         VBox commentsContainer;
@@ -695,12 +635,47 @@ public class BookDetailsController implements Initializable {
                         userHeader.getChildren().add(starsBox);
                     }
 
-                    // Crea etichetta per il commento - mostra sempre il commento completo
-                    Label textLabel = new Label(comment.text);
+                    // Crea etichetta per il commento
+                    Label textLabel = new Label();
                     textLabel.setWrapText(true);
                     textLabel.setStyle("-fx-font-style: italic;");
 
-                    commentBox.getChildren().addAll(userHeader, textLabel);
+                    // Verifica se il commento supera il limite di caratteri
+                    boolean isLongComment = comment.text.length() > COMMENT_LENGTH_LIMIT;
+
+                    if (isLongComment) {
+                        // Se il commento è lungo, mostra solo i primi caratteri
+                        textLabel.setText(comment.text.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+
+                        // Crea il pulsante "Mostra altro"
+                        Button showMoreButton = new Button("Mostra altro");
+                        showMoreButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #3498db; -fx-font-size: 11px; -fx-underline: true;");
+                        showMoreButton.setCursor(javafx.scene.Cursor.HAND);
+
+                        // Flag per tenere traccia dello stato del commento (espanso o contratto)
+                        final boolean[] isExpanded = {false};
+
+                        // Aggiungi l'event handler al pulsante
+                        showMoreButton.setOnAction(event -> {
+                            if (!isExpanded[0]) {
+                                // Espandi il commento
+                                textLabel.setText(comment.text);
+                                showMoreButton.setText("Mostra meno");
+                            } else {
+                                // Contrai il commento
+                                textLabel.setText(comment.text.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+                                showMoreButton.setText("Mostra altro");
+                            }
+                            isExpanded[0] = !isExpanded[0];
+                        });
+
+                        commentBox.getChildren().addAll(userHeader, textLabel, showMoreButton);
+                    } else {
+                        // Se il commento è breve, mostralo completamente
+                        textLabel.setText(comment.text);
+                        commentBox.getChildren().addAll(userHeader, textLabel);
+                    }
+
                     commentsContainer.getChildren().add(commentBox);
                 }
             } else {
@@ -712,14 +687,7 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Aggiorna l'interfaccia utente con tutti i dati del libro corrente.
-     * Questo metodo popola tutti i componenti dell'interfaccia con i dati del libro,
-     * inclusi titolo, autori, categoria, editore, anno di pubblicazione, valutazioni,
-     * recensioni e libri consigliati.
-     * <p>
-     * Viene chiamato dopo che i dati del libro sono stati caricati dal database
-     * o dopo che è stato creato un libro di esempio.
-     * </p>
+     * Modifica al metodo updateUI() per utilizzare l'implementazione aggiornata
      */
     private void updateUI() {
         // Imposta i dati del libro
@@ -752,17 +720,6 @@ public class BookDetailsController implements Initializable {
         // Genera libri consigliati basati sulla categoria del libro attuale
         generateRecommendedBooks();
     }
-
-    /**
-     * Aggiorna i container delle recensioni con i dati più recenti.
-     * Questo metodo pulisce i container esistenti e li popola con le recensioni
-     * specifiche per ogni caratteristica del libro (stile, contenuto, gradevolezza,
-     * originalità ed edizione).
-     * <p>
-     * Per ogni container, viene aggiunta un'intestazione appropriata e poi
-     * vengono visualizzate tutte le recensioni disponibili per quella caratteristica.
-     * </p>
-     */
     private void updateReviewContainers() {
         // Pulisci i container
         styleReviewsBox.getChildren().clear();
@@ -793,15 +750,9 @@ public class BookDetailsController implements Initializable {
         addReviewsToContainer(editionReviews, editionReviewsBox);
     }
 
-    /**
-     * Calcola e restituisce la valutazione media assegnata da un utente specifico a un libro.
-     * Interroga il database per ottenere il valore di "average_rating" registrato
-     * per la combinazione utente-libro specificata.
-     *
-     * @param userId L'identificativo dell'utente di cui si vuole conoscere la valutazione
-     * @param bookId L'identificativo del libro valutato
-     * @return La valutazione media dell'utente per il libro, o 0.0 se non trovata
-     */
+
+
+    // Metodo ausiliario per ottenere la valutazione media di un utente per un libro
     private double getUserRatingForBook(String userId, int bookId) {
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT average_rating FROM book_ratings WHERE user_id = ? AND book_id = ?";
@@ -820,14 +771,6 @@ public class BookDetailsController implements Initializable {
         }
         return 0.0; // Valore predefinito se non trovato
     }
-
-    /**
-     * Recupera dal database tutti i commenti generali lasciati dagli utenti per un libro specifico.
-     * Considera solo i commenti non vuoti e non nulli per il libro specificato.
-     *
-     * @param bookId L'identificativo del libro di cui recuperare i commenti
-     * @return Una lista di oggetti Comment contenenti l'ID utente e il testo del commento
-     */
     private List<Comment> getUserComments(int bookId) {
         List<Comment> comments = new ArrayList<>();
 
@@ -845,18 +788,12 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore
         }
 
         return comments;
     }
 
-    /**
-     * Genera e visualizza i libri consigliati per il libro corrente.
-     * Il metodo cerca prima consigli personalizzati inseriti dagli utenti nel database.
-     * Se non ne trova, genera automaticamente consigli basati sulla categoria del libro attuale,
-     * mostrando altri libri della stessa categoria.
-     */
+
     private void generateRecommendedBooks() {
         // Prima cerca se esistono consigli personalizzati dal database
         boolean foundCustomRecommendations = findCustomRecommendations();
@@ -866,19 +803,7 @@ public class BookDetailsController implements Initializable {
             findSimilarBooks();
         }
     }
-    /**
-     * Cerca nel database consigli personalizzati inseriti dagli utenti per il libro corrente.
-     * Per ogni consiglio trovato, crea un elemento visivo che mostra l'utente che ha fatto
-     * la raccomandazione, il titolo del libro consigliato, e un pulsante per visualizzare i dettagli.
-     * I titoli lunghi vengono troncati per mantenere una visualizzazione coerente.
-     *
-     * <p>Interroga il database per trovare le raccomandazioni associate al libro corrente
-     * e le visualizza nell'interfaccia utente. Per ogni libro consigliato, vengono mostrati
-     * il titolo (troncato se necessario), l'autore (se disponibile) e un pulsante "Visualizza"
-     * per navigare ai dettagli completi del libro.</p>
-     *
-     * @return true se sono stati trovati consigli personalizzati, false altrimenti
-     */
+
     private boolean findCustomRecommendations() {
         List<RecommendedBook> customRecommendations = new ArrayList<>();
 
@@ -898,7 +823,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore
         }
 
         // Se ci sono consigli personalizzati, crea box visivi per ognuno
@@ -936,65 +860,27 @@ public class BookDetailsController implements Initializable {
                     userColor = userColors.get(recommendation.userId);
                 }
 
-                // Crea un HBox per informazioni e bottone
-                HBox mainBox = new HBox();
-                mainBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                mainBox.setSpacing(15);
-
-                // Contenitore per le informazioni - imposta una larghezza massima
-                VBox infoBox = new VBox(5);
-                infoBox.setMaxWidth(520); // Limita la larghezza massima
-                HBox.setHgrow(infoBox, javafx.scene.layout.Priority.ALWAYS);
-
                 // Aggiungi prefisso "Consigliato da:" all'ID utente
-                Label userLabel = new Label(recommendation.userId);
+                Label userLabel = new Label( recommendation.userId);
                 userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
 
                 // Cerca il libro nel database per ottenere l'autore
                 Book recommendedBook = findBookByTitle(recommendation.bookTitle);
 
-                // Tronca il titolo se necessario
-                String displayTitle = recommendation.bookTitle;
-                String originalTitle = recommendation.bookTitle;
-                if (displayTitle.length() > 60) {
-                    displayTitle = displayTitle.substring(0, 57) + "...";
-                }
-
-                // Imposta il titolo del libro in grassetto
-                Label bookLabel = new Label("\"" + displayTitle + "\"");
+                // Modifica qui: imposta il titolo del libro in grassetto
+                Label bookLabel = new Label("\"" + recommendation.bookTitle + "\"");
                 bookLabel.setStyle("-fx-font-style: italic; -fx-font-weight: bold;");
                 bookLabel.setWrapText(true);
-                bookLabel.setUserData(originalTitle); // Salva il titolo originale come metadato
 
                 // Aggiungi l'autore se il libro è stato trovato
                 if (recommendedBook != null) {
                     Label authorLabel = new Label("Autore: " + recommendedBook.getAuthors());
                     authorLabel.setWrapText(true);
-                    infoBox.getChildren().addAll(userLabel, bookLabel, authorLabel);
+                    recommendationBox.getChildren().addAll(userLabel, bookLabel, authorLabel);
                 } else {
-                    infoBox.getChildren().addAll(userLabel, bookLabel);
+                    recommendationBox.getChildren().addAll(userLabel, bookLabel);
                 }
 
-                // Aggiungi bottone "Visualizza" simile a quello in homepage
-                Button viewButton = new Button("Visualizza");
-                viewButton.setStyle("-fx-text-fill: white; -fx-background-color: #75B965; -fx-background-radius: 40px; -fx-padding: 8px 15px;");
-                viewButton.setPrefWidth(100); // Imposta una larghezza fissa
-                viewButton.setMinWidth(100);  // Imposta larghezza minima
-                viewButton.setMaxWidth(100);  // Imposta larghezza massima
-                viewButton.setOnAction(e -> visualizzalibro(e, originalTitle));
-
-                // Crea un contenitore per il bottone e centralo verticalmente
-                VBox buttonBox = new VBox();
-                buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
-                buttonBox.setPrefWidth(120); // Spazio fisso per il contenitore del bottone
-                buttonBox.setMinWidth(120);
-                buttonBox.getChildren().add(viewButton);
-
-                // Aggiungi infoBox e buttonBox al mainBox
-                mainBox.getChildren().addAll(infoBox, buttonBox);
-
-                // Aggiungi il mainBox al recommendation box
-                recommendationBox.getChildren().add(mainBox);
                 recommendationsContainer.getChildren().add(recommendationBox);
             }
 
@@ -1011,21 +897,6 @@ public class BookDetailsController implements Initializable {
 
         return false;
     }
-
-    /**
-     * Cerca nel database libri simili al libro corrente basandosi sulla categoria.
-     * Se trovati, crea elementi visivi per mostrarli come consigli automatici,
-     * ciascuno con un pulsante "Visualizza" per accedere ai dettagli del libro.
-     * I titoli lunghi vengono troncati per garantire una visualizzazione uniforme.
-     *
-     * <p>Esegue una query sul database per trovare altri libri della stessa categoria
-     * del libro corrente, escludendo il libro stesso. Per ogni libro trovato, viene
-     * creato un elemento grafico contenente il titolo troncato, l'autore e un pulsante
-     * di dimensione fissa che permette all'utente di navigare direttamente ai dettagli
-     * completi del libro.</p>
-     *
-     * <p>Se non vengono trovati libri simili, viene visualizzato un messaggio informativo.</p>
-     */
     private void findSimilarBooks() {
         List<Book> similarBooks = new ArrayList<>();
 
@@ -1050,7 +921,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore
         }
 
         // Se ci sono libri simili, mostrali
@@ -1067,54 +937,15 @@ public class BookDetailsController implements Initializable {
                 bookBox.setPadding(new Insets(10));
                 bookBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
-                // Crea un HBox per informazioni e bottone
-                HBox mainBox = new HBox();
-                mainBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                mainBox.setSpacing(15);
-
-                // Contenitore per le informazioni - imposta una larghezza massima
-                VBox infoBox = new VBox(5);
-                infoBox.setMaxWidth(520); // Limita la larghezza massima
-                HBox.setHgrow(infoBox, javafx.scene.layout.Priority.ALWAYS);
-
-                // Tronca il titolo se necessario
-                String displayTitle = book.getTitle();
-                String originalTitle = book.getTitle();
-                if (displayTitle.length() > 60) {
-                    displayTitle = displayTitle.substring(0, 57) + "...";
-                }
-
                 // Il titolo è già in grassetto, ma aggiungiamo anche lo stile corsivo per coerenza
-                Label titleLabel = new Label("\"" + displayTitle + "\"");
+                Label titleLabel = new Label("\"" + book.getTitle() + "\"");
                 titleLabel.setStyle("-fx-font-weight: bold; -fx-font-style: italic;");
                 titleLabel.setWrapText(true);
-                titleLabel.setUserData(originalTitle); // Salva il titolo originale come metadato
 
                 Label authorLabel = new Label("Autore: " + book.getAuthors());
                 authorLabel.setWrapText(true);
 
-                infoBox.getChildren().addAll(titleLabel, authorLabel);
-
-                // Aggiungi bottone "Visualizza" simile a quello in homepage
-                Button viewButton = new Button("Visualizza");
-                viewButton.setStyle("-fx-text-fill: white; -fx-background-color: #75B965; -fx-background-radius: 40px; -fx-padding: 8px 15px;");
-                viewButton.setPrefWidth(100); // Imposta una larghezza fissa
-                viewButton.setMinWidth(100);  // Imposta larghezza minima
-                viewButton.setMaxWidth(100);  // Imposta larghezza massima
-                viewButton.setOnAction(e -> visualizzalibro(e, originalTitle));
-
-                // Crea un contenitore per il bottone e centralo verticalmente
-                VBox buttonBox = new VBox();
-                buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
-                buttonBox.setPrefWidth(120); // Spazio fisso per il contenitore del bottone
-                buttonBox.setMinWidth(120);
-                buttonBox.getChildren().add(viewButton);
-
-                // Aggiungi infoBox e buttonBox al mainBox
-                mainBox.getChildren().addAll(infoBox, buttonBox);
-
-                // Aggiungi il mainBox al bookBox
-                bookBox.getChildren().add(mainBox);
+                bookBox.getChildren().addAll(titleLabel, authorLabel);
                 similarBooksContainer.getChildren().add(bookBox);
             }
 
@@ -1129,45 +960,8 @@ public class BookDetailsController implements Initializable {
             recommendedBooksLabel.setText("Nessun libro consigliato disponibile.");
         }
     }
-
     /**
-     * Naviga alla pagina di dettaglio del libro specificato.
-     * Questo metodo carica la vista stampadettaglinologin.fxml e imposta il titolo del libro
-     * selezionato per visualizzarne i dettagli completi, permettendo all'utente di esplorare
-     * le informazioni del libro consigliato senza tornare alla homepage.
-     *
-     * <p>Gestisce la navigazione tra le viste dell'applicazione, caricando la pagina di
-     * dettaglio del libro e configurando il controller corrispondente con i dati appropriati.
-     * Utilizza lo stesso meccanismo di navigazione presente nella homepage per mantenere
-     * un'esperienza utente coerente.</p>
-     *
-     * @param event L'evento di azione generato dal click sul pulsante "Visualizza"
-     * @param bookTitle Il titolo del libro di cui visualizzare i dettagli
-     */
-    public void visualizzalibro(ActionEvent event, String bookTitle) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/stampadettaglinologin.fxml"));
-            Parent root = loader.load();
-
-            BookDetailsController controller = loader.getController();
-            controller.setBookData(bookTitle);
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            // Gestione silenziosa dell'errore
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gestisce l'evento di click sul pulsante "Torna indietro".
-     * Carica la schermata principale dell'applicazione (homepage)
-     * e la visualizza, sostituendo la schermata corrente.
-     *
-     * @param event L'evento di azione generato dal click sul pulsante
+     * Gestisce il click sul pulsante "Torna indietro".
      */
     @FXML
     public void handleBack(ActionEvent event) {

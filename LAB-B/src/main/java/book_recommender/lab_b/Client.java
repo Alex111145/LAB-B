@@ -22,80 +22,56 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Classe principale dell'applicazione client di Book Recommender.
- * Gestisce l'avvio dell'interfaccia utente, la connessione al server remoto tramite ngrok,
- * e il monitoraggio continuo dello stato della connessione al server.
+ * Classe principale del client dell'applicazione Book Recommender.
+ * Questa classe avvia l'interfaccia grafica JavaFX.
  */
 public class Client extends Application {
 
-    // Costanti per il dimensionamento dell'interfaccia
-    /** Larghezza iniziale della finestra dell'applicazione */
+    // Dimensioni iniziali per la finestra dell'applicazione
     public static final double INITIAL_WIDTH = 1000.0;
-    /** Altezza iniziale della finestra dell'applicazione */
     public static final double INITIAL_HEIGHT = 700.0;
-    /** Larghezza minima della finestra dell'applicazione */
+
+    // Dimensioni minime per la finestra dell'applicazione
     public static final double MIN_WIDTH = 1000.0;
-    /** Altezza minima della finestra dell'applicazione */
     public static final double MIN_HEIGHT = 700.0;
 
-    /** Identificatore univoco per questa istanza del client, utilizzato per il tracciamento */
+    // ID univoco per questo client
     private final String clientId = UUID.randomUUID().toString();
-    /** Gestore del database per le operazioni sul database remoto */
     private DatabaseManager dbManager;
 
-    /** Socket per la connessione al server */
+    // Socket connection to server
     private Socket serverSocket;
-    /** Flag che indica se è stato rilevato lo spegnimento del server */
     private boolean serverShutdownDetected = false;
 
-    // Parametri di connessione al database
-    /** URL JDBC per la connessione al database */
+    // Connessione remota
     private String dbUrl;
-    /** Nome utente predefinito per la connessione al database */
-    private String dbUser = "book_admin_8530"; // Credenziali fisse
-    /** Password predefinita per la connessione al database */
-    private String dbPassword = "CPuc#@r-zbKY"; // Credenziali fisse
+    private String dbUser = "book_admin_8530"; // Credenziali fisse per vedere il db su pgadmin
+    private String dbPassword = "CPuc#@r-zbKY"; // Credenziali fisse per vedere il db su pgadmin
 
-    /** Flag che indica se utilizzare ngrok per la connessione remota (sempre true) */
+    // Flag per usare ngrok - sempre true
     private boolean useNgrok = true;
 
-    /** Riferimento allo Stage principale dell'applicazione JavaFX */
+    // Riferimento allo Stage principale
     private Stage primaryStage;
 
-
-    /**
-     * Metodo principale per l'avvio dell'applicazione JavaFX.
-     * Gestisce la configurazione iniziale, richiede i parametri di connessione all'utente,
-     * stabilisce la connessione al database remoto e carica l'interfaccia utente.
-     *
-     * @param primaryStage Stage principale dell'applicazione JavaFX
-     * @throws Exception Se si verifica un errore durante l'inizializzazione
-     */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Salva il riferimento allo stage principale per uso futuro
+        // Salva il riferimento allo stage principale
         this.primaryStage = primaryStage;
 
-        // Tenta la connessione al server
+        // Try to connect to the server first
         try {
-            // Imposta il flag ngrok (sempre attivo in questa versione)
+            // Ngrok è sempre attivo
             useNgrok = true;
 
-            // Loop per richiedere i parametri di connessione finché non sono validi
-            boolean parametersProvided = false;
-            while (!parametersProvided) {
-                parametersProvided = getDatabaseConnectionParameters();
-                if (!parametersProvided) {
-                    // Se l'utente annulla invece di riprovare, chiude l'applicazione
-                    if (!retryConnectionDialog()) {
-                        Platform.exit();
-                        return;
-                    }
-                    // Se l'utente vuole riprovare, il ciclo continua
-                }
+            // Ask for database connection parameters (solo ngrok host e porta)
+            boolean parametersProvided = getDatabaseConnectionParameters();
+            if (!parametersProvided) {
+                Platform.exit();
+                return;
             }
 
-            // Crea e visualizza una schermata di caricamento mentre si tenta la connessione
+            // Creiamo un indicatore di caricamento mentre proviamo a connetterci
             ProgressIndicator progress = new ProgressIndicator();
             progress.setMaxSize(100, 100);
 
@@ -110,158 +86,120 @@ public class Client extends Application {
             primaryStage.setScene(loadingScene);
             primaryStage.show();
 
-            // Esegue la connessione in un thread separato per mantenere reattiva l'interfaccia utente
+            // Eseguiamo la connessione in un thread separato per non bloccare l'UI
             Task<Boolean> connectionTask = new Task<Boolean>() {
                 @Override
                 protected Boolean call() throws Exception {
                     try {
-                        // Stabilisce la connessione al database remoto
+                        // Establish database connection
                         dbManager = DatabaseManager.createRemoteInstance(dbUrl, dbUser, dbPassword);
 
-                        // Registra la connessione del client nella tabella active_clients
+                        // Register client connection
                         registerClientConnection(true);
                         return true;
                     } catch (Exception e) {
-                        // In caso di errore, restituisce false
-                        return false;
+                      return false;
                     }
                 }
             };
 
-            // Configura il comportamento in caso di successo della connessione
             connectionTask.setOnSucceeded(event -> {
                 Boolean success = connectionTask.getValue();
                 if (success) {
                     try {
-                        // Carica la pagina principale (homepage)
+                        // Load the main page
                         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/book_recommender/lab_b/homepage.fxml")));
 
-                        // Configura la finestra principale
+                        // Set the title and scene with initial dimensions
                         primaryStage.setTitle("Book Recommender - Client");
                         Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
                         primaryStage.setScene(scene);
 
-                        // Imposta le dimensioni minime della finestra
+                        // Set minimum window dimensions
                         primaryStage.setMinWidth(MIN_WIDTH);
                         primaryStage.setMinHeight(MIN_HEIGHT);
 
-                        // Permette il ridimensionamento della finestra
+                        // Allow window resizing
                         primaryStage.setResizable(true);
 
-                        // Avvia il thread di monitoraggio per rilevare disconnessioni dal server
+                        // Avvia il monitoraggio del server
                         startServerMonitoring();
 
                     } catch (Exception e) {
-                        // Mostra un avviso in caso di errore nel caricamento dell'interfaccia
                         showServerErrorAlert(primaryStage, "Errore applicazione",
                                 "Errore durante il caricamento dell'interfaccia",
                                 "Si è verificato un errore durante il caricamento dell'interfaccia: " + e.getMessage());
                     }
                 } else {
-                    // In caso di errore di connessione, riavvia il processo di connessione
-                    boolean retry = retryConnectionDialog();
-                    if (retry) {
-                        try {
-                            // Riavvia il processo di connessione
-                            start(primaryStage);
-                        } catch (Exception e) {
-                            showServerErrorAlert(primaryStage, "Errore fatale",
-                                    "Errore durante il riavvio dell'applicazione",
-                                    "Impossibile riavviare il processo di connessione: " + e.getMessage());
-                        }
-                    } else {
-                        // L'utente ha scelto di non riprovare, chiude l'applicazione
-                        Platform.exit();
-                    }
+                    showServerErrorAlert(primaryStage, "Errore di connessione",
+                            "Connessione al database fallita",
+                            "Impossibile connettersi al database. Verificare che il server sia in esecuzione e che i parametri di connessione siano corretti.");
                 }
             });
 
-            // Configura il comportamento in caso di errore durante la connessione
             connectionTask.setOnFailed(event -> {
                 Throwable exception = connectionTask.getException();
-                boolean retry = retryConnectionDialog();
-                if (retry) {
-                    try {
-                        // Riavvia il processo di connessione
-                        start(primaryStage);
-                    } catch (Exception e) {
-                        showServerErrorAlert(primaryStage, "Errore fatale",
-                                "Errore durante il riavvio dell'applicazione",
-                                "Impossibile riavviare il processo di connessione: " + e.getMessage());
-                    }
-                } else {
-                    // L'utente ha scelto di non riprovare, chiude l'applicazione
-                    Platform.exit();
-                }
+                showServerErrorAlert(primaryStage, "Errore di connessione",
+                        "Connessione al database fallita",
+                        "Impossibile connettersi al database: " + exception.getMessage() +
+                                "\nL'applicazione verrà chiusa. Verificare i parametri di connessione.");
             });
 
-            // Avvia il task di connessione in un thread separato
+            // Avvia il task di connessione
             new Thread(connectionTask).start();
 
         } catch (Exception e) {
-            // Gestisce eventuali eccezioni non catturate
-            boolean retry = retryConnectionDialog();
-            if (retry) {
-                try {
-                    // Riavvia il processo di connessione
-                    start(primaryStage);
-                } catch (Exception ex) {
-                    showServerErrorAlert(primaryStage, "Errore fatale",
-                            "Errore durante il riavvio dell'applicazione",
-                            "Impossibile riavviare il processo di connessione: " + ex.getMessage());
-                }
-            } else {
-                // L'utente ha scelto di non riprovare, chiude l'applicazione
-                Platform.exit();
-            }
+          showServerErrorAlert(primaryStage, "Errore di connessione",
+                    "Connessione al database fallita",
+                    "Impossibile connettersi al database: " + e.getMessage() +
+                            "\nL'applicazione verrà chiusa. Verificare i parametri di connessione.");
         }
     }
 
     /**
-     * Richiede all'utente di inserire i parametri di connessione al database tramite un dialog.
-     * Verifica che i parametri inseriti siano validi effettuando una connessione di prova.
-     *
+     * Chiedi all'utente i parametri di connessione al database (solo ngrok host e porta)
+     * e verifica che siano validi prima di procedere
      * @return true se i parametri sono stati forniti e sono validi, false altrimenti
      */
     private boolean getDatabaseConnectionParameters() {
-        // Crea un dialog personalizzato per i parametri di connessione
+        // Creiamo un dialog personalizzato per i parametri di connessione
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Connessione al Database");
         dialog.setHeaderText("Inserisci i parametri di connessione via ngrok");
 
-        // Aggiunge i pulsanti OK e Cancel al dialog
+        // Pulsanti
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Crea una griglia per i campi di input
+        // Griglia per i campi
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // Crea i campi di input per host e porta ngrok
+        // Campi di ingresso - solo host e porta ngrok
         TextField hostField = new TextField();
         hostField.setPromptText("Hostname ngrok");
 
         TextField portField = new TextField();
         portField.setPromptText("Porta ngrok");
 
-        // Aggiunge i campi alla griglia
+        // Aggiungi solo i campi per host e porta alla griglia
         grid.add(new Label("Host ngrok:"), 0, 0);
         grid.add(hostField, 1, 0);
         grid.add(new Label("Porta ngrok:"), 0, 1);
         grid.add(portField, 1, 1);
 
-        // Imposta la griglia come contenuto del dialog
+        // Aggiunge la griglia al dialog
         dialog.getDialogPane().setContent(grid);
 
-        // Mostra il dialog e attende la risposta dell'utente
+        // Mostra il dialog e aspetta che l'utente faccia una scelta
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // L'utente ha premuto OK, procede con la validazione dei parametri
+            // L'utente ha confermato, procedi con i parametri forniti
             String host = hostField.getText().trim();
             String port = portField.getText().trim();
 
-            // Verifica che i campi non siano vuoti
+            // Verifica che i parametri non siano vuoti
             if (host.isEmpty() || port.isEmpty()) {
                 showConnectionParametersError();
                 return false;
@@ -279,60 +217,39 @@ public class Client extends Application {
                 return false;
             }
 
-            // Costruisce l'URL di connessione JDBC
+            // Costruisci URL di connessione JDBC
             dbUrl = "jdbc:postgresql://" + host + ":" + port + "/book_recommender";
 
-            // Tenta una connessione di prova per verificare i parametri
+            // Qui possiamo anche verificare preliminarmente se la connessione è possibile
+            // prima di procedere con la creazione dell'istanza DatabaseManager
             try {
+                // Prova a fare un rapido test di connessione
                 Connection testConnection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
                 testConnection.close();
-                return true; // Connessione riuscita
+                return true;
             } catch (SQLException e) {
-                showConnectionParametersError();
-                return false; // Connessione fallita
+               showConnectionParametersError();
+                return false;
             }
         }
 
-        // L'utente ha annullato il dialog
+        // L'utente ha annullato
         return false;
     }
 
     /**
-     * Mostra una finestra di dialogo di errore quando i parametri di connessione
-     * sono mancanti o non validi.
+     * Mostra una finestra di dialogo di errore quando i parametri di connessione sono mancanti o non validi
      */
     private void showConnectionParametersError() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Errore di connessione");
-        alert.setHeaderText("Parametri di connessione mancanti o errati");
-        alert.setContentText("È necessario fornire i parametri di connessione corretti al database.");
+        alert.setHeaderText("Parametri di connessione mancanti o errari ");
+        alert.setContentText("È necessario fornire i parametri di connessione correti al database. \nL'applicazione verrà chiusa.");
         alert.showAndWait();
     }
 
     /**
-     * Mostra un dialog per chiedere all'utente se desidera riprovare la connessione.
-     *
-     * @return true se l'utente vuole riprovare, false altrimenti
-     */
-    private boolean retryConnectionDialog() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Errore di connessione");
-        alert.setHeaderText("Connessione al database fallita");
-        alert.setContentText("Vuoi riprovare a inserire i parametri di connessione?");
-
-        ButtonType buttonTypeRetry = new ButtonType("Riprova");
-        ButtonType buttonTypeExit = new ButtonType("Esci", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        alert.getButtonTypes().setAll(buttonTypeRetry, buttonTypeExit);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == buttonTypeRetry;
-    }
-    /**
-     * Mostra un avviso quando il server viene spento o diventa irraggiungibile.
-     * Terminata l'applicazione dopo la conferma dell'utente.
-     *
-     * @param primaryStage Stage principale dell'applicazione
+     * Show an alert when the server shuts down
      */
     private void showServerShutdownAlert(Stage primaryStage) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -340,7 +257,7 @@ public class Client extends Application {
         alert.setHeaderText("Server Spento");
         alert.setContentText("Il server è stato spento. L'applicazione verrà chiusa. Riavviare il server prima di riaprire il client.");
 
-        // Attende che l'avviso venga chiuso prima di terminare l'applicazione
+        // Wait for the alert to be closed before exiting
         alert.showAndWait().ifPresent(response -> {
             Platform.exit();
             System.exit(0);
@@ -348,13 +265,7 @@ public class Client extends Application {
     }
 
     /**
-     * Mostra un avviso generico di errore del server.
-     * Termina l'applicazione dopo la conferma dell'utente.
-     *
-     * @param primaryStage Stage principale dell'applicazione
-     * @param title Titolo dell'avviso
-     * @param header Intestazione dell'avviso
-     * @param content Contenuto del messaggio di errore
+     * Show a generic server error alert
      */
     private void showServerErrorAlert(Stage primaryStage, String title, String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -362,59 +273,49 @@ public class Client extends Application {
         alert.setHeaderText(header);
         alert.setContentText(content);
 
-        // Attende che l'avviso venga chiuso prima di terminare l'applicazione
+        // Wait for the alert to be closed before exiting
         alert.showAndWait().ifPresent(response -> {
             Platform.exit();
-            System.exit(1); // Codice di uscita 1 indica errore
+            System.exit(1);
         });
     }
 
     /**
-     * Registra la connessione o disconnessione del client nel database.
-     * Aggiorna la tabella active_clients per tenere traccia dei client attivi.
-     *
-     * @param isConnecting true per registrare una connessione, false per una disconnessione
+     * Register client connection or disconnection in the database
      */
     private void registerClientConnection(boolean isConnecting) {
         try {
-            // Crea un ID client più breve per migliorare la leggibilità
-            String clientIdShort = clientId.substring(0, 8);
+            // Create a shorter client ID (just UUID, without hostname and IP)
+            String clientIdShort = clientId.substring(0, 8); // Use a shorter ID for better readability
 
-            // Aggiorna la tabella active_clients nel database
+            // Update active_clients table in database
             if (dbManager != null) {
                 dbManager.updateClientConnection(clientIdShort, isConnecting);
-            }
+           }
         } catch (Exception e) {
-            e.printStackTrace();
+           e.printStackTrace();
         }
     }
 
-    /**
-     * Metodo chiamato quando l'applicazione viene terminata.
-     * Esegue la pulizia delle risorse e registra la disconnessione del client.
-     */
     @Override
     public void stop() {
-        // Rimuove il client dal conteggio quando l'applicazione termina
+        // Remove the client from count when the application terminates
         try {
             if (dbManager != null && !serverShutdownDetected) {
-                // Registra la disconnessione del client
+                // Register client disconnection
                 registerClientConnection(false);
             }
 
-            // Chiude la connessione socket se esistente
+            // Close socket connection
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
         } catch (IOException e) {
-            // Gestione silenziosa dell'errore durante la chiusura
-        }
+      }
     }
 
     /**
-     * Avvia un thread di monitoraggio per rilevare quando il server diventa irraggiungibile.
-     * Verifica periodicamente la connessione al database e mostra una schermata di
-     * disconnessione quando la connessione viene persa.
+     * Avvia il monitoraggio del server per rilevare quando viene spento
      */
     private void startServerMonitoring() {
         Thread monitorThread = new Thread(() -> {
@@ -422,11 +323,11 @@ public class Client extends Application {
                 try {
                     Thread.sleep(3000); // Controlla ogni 3 secondi
 
-                    // Verifica la connessione al database
+                    // Prova a controllare la connessione al database
                     if (dbManager != null) {
                         try {
                             Connection conn = dbManager.getConnection();
-                            // Se la connessione fallisce, lancerà un'eccezione SQLException
+                            // Se la connessione fallisce, lancerà un'eccezione
                         } catch (SQLException e) {
                             // Connessione persa, segnala la disconnessione
                             Platform.runLater(() -> {
@@ -437,11 +338,10 @@ public class Client extends Application {
                         }
                     }
                 } catch (InterruptedException e) {
-                    // Il thread è stato interrotto, termina il ciclo di monitoraggio
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception e) {
-                    // Qualsiasi altro errore è considerato una disconnessione dal server
+                    // Se c'è un errore, mostra la schermata di disconnessione
                     Platform.runLater(() -> {
                         showServerDisconnectedScreen();
                     });
@@ -451,28 +351,26 @@ public class Client extends Application {
             }
         });
 
-        // Imposta il thread come daemon per consentirne la terminazione automatica
         monitorThread.setDaemon(true);
         monitorThread.start();
     }
 
     /**
-     * Mostra la schermata di disconnessione quando il server diventa irraggiungibile.
-     * Carica il layout FXML dedicato alla disconnessione o mostra un avviso di fallback.
+     * Mostra la schermata di disconnessione del server
      */
     private void showServerDisconnectedScreen() {
         try {
-            // Imposta il flag per evitare chiamate multiple alla schermata di disconnessione
+            // Interrompi eventuale monitoraggio per evitare chiamate multiple
             serverShutdownDetected = true;
 
             // Carica il layout FXML per la schermata di disconnessione
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/server_disconnected.fxml"));
             Parent root = loader.load();
 
-            // Crea una nuova scena con la schermata di disconnessione
+            // Crea una nuova scena con lo schermo di disconnessione
             Scene scene = new Scene(root, 600, 400);
 
-            // Applica la scena allo stage principale
+            // Applica la scena alla finestra primaria
             Platform.runLater(() -> {
                 primaryStage.setScene(scene);
                 primaryStage.setTitle("Server Disconnesso");
@@ -481,7 +379,8 @@ public class Client extends Application {
             });
 
         } catch (IOException e) {
-            // Fallback in caso di errore nel caricamento del file FXML
+
+            // Fallback nel caso in cui non si riesca a caricare il FXML
             Platform.runLater(() -> {
                 showServerShutdownAlert(primaryStage);
             });
@@ -489,10 +388,8 @@ public class Client extends Application {
     }
 
     /**
-     * Metodo principale dell'applicazione client.
-     * Punto di ingresso per l'avvio dell'applicazione JavaFX.
-     *
-     * @param args Argomenti della riga di comando (non utilizzati)
+     * Main method for client application
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         launch(args);

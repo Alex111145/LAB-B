@@ -11,43 +11,37 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
- * Controller per la schermata del menu utente principale.
- * Gestisce la navigazione verso le varie funzionalità dell'applicazione
- * come creazione librerie, aggiunta libri, valutazione e consigli.
- * Fornisce anche il meccanismo di logout.
- */
 public class UserMenuController {
 
-    @FXML private Label welcomeLabel;
-    @FXML private Label statusLabel;
+    @FXML
+    private Label welcomeLabel;
+
+    @FXML
+    private Label statusLabel;
 
     private String userId;
     private DatabaseManager dbManager;
 
     /**
-     * Inizializza il controller dopo che il file FXML è stato caricato.
-     * Configura lo stato iniziale dell'interfaccia e inizializza la connessione al database.
-     * Questo metodo viene chiamato automaticamente da JavaFX.
+     * Inizializza il controller.
+     * Questo metodo viene chiamato automaticamente da JavaFX dopo che l'FXML è stato caricato
      */
     public void initialize() {
-        // Pulisce eventuali messaggi di stato precedenti
+        // Le inizializzazioni che non dipendono da dati esterni vanno qui
         statusLabel.setText("");
 
-        // Inizializza la connessione al database manager
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore - verrà gestito nei metodi che usano il database
         }
     }
 
     /**
-     * Imposta l'ID utente nel controller e aggiorna il messaggio di benvenuto.
-     * Questo metodo deve essere chiamato dopo il caricamento della vista
-     * per fornire i dati dell'utente autenticato.
+     * Imposta i dati dell'utente e aggiorna l'interfaccia.
+     * Questo metodo deve essere chiamato dopo il caricamento del controller
+     * per impostare i dati specifici dell'utente.
      *
-     * @param userId ID dell'utente che ha effettuato l'accesso
+     * @param userId l'ID dell'utente che ha effettuato l'accesso
      */
     public void setUserData(String userId) {
         this.userId = userId;
@@ -55,55 +49,48 @@ public class UserMenuController {
     }
 
     /**
-     * Imposta un messaggio di stato nell'interfaccia utente.
-     * Utilizzato per mostrare feedback all'utente come conferme di operazioni
-     * o messaggi di benvenuto dopo la registrazione.
+     * Imposta un messaggio di stato nell'interfaccia.
      *
-     * @param message Messaggio da visualizzare nella label di stato
+     * @param message il messaggio da visualizzare
      */
     public void setStatusMessage(String message) {
         statusLabel.setText(message);
     }
 
     /**
-     * Gestisce il click sul pulsante "Logout".
-     * Rimuove l'utente dalla lista degli utenti connessi e torna alla homepage.
-     *
-     * @param event Evento di azione generato dal pulsante
+     * Gestisce il clic sul pulsante "Logout"
      */
     @FXML
     public void onLogoutClicked(ActionEvent event) {
         try {
-            // Rimuove l'utente dalla lista degli utenti connessi nel database
+            // Rimuove l'utente dalla lista degli utenti connessi
             unregisterUserConnection();
 
-            // Naviga alla homepage
+            // Torna alla homepage
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/homepage.fxml"));
             Parent root = loader.load();
 
-            // Cambia la scena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
+
             stage.show();
         } catch (IOException e) {
-            // Mostra un messaggio di errore in caso di problemi con il caricamento della homepage
+
             statusLabel.setText("Errore: Impossibile tornare alla homepage");
         }
     }
 
     /**
-     * Rimuove l'utente dalla tabella degli utenti connessi nel database.
-     * Questo metodo viene chiamato durante il logout per garantire che
-     * l'utente venga correttamente disconnesso dal sistema.
+     * Rimuove l'utente dalla tabella degli utenti connessi
      */
     private void unregisterUserConnection() {
         try {
             if (dbManager != null && userId != null) {
-                // Crea un pattern per cercare tutti i client IDs associati all'utente corrente
+                // Cerca tutti i client IDs che contengono questo userID
                 String clientIdPattern = "user_" + userId + "_%";
 
-                // Esegue una query SQL per eliminare tutte le connessioni dell'utente
+                // Rimuove l'utente dalla lista degli utenti connessi usando una query speciale
                 String sql = "DELETE FROM active_clients WHERE client_id LIKE ?";
 
                 java.sql.Connection conn = dbManager.getConnection();
@@ -111,17 +98,14 @@ public class UserMenuController {
                 pstmt.setString(1, clientIdPattern);
                 pstmt.executeUpdate();
                 pstmt.close();
+
             }
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore - l'utente può comunque essere disconnesso
         }
     }
 
     /**
-     * Gestisce il click sul pulsante "Crea Libreria".
-     * Naviga alla schermata di creazione libreria e passa i dati dell'utente.
-     *
-     * @param event Evento di azione generato dal pulsante
+     * Gestisce il clic sul pulsante "Crea Libreria"
      */
     @FXML
     public void onCreateLibraryClicked(ActionEvent event) {
@@ -130,122 +114,120 @@ public class UserMenuController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/crealibreria.fxml"));
             Parent root = loader.load();
 
-            // Ottiene il controller e passa l'ID utente
+            // Ottieni il controller e passa l'ID utente
             CreateLibraryController controller = loader.getController();
             controller.setUserId(userId);
 
-            // Cambia la scena
+            // Imposta la nuova scena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            // Mostra un messaggio di errore in caso di problemi
+
             statusLabel.setText("Errore: Impossibile aprire la pagina di creazione libreria");
         }
     }
 
     /**
-     * Gestisce il click sul pulsante "Aggiungi Libro alla Libreria".
-     * Naviga alla schermata di selezione libreria con modalità di aggiunta libri.
-     *
-     * @param event Evento di azione generato dal pulsante
+     * Gestisce il clic sul pulsante "Aggiungi Libro alla Libreria"
+     * Naviga alla schermata di selezione della libreria con modalità di aggiunta libri
      */
     @FXML
     public void onAddBookClicked(ActionEvent event) {
         try {
-            // Definisce il percorso del file FXML
+            // Carica la pagina di selezione libreria
             String fxmlFile = "/book_recommender/lab_b/selezionalib.fxml";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
 
-            // Verifica che il file FXML esista
             if (getClass().getResource(fxmlFile) == null) {
                 throw new IOException("File FXML non trovato: " + fxmlFile);
             }
 
             Parent root = loader.load();
 
-            // Ottiene il controller e imposta la modalità "add" (aggiunta libri)
+            // Ottieni il controller e passa i dati necessari
             LibrarySelectionController controller = loader.getController();
+            // Specifica che l'operazione è di aggiunta libri
             controller.setUserId(userId, "add");
 
-            // Cambia la scena
+            // Imposta la nuova scena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
+
             stage.show();
+
         } catch (IOException e) {
-            // Mostra un messaggio di errore in caso di problemi
+
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
     }
-
     /**
-     * Gestisce il click sul pulsante "Valuta Libro".
-     * Naviga alla schermata di selezione libreria con modalità valutazione.
-     *
-     * @param event Evento di azione generato dal pulsante
+     * Gestisce il clic sul pulsante "Valuta Libro"
+     * Naviga alla schermata di selezione della libreria con modalità valutazione
      */
     @FXML
     public void onRateBookClicked(ActionEvent event) {
         try {
-            // Definisce il percorso del file FXML
+            // Carica la pagina di selezione libreria
             String fxmlFile = "/book_recommender/lab_b/selezionalib.fxml";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
 
-            // Verifica che il file FXML esista
             if (getClass().getResource(fxmlFile) == null) {
                 throw new IOException("File FXML non trovato: " + fxmlFile);
             }
 
             Parent root = loader.load();
 
-            // Ottiene il controller e imposta la modalità "rate" (valutazione)
+            // Ottieni il controller e passa i dati necessari
             LibrarySelectionController controller = loader.getController();
+            // Specifica che l'operazione è di valutazione
             controller.setUserId(userId, "rate");
 
-            // Cambia la scena
+            // Imposta la nuova scena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
+
         } catch (IOException e) {
-            // Mostra un messaggio di errore in caso di problemi
+
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
     }
 
     /**
-     * Gestisce il click sul pulsante "Consiglia Libro".
-     * Naviga alla schermata di selezione libreria con modalità consiglio.
-     *
-     * @param event Evento di azione generato dal pulsante
+     * Gestisce il clic sul pulsante "Consiglia Libro"
+     * Naviga alla schermata di selezione della libreria con modalità consiglio
      */
     @FXML
     public void onRecommendBookClicked(ActionEvent event) {
         try {
-            // Definisce il percorso del file FXML
+            // Carica la pagina di selezione libreria
             String fxmlFile = "/book_recommender/lab_b/selezionalib.fxml";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
 
-            // Verifica che il file FXML esista
             if (getClass().getResource(fxmlFile) == null) {
                 throw new IOException("File FXML non trovato: " + fxmlFile);
             }
 
             Parent root = loader.load();
 
-            // Ottiene il controller e imposta la modalità "recommend" (consiglio)
+            // Ottieni il controller e passa i dati necessari
             LibrarySelectionController controller = loader.getController();
+            // Specifica che l'operazione è di consiglio
             controller.setUserId(userId, "recommend");
 
-            // Cambia la scena
+            // Imposta la nuova scena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
+
             stage.show();
+
         } catch (IOException e) {
-            // Mostra un messaggio di errore in caso di problemi
+
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
     }

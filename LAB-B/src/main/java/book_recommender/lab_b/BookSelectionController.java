@@ -18,11 +18,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Controller per la schermata di selezione dei libri.
- * Gestisce la visualizzazione e la selezione dei libri all'interno di una libreria specifica.
- * Supporta diverse modalità operative (selezione, valutazione, consigli).
- */
 public class BookSelectionController {
 
     @FXML private Label userIdLabel;
@@ -38,22 +33,13 @@ public class BookSelectionController {
     private String operationType;
     private DatabaseManager dbManager;
 
-    /**
-     * Costruttore del controller.
-     * Inizializza la connessione al database manager.
-     */
     public BookSelectionController() {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            // Gestione silenziosa dell'errore - la connessione sarà tentata di nuovo in seguito
         }
     }
 
-    /**
-     * Metodo di inizializzazione chiamato automaticamente dopo che l'FXML è stato caricato.
-     * Configura lo stato iniziale dell'interfaccia e registra il gestore degli eventi per i tasti.
-     */
     public void initialize() {
         errorLabel.setVisible(false);
         noBooksLabel.setVisible(false);
@@ -61,12 +47,6 @@ public class BookSelectionController {
         booksListView.setOnKeyPressed(this::handleKeyPress);
     }
 
-    /**
-     * Gestisce gli eventi di pressione dei tasti nella lista dei libri.
-     * Quando viene premuto il tasto Enter, seleziona il libro corrente.
-     *
-     * @param event Evento di input da tastiera
-     */
     private void handleKeyPress(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             String selectedBook = booksListView.getSelectionModel().getSelectedItem();
@@ -76,13 +56,6 @@ public class BookSelectionController {
         }
     }
 
-    /**
-     * Imposta i dati di base per il controller: ID utente e nome libreria.
-     * Carica i libri dell'utente e aggiorna l'interfaccia di conseguenza.
-     *
-     * @param userId ID dell'utente
-     * @param libraryName Nome della libreria
-     */
     public void setData(String userId, String libraryName) {
         this.userId = userId;
         this.libraryName = libraryName;
@@ -101,14 +74,6 @@ public class BookSelectionController {
         }
     }
 
-    /**
-     * Versione estesa del metodo setData che consente di specificare anche il tipo di operazione.
-     * Modifica l'etichetta del pulsante di selezione in base al tipo di operazione.
-     *
-     * @param userId ID dell'utente
-     * @param libraryName Nome della libreria
-     * @param operationType Tipo di operazione ("rate", "recommend", o "select")
-     */
     public void setData(String userId, String libraryName, String operationType) {
         this.operationType = operationType;
 
@@ -121,13 +86,6 @@ public class BookSelectionController {
         setData(userId, libraryName);
     }
 
-    /**
-     * Carica i libri dell'utente dalla libreria specificata utilizzando una query SQL.
-     * Aggiorna la ListView con i titoli dei libri trovati.
-     *
-     * @param userId ID dell'utente
-     * @param libraryName Nome della libreria
-     */
     private void loadUserBooks(String userId, String libraryName) {
         books.clear();
         booksListView.getItems().clear();
@@ -159,12 +117,6 @@ public class BookSelectionController {
         }
     }
 
-    /**
-     * Gestisce la selezione di un libro dalla lista.
-     * In base al tipo di operazione, naviga alla schermata appropriata o mostra un messaggio.
-     *
-     * @param event Evento di azione dal pulsante o dalla tastiera
-     */
     @FXML
     public void handleSelect(ActionEvent event) {
         String selectedBook = booksListView.getSelectionModel().getSelectedItem();
@@ -188,13 +140,6 @@ public class BookSelectionController {
         }
     }
 
-    /**
-     * Naviga alla schermata di raccomandazione libri per il libro selezionato.
-     * Carica il controller RecommendBookController e gli passa i dati necessari.
-     *
-     * @param event Evento di azione
-     * @param bookTitle Titolo del libro selezionato
-     */
     private void navigateToRecommendBook(ActionEvent event, String bookTitle) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/consigli.fxml"));
@@ -209,19 +154,12 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            // Gestione dell'errore di caricamento della vista
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
     }
 
-    /**
-     * Naviga alla schermata di valutazione per il libro selezionato.
-     * Carica il controller RateBookController e gli passa i dati necessari.
-     *
-     * @param event Evento di azione
-     * @param bookTitle Titolo del libro selezionato
-     */
     private void navigateToRateBook(ActionEvent event, String bookTitle) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/valutazione.fxml"));
@@ -236,40 +174,22 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            // Gestione dell'errore di caricamento della vista
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
     }
 
-    /**
-     * Gestisce l'evento click sul pulsante "Indietro".
-     * Naviga alla schermata di selezione della libreria.
-     *
-     * @param event Evento di azione
-     */
     @FXML
     public void handleBack(ActionEvent event) {
         navigateToLibrarySelection(event);
     }
 
-    /**
-     * Gestisce l'evento click sul pulsante "Annulla".
-     * Naviga alla schermata di selezione della libreria.
-     *
-     * @param event Evento di azione
-     */
     @FXML
     public void handleCancel(ActionEvent event) {
         navigateToLibrarySelection(event);
     }
 
-    /**
-     * Naviga alla schermata di selezione della libreria.
-     * Passa il tipo di operazione al controller LibrarySelectionController.
-     *
-     * @param event Evento di azione
-     */
     private void navigateToLibrarySelection(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionalib.fxml"));
@@ -290,7 +210,7 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            // Gestione dell'errore di caricamento della vista
+
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }

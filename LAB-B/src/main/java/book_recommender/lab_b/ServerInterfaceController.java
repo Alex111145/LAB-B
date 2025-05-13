@@ -25,118 +25,75 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Controller dell'interfaccia utente per il server del sistema di raccomandazione di libri.
- * Gestisce l'avvio, l'arresto e il monitoraggio del server, la configurazione del database
- * e l'esposizione del server tramite tunnel ngrok.
- * <p>
- * Funzionalità principali:
- * - Avvio/arresto del server PostgreSQL
- * - Inizializzazione e popolazione del database
- * - Monitoraggio delle connessioni client
- * - Gestione del tunnel ngrok per l'accesso remoto
- * - Download dei dati necessari (utenti, libri, valutazioni, ecc.)
- * </p>
- */
 public class ServerInterfaceController {
 
-    /** ID dei file su Google Drive contenenti i dati per il sistema */
-    /** ID del file Google Drive contenente i dati delle valutazioni dei libri */
+    // Google Drive file IDs
     private static final String VALUTAZIONI_FILE_ID = "1kBmaKQoCb-Z_DrTXGzEXt0htDYxG0ZRd";
-    /** ID del file Google Drive contenente i dati degli utenti */
     private static final String UTENTI_FILE_ID = "1Yn_pEZa7TpcT1ZIynhBCL31jtAHyRHBj";
-    /** ID del file Google Drive contenente i dati dei libri */
     private static final String LIBRI_FILE_ID = "1C7Uz6fc6MRR0zp4tcDeU9D-THXW8n5mk";
-    /** ID del file Google Drive contenente i dati delle librerie */
     private static final String LIBRERIE_FILE_ID = "1S5G3wYhCq9UXDrhfGuhOZ7JzQ_YCyR4Q";
-    /** ID del file Google Drive contenente dati generali */
     private static final String DATA_FILE_ID = "17E35q-wg3YQn3EUsYyKeHDpzXOre8pYU";
-    /** ID del file Google Drive contenente i consigli di libri */
     private static final String CONSIGLI_FILE_ID = "1tuUDCljamjaC4VKsu2VBwXSYFV7e8ilC";
 
-    /** Scheduler per monitorare i client connessi */
-    private ScheduledExecutorService clientMonitorScheduler;
-    /** Gestore del tunnel ngrok */
-    private NgrokManager ngrokManager;
-    /** Flag per indicare se ngrok è attivo */
-    private boolean ngrokEnabled = false;
-    /** Campo per l'URL del database (non più nel FXML) */
-    private TextField dbUrlField;
-    /** Campo per l'utente del database (non più nel FXML) */
-    private TextField dbUserField;
-    /** Campo per la password del database (non più nel FXML) */
-    private TextField dbPasswordField;
-    /** Contenitore per i log (non più nel FXML) */
-    private VBox logContainer;
 
-    /** Lista dei socket dei client connessi */
+    private ScheduledExecutorService clientMonitorScheduler;  // Add at the top of the class with other fields
+    private NgrokManager ngrokManager;
+    private boolean ngrokEnabled = false;
+    private TextField dbUrlField; // Not in FXML anymore, but still needed
+    private TextField dbUserField; // Not in FXML anymore, but still needed
+    private TextField dbPasswordField; // Not in FXML anymore, but still needed
+    private VBox logContainer; // Not in FXML anymore, but still needed for compatibility
+
     private final List<Socket> connectedClientSockets = new ArrayList<>();
-    /** Directory temporanea per i file scaricati */
+    // Directory temporanea per i file scaricati
     private static final String TEMP_DIR = "temp_data/";
 
-    /** Label per lo stato del database */
+
+
+
     @FXML
     private Label dbStatusLabel;
-    /** Label per lo stato del server */
     @FXML
     private Label serverStatusLabel;
-    /** Label per il conteggio dei client */
     @FXML
     private Label clientCountLabel;
-    /** Label per l'ora di avvio */
     @FXML
     private Label startTimeLabel;
-    /** Label per lo stato di ngrok */
     @FXML
     private Label ngrokStatusLabel;
-    /** Campo per l'host di ngrok */
     @FXML
     private TextField ngrokHostField;
-    /** Campo per la porta di ngrok */
+
     @FXML
     private TextField ngrokPortField;
-    /** Campo per l'URL di ngrok */
+
     @FXML
     private TextField ngrokUrlField;
-    /** Pulsante per avviare ngrok */
+
     @FXML
     private Button startNgrokButton;
-    /** Pulsante per fermare ngrok */
+
     @FXML
     private Button stopNgrokButton;
-    /** Label per il tempo di attività */
     @FXML
     private Label uptimeLabel;
-    /** Barra di avanzamento per l'inizializzazione */
     @FXML
     private ProgressBar initProgressBar;
-    /** Pulsante per avviare il server */
     @FXML
     private Button startButton;
-    /** Pulsante per fermare il server */
     @FXML
     private Button stopButton;
 
-    /** Socket del server */
-    private ServerSocket serverSocket;
-    /** Thread per il server */
-    private Thread serverThread;
-    /** Ora di avvio del server */
-    private LocalDateTime serverStartTime;
-    /** Scheduler per le attività periodiche */
-    private ScheduledExecutorService scheduler;
-    /** Contatore atomico dei client connessi */
-    private final AtomicInteger connectedClients = new AtomicInteger(0);
-    /** Flag per indicare se il server è in esecuzione */
-    private boolean serverRunning = false;
 
-    /**
-     * Gestisce l'evento di copia dell'host ngrok negli appunti.
-     * Quando l'utente fa clic sul pulsante di copia dell'host, questo metodo copia
-     * l'URL pubblico di ngrok negli appunti del sistema e fornisce un feedback visivo.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante
-     */
+
+    private ServerSocket serverSocket;
+    private Thread serverThread;
+    private LocalDateTime serverStartTime;
+    private ScheduledExecutorService scheduler;
+    private final AtomicInteger connectedClients = new AtomicInteger(0);
+    private boolean serverRunning = false;
+// Modifica in ServerInterfaceController.java
+
     @FXML
     public void onCopyNgrokHost(ActionEvent event) {
         // Copia solo l'host negli appunti
@@ -152,14 +109,6 @@ public class ServerInterfaceController {
             showButtonFeedback(sourceButton);
         }
     }
-
-    /**
-     * Gestisce l'evento di copia della porta ngrok negli appunti.
-     * Quando l'utente fa clic sul pulsante di copia della porta, questo metodo copia
-     * la porta pubblica di ngrok negli appunti del sistema e fornisce un feedback visivo.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante
-     */
     @FXML
     public void onCopyNgrokPort(ActionEvent event) {
         // Copia solo la porta negli appunti
@@ -175,31 +124,25 @@ public class ServerInterfaceController {
             showButtonFeedback(sourceButton);
         }
     }
-
-    /**
-     * Inizializza il controller dell'interfaccia.
-     * Questo metodo viene chiamato automaticamente dopo che il file FXML è stato caricato.
-     * Configura i componenti dell'interfaccia, inizializza i gestori e prepara l'ambiente.
-     */
     @FXML
     public void initialize() {
-        // Crea una directory temp se non esiste
+        // Create a temp directory if it doesn't exist
         new File(TEMP_DIR);
 
-        // Inizializza lo scheduler per aggiornare il tempo di attività
+        // Initialize scheduler for updating uptime
         scheduler = Executors.newScheduledThreadPool(1);
 
-        // Inizializza NgrokManager
+        // Initialize NgrokManager
         ngrokManager = new NgrokManager();
         ngrokEnabled = false;
 
-        // Crea i campi che sono stati rimossi dal FXML ma sono ancora necessari nel codice
+        // Create fields that were removed from FXML but still needed in code
         dbUrlField = new TextField("jdbc:postgresql://localhost:5432/book_recommender");
         dbUserField = new TextField("book_admin_8530");
         dbPasswordField = new TextField("CPuc#@r-zbKY");
         logContainer = new VBox();
 
-        // Configura l'UI per ngrok se i componenti esistono
+        // Configure UI for ngrok if components exist
         if (ngrokStatusLabel != null) {
             ngrokStatusLabel.setText("Inattivo");
             ngrokStatusLabel.setTextFill(Color.RED);
@@ -215,7 +158,7 @@ public class ServerInterfaceController {
             ngrokPortField.setTooltip(new Tooltip("Porta pubblica per la connessione tramite ngrok"));
         }
 
-        // Nascondi i pulsanti start/stop ngrok poiché sarà automatico
+        // Hide the start/stop ngrok buttons since it will be automatic
         if (startNgrokButton != null) {
             startNgrokButton.setVisible(false);
             startNgrokButton.setManaged(false);
@@ -226,46 +169,43 @@ public class ServerInterfaceController {
             stopNgrokButton.setManaged(false);
         }
 
-        // Aggiungi la funzionalità di copia delle informazioni di connessione
+        // Add the copy connection info feature
         if (ngrokHostField != null && ngrokPortField != null) {
             ContextMenu contextMenu = new ContextMenu();
             MenuItem copyItem = new MenuItem("Copia informazioni di connessione");
             copyItem.setOnAction(e -> {
-                Clipboard clipboard = Clipboard.getSystemClipboard();
+              Clipboard clipboard = Clipboard.getSystemClipboard();
                 ClipboardContent content = new ClipboardContent();
-                clipboard.setContent(content);
-            });
+               clipboard.setContent(content);
+          });
             contextMenu.getItems().add(copyItem);
             ngrokHostField.setContextMenu(contextMenu);
             ngrokPortField.setContextMenu(contextMenu);
         }
 
-        // Il codice rimanente resta lo stesso...
+        // Remaining code stays the same...
     }
 
-    /**
-     * Gestisce l'evento di avvio del server.
-     * Avvia il processo di inizializzazione del server in un thread separato,
-     * controlla lo stato di PostgreSQL e configura l'ambiente di database.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante di avvio
-     */
+
+
+
     @FXML
     public void onStartServer(ActionEvent event) {
         if (serverRunning) return;
 
-        // Disabilita il pulsante durante l'inizializzazione
+        // Disable the button during initialization
         startButton.setDisable(true);
 
-        // Esegui il controllo in un thread di background
+
+        // Run check in the background thread
         new Thread(() -> {
-            // Ora dobbiamo assicurarci che dbUrlField sia inizializzato con un valore predefinito
+            // We now need to make sure dbUrlField is initialized with a default value
             String dbUrl = "jdbc:postgresql://localhost:5432/book_recommender";
             if (dbUrlField != null) {
                 dbUrl = dbUrlField.getText();
             }
 
-            // Lo stesso per username e password
+            // Same for username and password
             String dbUser = "book_admin_8530";
             if (dbUserField != null) {
                 dbUser = dbUserField.getText();
@@ -277,38 +217,38 @@ public class ServerInterfaceController {
             }
 
             try {
-                // Prima, controlla se PostgreSQL è installato e in esecuzione
+                // First, check if the PostgreSQL is installed and running
                 updateProgress(0.1, "Checking PostgreSQL status...");
                 if (!isPostgresInstalled()) {
-                    if (!installPostgresIfNeeded()) {
+                   if (!installPostgresIfNeeded()) {
                         Platform.runLater(() -> {
                             dbStatusLabel.setText("PostgreSQL not installed");
                             dbStatusLabel.setTextFill(Color.RED);
-                            startButton.setDisable(false);
+                          startButton.setDisable(false);
                         });
                         return;
                     }
                 }
 
                 if (!isPostgresRunning()) {
-                    if (!startPostgresIfNeeded()) {
+                 if (!startPostgresIfNeeded()) {
                         Platform.runLater(() -> {
                             dbStatusLabel.setText("PostgreSQL is not running");
                             dbStatusLabel.setTextFill(Color.RED);
-                            startButton.setDisable(false);
+                          startButton.setDisable(false);
                         });
                         return;
                     }
                 }
 
-                // Controlla se un altro server è già in esecuzione
+                // Check if another server is already running
                 updateProgress(0.2, "Checking for existing server...");
                 if (checkExistingServer(dbUrl)) {
-                    // Connetti a un server esistente
+                    // Connect to an existing server
                     updateProgress(0.3, "Connecting to existing server...");
                     connectToExistingServer(dbUrl, dbUser, dbPassword);
                 } else {
-                    // Avvia un nuovo server
+                    // Start a new server
                     Platform.runLater(() -> {
                         serverStatusLabel.setText("Starting...");
                         serverStatusLabel.setTextFill(Color.BLUE);
@@ -318,40 +258,36 @@ public class ServerInterfaceController {
                     serverRunning = true;
                     updateUIState(true);
 
-                    // Registra l'ora di inizio
+                    // Record start time
                     serverStartTime = LocalDateTime.now();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     Platform.runLater(() -> {
                         startTimeLabel.setText(serverStartTime.format(formatter));
                     });
 
-                    // Avvia il contatore di uptime
+                    // Start uptime counter
                     startUptimeCounter();
 
-                    // Avvia il server in un thread di background
+                    // Start server in background thread
                     serverThread = new Thread(this::startServerProcess);
                     serverThread.setDaemon(true);
                     serverThread.start();
                 }
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    startButton.setDisable(false);
+                   startButton.setDisable(false);
 
-                    // Reimposta lo stato del server in caso di errore
+                    // Reset server state in case of error
                     serverRunning = false;
                     updateUIState(false);
                 });
             }
         }).start();
     }
-
     /**
-     * Controlla se un altro server è già in esecuzione.
-     * Utilizza la classe Server per verificare se è già presente un'istanza attiva
-     * connessa al database specificato.
-     *
-     * @param dbUrl L'URL del database da controllare
-     * @return true se un altro server è in esecuzione, false altrimenti
+     * Checks if another server is already running
+     * @param dbUrl The database URL to check
+     * @return true if another server is running, false otherwise
      */
     private boolean checkExistingServer(String dbUrl) {
         try {
@@ -359,17 +295,11 @@ public class ServerInterfaceController {
 
             return serverRunning;
         } catch (Exception e) {
-            return false;
+           return false;
         }
     }
 
-    /**
-     * Gestisce l'evento di avvio del tunnel ngrok.
-     * Avvia il tunnel ngrok per esporre la porta PostgreSQL su Internet,
-     * permettendo connessioni remote al database.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante
-     */
+
     @FXML
     public void onStartNgrok(ActionEvent event) {
         if (ngrokEnabled) return;
@@ -415,12 +345,6 @@ public class ServerInterfaceController {
         }).start();
     }
 
-    /**
-     * Gestisce l'evento di arresto del tunnel ngrok.
-     * Ferma il tunnel ngrok attivo e aggiorna l'interfaccia utente.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante
-     */
     @FXML
     public void onStopNgrok(ActionEvent event) {
         if (!ngrokEnabled) return;
@@ -430,14 +354,6 @@ public class ServerInterfaceController {
         updateNgrokUIState(false);
 
     }
-
-    /**
-     * Aggiorna lo stato dell'interfaccia utente di ngrok.
-     * Modifica la visibilità e lo stato dei pulsanti e delle etichette
-     * in base allo stato del tunnel ngrok.
-     *
-     * @param running true se ngrok è in esecuzione, false altrimenti
-     */
     private void updateNgrokUIState(boolean running) {
         Platform.runLater(() -> {
             startNgrokButton.setDisable(running);
@@ -452,27 +368,23 @@ public class ServerInterfaceController {
         });
 
     }
-
     /**
-     * Si connette a un server esistente e aggiorna l'interfaccia utente.
-     * Stabilisce una connessione con un database in cui è già presente un server attivo,
-     * recupera le informazioni di stato e aggiorna l'UI di conseguenza.
-     *
-     * @param dbUrl L'URL del database
-     * @param dbUser L'utente del database
-     * @param dbPassword La password del database
+     * Connects to an existing server and updates the UI
+     * @param dbUrl The database URL
+     * @param dbUser The database username
+     * @param dbPassword The database password
      */
     private void connectToExistingServer(String dbUrl, String dbUser, String dbPassword) {
         try {
-            // Connetti al database
+            // Connect to database
             updateProgress(0.4, "Connecting to database...");
             Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
 
 
-            // Aggiorna l'UI per riflettere che siamo connessi al server esistente
+            // Update UI to reflect we're connected to the existing server
             serverRunning = true;
 
-            // Ottieni l'ora di avvio corrente del server dal database se disponibile
+            // Get the current server start time from a database if available
             try {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT server_start_time FROM server_info LIMIT 1");
@@ -487,11 +399,11 @@ public class ServerInterfaceController {
                     serverStartTime = LocalDateTime.now(); // Fallback
                 }
             } catch (SQLException e) {
-                // Se una tabella non esiste, usa semplicemente l'ora corrente
+                // If a table doesn't exist, just use the current time
                 serverStartTime = LocalDateTime.now();
             }
 
-            // Aggiorna l'UI con lo stato del server
+            // Update UI with server status
             updateProgress(1.0, "Connected to existing server");
             Platform.runLater(() -> {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -503,29 +415,27 @@ public class ServerInterfaceController {
                 startButton.setDisable(true);
                 stopButton.setDisable(false);
 
-                // Disabilita i campi di input
+                // Disable input fields
                 dbUrlField.setDisable(true);
                 dbUserField.setDisable(true);
                 dbPasswordField.setDisable(true);
             });
 
-            // Avvia il contatore di uptime
+            // Start uptime counter
             startUptimeCounter();
 
-            // Avvia il monitoraggio del conteggio dei client
+            // Start client count monitoring
             startClientCountMonitoring();
 
         } catch (SQLException e) {
             Platform.runLater(() -> {
-                startButton.setDisable(false);
+              startButton.setDisable(false);
             });
         }
     }
 
     /**
-     * Avvia un thread per aggiornare periodicamente il conteggio dei client connessi.
-     * Crea uno scheduler che interroga periodicamente il database per ottenere
-     * il numero di client attivi e aggiorna l'interfaccia utente.
+     * Starts a thread to periodically update the connected client count
      */
     private void startClientCountMonitoring() {
         // Prima interrompi qualsiasi scheduler di monitoraggio esistente
@@ -549,17 +459,15 @@ public class ServerInterfaceController {
                 // Update UI
                 Platform.runLater(() -> {
                     clientCountLabel.setText(String.valueOf(count));
-                });
+               });
             } catch (SQLException e) {
-
+                // Log error but continue trying if server is still running
             }
         }, 0, 2, TimeUnit.SECONDS);
 
     }
-
     /**
-     * Ferma il thread di monitoraggio del conteggio dei client.
-     * Arresta lo scheduler che monitora il numero di client connessi.
+     * Stops the client count monitoring thread
      */
     private void stopClientCountMonitoring() {
         if (clientMonitorScheduler != null && !clientMonitorScheduler.isShutdown()) {
@@ -568,49 +476,44 @@ public class ServerInterfaceController {
                 if (!clientMonitorScheduler.awaitTermination(2, TimeUnit.SECONDS)) {
                     clientMonitorScheduler.shutdownNow();
                 }
-            } catch (InterruptedException e) {
+           } catch (InterruptedException e) {
                 clientMonitorScheduler.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         }
     }
-
-    /**
-     * Gestisce l'evento di arresto del server.
-     * Mostra un dialogo di conferma e, se confermato, procede con lo spegnimento
-     * del server, la pulizia del database e la chiusura delle connessioni.
-     *
-     * @param event L'evento di azione generato dal clic sul pulsante
-     */
     @FXML
     private void onStopServer(ActionEvent event) {
         if (!serverRunning) return;
 
-
+     
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Spegni Server");
             alert.setHeaderText("Spegnimento del Server in corso...");
             alert.setContentText("Sei sicuro di voler arrestare il Server? \nTutti gli utenti collegati verranno immediatamente scollegati.");
 
-            // Personalizza i pulsanti
+            // Customize the buttons
             ((Button) alert.getDialogPane().lookupButton(ButtonType.OK)).setText("OK");
             ((Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("Annulla");
 
-            // Gestisci il risultato
+            // Handle the result
             alert.showAndWait().ifPresent(result -> {
                 if (result == ButtonType.OK) {
-                    // Utente ha confermato, procedi con lo spegnimento
+                    // User confirmed, proceed with shutdown
                     cleanupDatabaseAndShutdown();
                 }
-                // Se annulla, non fare nulla
+                // If cancel, do nothing
             });
         });
     }
-
+    @FXML
+    private void onClearLog() {
+        logContainer.getChildren().clear();
+    }
 
     private void startServerProcess() {
-        // Assicuriamoci di avere un valore predefinito se dbUrlField è null
+        // Make sure we have a default value if dbUrlField is null
         final String dbUrl;
         if (dbUrlField != null) {
             dbUrl = dbUrlField.getText();
@@ -619,14 +522,14 @@ public class ServerInterfaceController {
         }
 
         try {
-            // Passo 1: Inizializza il progresso
+            // Step 1: Initialize progress
             updateProgress(0.0, "Initializing server...");
 
-            // Avvia un socket server anticipatamente
+            // Start a socket server early
             updateProgress(0.1, "Starting socket server...");
             startSocketServer();
 
-            // Passo 1.5: Verifica e avvia PostgreSQL se necessario
+            // Step 1.5: Verify and start PostgreSQL if necessary
             updateProgress(0.15, "Checking PostgreSQL status...");
             if (!isPostgresInstalled()) {
                 boolean installed = installPostgresIfNeeded();
@@ -640,44 +543,44 @@ public class ServerInterfaceController {
                 }
             }
 
-            // Passo 2: Inizializza la connessione al database usando DatabaseManager
+            // Step 2: Initialize the database connection using DatabaseManager
             updateProgress(0.2, "Initializing database connection...");
             try {
                 final DatabaseManager dbManager = DatabaseManager.getInstance();
-                // Ottieni le credenziali da DatabaseManager per la visualizzazione UI
+                // Get credentials from DatabaseManager for UI display
                 final String finalDbUser = dbManager.getDbUser();
                 final String finalDbPassword = dbManager.getDbPassword();
 
-                // Aggiorna i campi UI se esistono - usando variabili finali
+                // Update UI fields if they exist - using final variables
                 Platform.runLater(() -> {
                     if (dbUserField != null) dbUserField.setText(finalDbUser);
                     if (dbPasswordField != null) dbPasswordField.setText(finalDbPassword);
                 });
 
-                // Passo 3: Scarica i file
+                // Step 3: Download files
                 updateProgress(0.3, "Downloading data files...");
                 downloadAllFiles();
 
-                // Passo 4: Inizializza le tabelle del database
+                // Step 4: Initialize database tables
                 updateProgress(0.5, "Creating database tables...");
                 initializeDatabase(dbUrl, finalDbUser, finalDbPassword);
 
-                // Passo 5: Importa i dati
+                // Step 5: Import data
                 updateProgress(0.7, "Importing data...");
                 populateDatabase(dbUrl, finalDbUser, finalDbPassword);
 
-                // Passo 6: Crea la tabella active_clients per il tracciamento dei client (già fatto in initializeDatabase)
+                // Step 6: Create active_clients table for client tracking (already done in initializeDatabase)
                 updateProgress(0.8, "Setting up client tracking...");
 
-                // Passo 7: Avvia il monitoraggio del conteggio dei client
+                // Step 7: Start client count monitoring
                 updateProgress(0.85, "Starting client monitoring...");
                 startClientCountMonitoring();
 
-                // Passo 8: Avvia Ngrok automaticamente
+                // Step 8: Start Ngrok automatically
                 updateProgress(0.9, "Starting ngrok tunnel...");
                 startNgrokAutomatically();
 
-                // Completato
+                // Complete
                 updateProgress(1.0, "Server started successfully!");
                 Platform.runLater(() -> {
                     serverStatusLabel.setText("Running");
@@ -692,7 +595,7 @@ public class ServerInterfaceController {
             String errorMsg = "Server initialization failed: " + e.getMessage();
             e.printStackTrace();
 
-            // Aggiorna l'UI in caso di errore
+            // Update UI on error
             Platform.runLater(() -> {
                 serverStatusLabel.setText("Error");
                 serverStatusLabel.setTextFill(Color.RED);
@@ -702,13 +605,7 @@ public class ServerInterfaceController {
         }
     }
 
-    /**
-     * Metodo di utilità per dare feedback visivo al bottone dopo il clic.
-     * Modifica temporaneamente lo stile del pulsante per indicare visivamente
-     * che l'azione è stata eseguita, poi ripristina lo stile originale.
-     *
-     * @param button Il pulsante che ha ricevuto il clic
-     */
+    // Metodo di utilità per dare feedback visivo al bottone dopo il clic
     private void showButtonFeedback(Button button) {
         // Salva il colore originale
         String originalStyle = button.getStyle();
@@ -729,12 +626,6 @@ public class ServerInterfaceController {
         }).start();
     }
 
-    /**
-     * Avvia automaticamente il tunnel ngrok.
-     * Configura e avvia un tunnel ngrok per esporre la porta PostgreSQL
-     * su Internet, consentendo connessioni remote al database.
-     * Il processo viene eseguito in un thread separato per non bloccare l'interfaccia utente.
-     */
     private void startNgrokAutomatically() {
         // Get the PostgreSQL port
         int postgresPort = 5432; // Default port
@@ -767,20 +658,12 @@ public class ServerInterfaceController {
                 } else {
                     ngrokStatusLabel.setText("Errore");
                     ngrokStatusLabel.setTextFill(Color.RED);
-                }
+               }
             });
         }).start();
     }
-
     /**
-     * Notifica tutti i client dello spegnimento, pulisce il database e arresta il server.
-     * Questo metodo esegue tutte le operazioni necessarie per una chiusura ordinata del server:
-     * - Ferma il monitoraggio dei client connessi
-     * - Arresta il tunnel ngrok se attivo
-     * - Pulisce il database rimuovendo tutte le tabelle
-     * - Elimina i file temporanei scaricati
-     * - Chiude il socket del server e lo scheduler
-     * - Aggiorna l'interfaccia utente allo stato "server spento"
+     * Notifies all clients of a shutdown, cleans up a database and shuts down the server
      */
     public void cleanupDatabaseAndShutdown() {
         if (!serverRunning) return;
@@ -788,7 +671,7 @@ public class ServerInterfaceController {
         // Arresta il tunnel ngrok se attivo
         if (ngrokManager != null) {
             try {
-                ngrokManager.stopTunnel();
+              ngrokManager.stopTunnel();
 
                 // Aggiorna UI per ngrok
                 Platform.runLater(() -> {
@@ -809,7 +692,7 @@ public class ServerInterfaceController {
                         stopNgrokButton.setDisable(true);
                     }
                 });
-            } catch (Exception e) {
+ } catch (Exception e) {
             }
         }
 
@@ -837,10 +720,10 @@ public class ServerInterfaceController {
                 if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                     scheduler.shutdownNow();
                 }
-            } catch (InterruptedException e) {
+         } catch (InterruptedException e) {
                 scheduler.shutdownNow();
                 Thread.currentThread().interrupt();
-            }
+          }
         }
 
         // Reimpostazione delle variabili di stato del server - AGGIUNGI QUESTA SEZIONE
@@ -882,61 +765,57 @@ public class ServerInterfaceController {
                 startNgrokButton.setDisable(!postgresRunning);
             }
         });
-    }
 
+    }
     /**
-     * Elimina tutti i file nella directory temporanea.
-     * Questo metodo è stato migliorato per garantire una cancellazione efficace dei file temporanei
-     * anche in presenza di possibili lock sui file. Utilizza tecniche come la garbage collection
-     * forzata e la programmazione della cancellazione all'uscita della JVM per i file problematici.
+     * Delete all files in the temporary directory
+     * Metodo migliorato per la cancellazione efficace dei file temporanei
      */
     private void deleteTemporaryFiles() {
-        File tempDir = new File(TEMP_DIR);
-        if (tempDir.exists() && tempDir.isDirectory()) {
-            // First, delete all files in the directory
-            File[] files = tempDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile()) {
-                        boolean deleted = file.delete();
-                        if (!deleted) {
-                            file.deleteOnExit();
+
+            File tempDir = new File(TEMP_DIR);
+            if (tempDir.exists() && tempDir.isDirectory()) {
+                // First, delete all files in the directory
+                File[] files = tempDir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            boolean deleted = file.delete();
+                            if (!deleted) {
+                             file.deleteOnExit();
+                            }
+                        } else if (file.isDirectory()) {
+                            // Handle subdirectories recursively
+                            deleteDirectoryRecursively(file);
                         }
-                    } else if (file.isDirectory()) {
-                        // Handle subdirectories recursively
-                        deleteDirectoryRecursively(file);
                     }
                 }
-            }
 
-            // Now try to delete the directory itself
-            boolean dirDeleted = tempDir.delete();
-            if (!dirDeleted) {
-                // Try force garbage collection to release locks
-                System.gc();
-                try {
-                    Thread.sleep(200); // Give a little time for GC
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-
-                dirDeleted = tempDir.delete();
-
+                // Now try to delete the directory itself
+                boolean dirDeleted = tempDir.delete();
                 if (!dirDeleted) {
-                    // If still can't delete, schedule for deletion on JVM exit
-                    tempDir.deleteOnExit();
+
+                    // Try force garbage collection to release locks
+                    System.gc();
+                    try {
+                        Thread.sleep(200); // Give a little time for GC
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    dirDeleted = tempDir.delete();
+
+                    if (!dirDeleted) {
+                        // If still can't delete, schedule for deletion on JVM exit
+                        tempDir.deleteOnExit();
+                  }
                 }
             }
         }
-    }
 
     /**
-     * Metodo di supporto per eliminare ricorsivamente una directory e tutto il suo contenuto.
-     * Elimina tutti i file e sottodirectory contenuti nella directory specificata,
-     * gestendo i casi in cui alcuni file potrebbero essere bloccati.
-     *
-     * @param directory Directory da eliminare ricorsivamente
-     * @return true se la directory è stata eliminata con successo, false altrimenti
+     * Helper method to delete a directory and all its contents recursively
+     * Nuovo metodo helper per la cancellazione ricorsiva di directory
      */
     private boolean deleteDirectoryRecursively(File directory) {
         if (directory.exists()) {
@@ -948,7 +827,7 @@ public class ServerInterfaceController {
                     } else {
                         boolean deleted = file.delete();
                         if (!deleted) {
-                            file.deleteOnExit();
+                         file.deleteOnExit();
                         }
                     }
                 }
@@ -956,18 +835,15 @@ public class ServerInterfaceController {
         }
         boolean deleted = directory.delete();
         if (!deleted) {
-            directory.deleteOnExit();
+           directory.deleteOnExit();
         }
         return deleted;
     }
-
     /**
-     * Pulisce il database eliminando tutte le tabelle.
-     * Questo metodo esegue un DROP di tutte le tabelle del database nell'ordine corretto
-     * per gestire le dipendenze tra le tabelle. È utilizzato durante lo spegnimento del server
-     * per lasciare il database in uno stato pulito.
+     * Cleans up the database by dropping all tables
      */
     private void cleanDatabase() {
+
         String dbUrl = dbUrlField.getText();
         String dbUser = dbUserField.getText();
         String dbPassword = dbPasswordField.getText();
@@ -994,15 +870,8 @@ public class ServerInterfaceController {
         }
     }
 
-    /**
-     * Scarica tutti i file necessari per l'applicazione.
-     * Questo metodo scarica da Google Drive tutti i file di dati richiesti dall'applicazione,
-     * come le valutazioni dei libri, gli utenti registrati, i libri, le librerie, ecc.
-     * Crea la directory temporanea se non esiste.
-     *
-     * @throws IOException Se si verifica un errore durante il download o la creazione della directory
-     */
     private void downloadAllFiles() throws IOException {
+
         // Make sure the temp directory exists
         File tempDir = new File(TEMP_DIR);
         if (!tempDir.exists()) {
@@ -1021,22 +890,13 @@ public class ServerInterfaceController {
             downloadFromGoogleDrive(DATA_FILE_ID, "Data.csv");
             downloadFromGoogleDrive(CONSIGLI_FILE_ID, "ConsigliLibri.csv");
 
-        } catch (IOException e) {
-            throw e;
+      } catch (IOException e) {
+           throw e;
         }
     }
 
-    /**
-     * Scarica un file specifico da Google Drive.
-     * Questo metodo effettua il download di un singolo file da Google Drive utilizzando
-     * l'ID del file e salva il file scaricato nella directory temporanea con il nome specificato.
-     * Implementa gestione dei timeout, monitoraggio del progresso e verifica della completezza del file.
-     *
-     * @param fileId ID del file su Google Drive
-     * @param fileName Nome con cui salvare il file localmente
-     * @throws IOException Se si verifica un errore durante il download del file
-     */
     private void downloadFromGoogleDrive(String fileId, String fileName) throws IOException {
+       
         String urlString = "https://drive.google.com/uc?id=" + fileId + "&export=download";
         File outputFile = new File(TEMP_DIR + fileName);
 
@@ -1054,7 +914,7 @@ public class ServerInterfaceController {
 
             // Get file size for logging
             int fileSize = connection.getContentLength();
-
+         
             // Create parent directories if needed
             if (outputFile.getParentFile() != null) {
                 outputFile.getParentFile().mkdirs();
@@ -1074,9 +934,10 @@ public class ServerInterfaceController {
 
                     // Log progress for large files
                     if (fileSize > 1000000 && totalBytesRead % 500000 == 0) { // 500KB increments for files > 1MB
-                    }
+                  }
                 }
-            }
+
+           }
 
             // Check if file was actually downloaded
             if (!outputFile.exists() || outputFile.length() == 0) {
@@ -1088,18 +949,8 @@ public class ServerInterfaceController {
         }
     }
 
-    /**
-     * Inizializza il database creando tutte le tabelle necessarie.
-     * Questo metodo crea la struttura del database eliminando eventuali tabelle esistenti
-     * e creando nuove tabelle con i vincoli e gli indici appropriati. La struttura include
-     * tabelle per utenti, libri, librerie, valutazioni, consigli e client attivi.
-     *
-     * @param dbUrl URL di connessione al database
-     * @param dbUser Nome utente per l'autenticazione al database
-     * @param dbPassword Password per l'autenticazione al database
-     * @throws SQLException Se si verifica un errore durante l'operazione sul database
-     */
     private void initializeDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException {
+      
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
@@ -1119,7 +970,7 @@ public class ServerInterfaceController {
 
                 for (String sql : dropStatements) {
                     stmt.execute(sql);
-                }
+              }
 
                 // Create tables in proper order
                 String[] createTableStatements = {
@@ -1210,7 +1061,7 @@ public class ServerInterfaceController {
 
                 for (String sql : indexStatements) {
                     stmt.execute(sql);
-                }
+              }
             }
 
         } catch (SQLException e) {
@@ -1218,19 +1069,8 @@ public class ServerInterfaceController {
         }
     }
 
-    /**
-     * Popola il database con i dati importati dai file CSV.
-     * Questo metodo importa sequenzialmente tutti i dati dai file scaricati nel database,
-     * seguendo l'ordine corretto per rispettare i vincoli di integrità referenziale.
-     * Utilizza transazioni per garantire la consistenza dei dati.
-     *
-     * @param dbUrl URL di connessione al database
-     * @param dbUser Nome utente per l'autenticazione al database
-     * @param dbPassword Password per l'autenticazione al database
-     * @throws SQLException Se si verifica un errore durante l'operazione sul database
-     * @throws IOException Se si verifica un errore durante la lettura dei file CSV
-     */
     private void populateDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException, IOException {
+    
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
@@ -1242,25 +1082,25 @@ public class ServerInterfaceController {
 
             try {
                 // Import books from Data.csv first (this contains all book metadata)
-                importBooks(conn, TEMP_DIR + "Data.csv");
+             importBooks(conn, TEMP_DIR + "Data.csv");
                 conn.commit();
-
+            
                 // Import users from UtentiRegistrati.csv
                 importUsers(conn);
                 conn.commit();
-
+             
                 // Import libraries from Librerie.dati.csv
-                importLibraries(conn);
+             importLibraries(conn);
                 conn.commit();
-
+             
                 // Import ratings from ValutazioniLibri.csv
-                importRatings(conn);
+               importRatings(conn);
                 conn.commit();
-
+              
                 // Import recommendations from ConsigliLibri.dati.csv or ConsigliLibri.csv
-                importRecommendations(conn);
+              importRecommendations(conn);
                 conn.commit();
-
+             
                 // Verify database content
                 verifyDatabaseContent(conn);
 
@@ -1276,23 +1116,14 @@ public class ServerInterfaceController {
         } catch (SQLException e) {
             throw e;
         }
-    }
-
-    /**
-     * Verifica il contenuto del database dopo l'importazione.
-     * Questo metodo esegue una serie di query per contare i record in ogni tabella
-     * e recuperare campioni di dati per verificare che l'importazione sia avvenuta correttamente.
-     * Utile per il debug e la verifica dell'integrità dei dati.
-     *
-     * @param conn Connessione al database da utilizzare per le query
-     * @throws SQLException Se si verifica un errore durante l'interrogazione del database
-     */
+ }
     private void verifyDatabaseContent(Connection conn) throws SQLException {
+       
         try (Statement stmt = conn.createStatement()) {
             // Check users table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
                 if (rs.next()) {
-                }
+             }
             }
 
             // Check books table
@@ -1304,39 +1135,39 @@ public class ServerInterfaceController {
             // Check libraries table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM libraries")) {
                 if (rs.next()) {
-                }
+               }
             }
 
             // Check library_books table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM library_books")) {
                 if (rs.next()) {
-                }
+               }
             }
 
             // Check book_ratings table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_ratings")) {
                 if (rs.next()) {
-                }
+               }
             }
 
             // Check book_recommendations table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_recommendations")) {
                 if (rs.next()) {
-                }
+              }
             }
 
             // Sample data check
-
+       
             // Sample users
             try (ResultSet rs = stmt.executeQuery("SELECT user_id, full_name, email FROM users LIMIT 3")) {
-                while (rs.next()) {
-                }
+              while (rs.next()) {
+               }
             }
 
             // Sample books
             try (ResultSet rs = stmt.executeQuery("SELECT id, title, authors, category FROM books LIMIT 3")) {
-                while (rs.next()) {
-                }
+               while (rs.next()) {
+               }
             }
 
             // Sample ratings
@@ -1345,32 +1176,25 @@ public class ServerInterfaceController {
                             "FROM book_ratings br " +
                             "JOIN books b ON br.book_id = b.id " +
                             "LIMIT 3")) {
-                while (rs.next()) {
-                }
+               while (rs.next()) {
+               }
             }
         }
+
     }
 
-    /**
-     * Importa i consigli dei libri nel database dal file CSV.
-     * Questo metodo legge il file di consigli libri e popola la tabella book_recommendations.
-     * Gestisce casi particolari come titoli di libri non trovati esattamente, cercando
-     * corrispondenze approssimative o inserendo nuovi libri quando necessario.
-     *
-     * @param conn Connessione al database da utilizzare per le operazioni di importazione
-     * @throws SQLException Se si verifica un errore durante l'operazione sul database
-     * @throws IOException Se si verifica un errore durante la lettura del file CSV
-     */
     private void importRecommendations(Connection conn) throws SQLException, IOException {
+      
         // Try both possible filenames
         File consigliFile = new File(TEMP_DIR + "ConsigliLibri.csv");
         if (!consigliFile.exists()) {
             consigliFile = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
             if (!consigliFile.exists()) {
-                return;
+               return;
             }
         }
 
+      
         String findBookByTitleSql = "SELECT id FROM books WHERE title = ?";
         String findBookByTitleLikeSql = "SELECT id FROM books WHERE title ILIKE ?";
 
@@ -1387,14 +1211,14 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(consigliFile))) {
 
             String line = reader.readLine(); // Skip header
-            int lineNum = 1;
+        int lineNum = 1;
             while ((line = reader.readLine()) != null) {
                 lineNum++;
                 try {
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 3) {
-                        continue;
+                      continue;
                     }
 
                     String userId = fields[0].trim();
@@ -1402,7 +1226,7 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || sourceBookTitle.isEmpty()) {
-                        continue;
+                     continue;
                     }
 
                     // Check if user exists
@@ -1412,7 +1236,7 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-                            continue;
+                         continue;
                         }
                     }
 
@@ -1434,6 +1258,7 @@ public class ServerInterfaceController {
                     }
 
                     if (sourceBookId == null) {
+             
                         // Add the book to the database
                         String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
                                 "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
@@ -1443,7 +1268,7 @@ public class ServerInterfaceController {
 
                             if (newBookRs.next()) {
                                 sourceBookId = newBookRs.getInt(1);
-                            } else {
+                          } else {
                                 continue; // Skip if failed to add book
                             }
                         }
@@ -1508,13 +1333,11 @@ public class ServerInterfaceController {
 
                 } catch (Exception e) {
                     errorCount++;
-                }
+             }
             }
         }
+
     }
-
-
-
 
     private void importBooks(Connection conn, String filePath) throws SQLException, IOException {
        
@@ -1943,6 +1766,50 @@ public class ServerInterfaceController {
         }
     }
 
+    private void importAdditionalBooks(Connection conn, String filePath) throws SQLException, IOException {
+        File file = new File(filePath);
+        if (!file.exists() || file.length() == 0) {
+            return;
+        }
+
+
+        String sql = "INSERT INTO books (title, authors, category, publisher, publish_year) " +
+                "VALUES (?, ?, ?, ?, ?) ON CONFLICT (title, authors) DO NOTHING";
+
+        int successCount = 0;
+        int errorCount = 0;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
+            String line = reader.readLine(); // Read the header line
+            if (line == null) return;
+
+            while ((line = reader.readLine()) != null) {
+                try {
+                    String[] fields = line.split("\t");
+                    if (fields.length >= 5) {
+                        pstmt.setString(1, fields[0].trim()); // Titolo
+                        pstmt.setString(2, fields[1].trim()); // Autore
+                        pstmt.setString(3, fields[2].trim()); // Categoria
+                        pstmt.setString(4, fields[3].trim()); // Editore
+
+                        // Anno
+                        try {
+                            pstmt.setInt(5, Integer.parseInt(fields[4].trim()));
+                        } catch (NumberFormatException e) {
+                            pstmt.setNull(5, Types.INTEGER);
+                        }
+
+                        pstmt.executeUpdate();
+                        successCount++;
+                    }
+                } catch (Exception e) {
+                    errorCount++;
+                }
+            }
+        }
+}
 
     private void importUsers(Connection conn) throws SQLException, IOException {
       
@@ -2418,7 +2285,109 @@ public class ServerInterfaceController {
           throw new RuntimeException("Failed to start server: " + errorMsg);
         }
     }
+    private void handleClient(Socket clientSocket) {
+        try {
+            // Add socket to the list of connected clients
+            synchronized(connectedClientSockets) {
+                connectedClientSockets.add(clientSocket);
+            }
 
+            // Set up input stream for reading commands
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            // Wait for a client to disconnect
+            while (!clientSocket.isClosed() && serverRunning) {
+                try {
+                    // Check for messages
+                    if (in.ready()) {
+                        String message = in.readLine();
+                        // Process any client messages if needed
+                    }
+
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        } catch (Exception e) {
+        } finally {
+            // Clean up
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+
+            // Remove from a list of connected clients
+            synchronized(connectedClientSockets) {
+                connectedClientSockets.remove(clientSocket);
+            }
+
+            // Decrement client counter on disconnect
+            int currentClients = connectedClients.decrementAndGet();
+            Platform.runLater(() -> {
+                clientCountLabel.setText(String.valueOf(currentClients));
+            });
+ }
+    }
+    /**
+     * Notifies all connected clients about server shutdown and initiates server shutdown
+     */
+    public void notifyAllClientsAndShutdown() {
+        if (!serverRunning) return;
+
+
+        // Notify all connected clients
+        synchronized (connectedClientSockets) {
+            for (Socket clientSocket : connectedClientSockets) {
+                try {
+                    if (!clientSocket.isClosed()) {
+                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                        out.println("SERVER_SHUTDOWN");
+                    }
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        // Now proceed with a normal shutdown
+        serverRunning = false;
+
+        // Close a server socket if it exists
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+            }
+        }
+
+        // Shutdown scheduler
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+
+        // Reset UI state
+        Platform.runLater(() -> {
+            updateUIState(false);
+
+            // Reset client count
+            connectedClients.set(0);
+            clientCountLabel.setText("0");
+
+            serverStatusLabel.setText("Stopped");
+            serverStatusLabel.setTextFill(Color.RED);
+            startTimeLabel.setText("-");
+            uptimeLabel.setText("-");
+        });
+
+    }
+
+
+    /**
+     * Improved CSV line parser that handles both comma and tab-delimited formats
+     * and properly manages quoted fields
+     */
     private String[] parseCsvLine(String line) {
         if (line == null || line.trim().isEmpty()) {
             return new String[0];
