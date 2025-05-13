@@ -466,8 +466,8 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Versione modificata del metodo addReviewsToContainer che mostra
-     * sempre i commenti completi senza pulsante "Mostra altro"
+     * Versione migliorata del metodo addReviewsToContainer che aggiunge
+     * il pulsante "Mostra altro" per i commenti lunghi
      */
     private void addReviewsToContainer(List<Review> reviews, VBox container) {
         if (reviews.isEmpty()) {
@@ -476,6 +476,9 @@ public class BookDetailsController implements Initializable {
             container.getChildren().add(noReviewsLabel);
             return;
         }
+
+        // Lunghezza limite dei caratteri prima di mostrare il pulsante "Mostra altro"
+        final int COMMENT_LENGTH_LIMIT = 100;
 
         for (Review review : reviews) {
             // Crea un box per la recensione
@@ -502,20 +505,57 @@ public class BookDetailsController implements Initializable {
             // Aggiungi username e stelle all'header
             headerBox.getChildren().addAll(userLabel, starsBox);
 
-            // Corpo della recensione - mostra sempre il commento completo
-            Label commentLabel = new Label(review.comment);
+            // Corpo della recensione
+            Label commentLabel = new Label();
             commentLabel.setWrapText(true);
             commentLabel.setStyle("-fx-padding: 5 0 0 0;");
 
-            // Aggiungi tutto al container della recensione
-            reviewBox.getChildren().addAll(headerBox, commentLabel);
+            // Verifica se il commento supera il limite di caratteri
+            boolean isLongComment = review.comment.length() > COMMENT_LENGTH_LIMIT;
+
+            if (isLongComment) {
+                // Se il commento è lungo, mostra solo i primi caratteri
+                commentLabel.setText(review.comment.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+
+                // Crea il pulsante "Mostra altro"
+                Button showMoreButton = new Button("Mostra altro");
+                showMoreButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #3498db; -fx-font-size: 11px; -fx-underline: true;");
+                showMoreButton.setCursor(javafx.scene.Cursor.HAND);
+
+                // Flag per tenere traccia dello stato del commento (espanso o contratto)
+                final boolean[] isExpanded = {false};
+
+                // Aggiungi l'event handler al pulsante
+                showMoreButton.setOnAction(event -> {
+                    if (!isExpanded[0]) {
+                        // Espandi il commento
+                        commentLabel.setText(review.comment);
+                        showMoreButton.setText("Mostra meno");
+                    } else {
+                        // Contrai il commento
+                        commentLabel.setText(review.comment.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+                        showMoreButton.setText("Mostra altro");
+                    }
+                    isExpanded[0] = !isExpanded[0];
+                });
+
+                // Aggiungi tutto al container della recensione
+                reviewBox.getChildren().addAll(headerBox, commentLabel, showMoreButton);
+            } else {
+                // Se il commento è breve, mostralo completamente
+                commentLabel.setText(review.comment);
+
+                // Aggiungi tutto al container della recensione
+                reviewBox.getChildren().addAll(headerBox, commentLabel);
+            }
+
             container.getChildren().add(reviewBox);
         }
     }
 
     /**
-     * Versione modificata del metodo generateGeneralComment che mostra
-     * sempre i commenti generali completi, senza pulsante "Mostra altro"
+     * Versione migliorata del metodo generateGeneralComment che aggiunge
+     * il pulsante "Mostra altro" per i commenti generali lunghi
      */
     private void generateGeneralComment() {
         // Pulisci prima il container dei commenti generali
@@ -524,6 +564,9 @@ public class BookDetailsController implements Initializable {
         // Definisci i colori per le stelle
         final Color goldStarColor = Color.web("#FFD700"); // Giallo oro per stelle piene e mezze stelle
         final Color grayStarColor = Color.web("#dddddd"); // Grigio per stelle vuote
+
+        // Lunghezza limite dei caratteri prima di mostrare il pulsante "Mostra altro"
+        final int COMMENT_LENGTH_LIMIT = 100;
 
         // Crea un container per i commenti se non esiste già
         VBox commentsContainer;
@@ -592,12 +635,47 @@ public class BookDetailsController implements Initializable {
                         userHeader.getChildren().add(starsBox);
                     }
 
-                    // Crea etichetta per il commento - mostra sempre il commento completo
-                    Label textLabel = new Label(comment.text);
+                    // Crea etichetta per il commento
+                    Label textLabel = new Label();
                     textLabel.setWrapText(true);
                     textLabel.setStyle("-fx-font-style: italic;");
 
-                    commentBox.getChildren().addAll(userHeader, textLabel);
+                    // Verifica se il commento supera il limite di caratteri
+                    boolean isLongComment = comment.text.length() > COMMENT_LENGTH_LIMIT;
+
+                    if (isLongComment) {
+                        // Se il commento è lungo, mostra solo i primi caratteri
+                        textLabel.setText(comment.text.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+
+                        // Crea il pulsante "Mostra altro"
+                        Button showMoreButton = new Button("Mostra altro");
+                        showMoreButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #3498db; -fx-font-size: 11px; -fx-underline: true;");
+                        showMoreButton.setCursor(javafx.scene.Cursor.HAND);
+
+                        // Flag per tenere traccia dello stato del commento (espanso o contratto)
+                        final boolean[] isExpanded = {false};
+
+                        // Aggiungi l'event handler al pulsante
+                        showMoreButton.setOnAction(event -> {
+                            if (!isExpanded[0]) {
+                                // Espandi il commento
+                                textLabel.setText(comment.text);
+                                showMoreButton.setText("Mostra meno");
+                            } else {
+                                // Contrai il commento
+                                textLabel.setText(comment.text.substring(0, COMMENT_LENGTH_LIMIT) + "...");
+                                showMoreButton.setText("Mostra altro");
+                            }
+                            isExpanded[0] = !isExpanded[0];
+                        });
+
+                        commentBox.getChildren().addAll(userHeader, textLabel, showMoreButton);
+                    } else {
+                        // Se il commento è breve, mostralo completamente
+                        textLabel.setText(comment.text);
+                        commentBox.getChildren().addAll(userHeader, textLabel);
+                    }
+
                     commentsContainer.getChildren().add(commentBox);
                 }
             } else {
