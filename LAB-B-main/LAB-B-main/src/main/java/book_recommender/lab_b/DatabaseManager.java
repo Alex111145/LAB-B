@@ -4,50 +4,96 @@ import java.sql.*;
 import java.util.Random;
 
 /**
- * Singleton class for managing database connections.
- * This class provides a centralized way to access the database
- * and can automatically create the database if it doesn't exist.
- * It also supports remote connections from any network using ngrok.
+ * Classe Singleton per la gestione delle connessioni al database.
+ * Questa classe fornisce un modo centralizzato per accedere al database
+ * e può creare automaticamente il database se non esiste.
+ * Supporta anche connessioni remote da qualsiasi rete utilizzando ngrok.
+ *
+ * <p>La classe DatabaseManager segue il pattern Singleton assicurando che solo una
+ * connessione al database sia attiva in qualsiasi momento. Gestisce vari scenari di connessione
+ * incluse connessioni locali e remote, ed esegue la creazione automatica del database
+ * e la configurazione dell'utente quando necessario.</p>
+ *
+ * <p>Le credenziali di connessione sono predefinite per sicurezza e coerenza tra
+ * le istanze dell'applicazione.</p>
+ *
+ * @author book_recommender.lab_b
+ * @version 1.0
  */
 public class DatabaseManager {
-    // Database connection settings - default values
-    private static final String DEFAULT_HOST = "localhost"; // Modificato da 0.0.0.0 a localhost
+    /**
+     * Host predefinito per la connessione al database locale.
+     * Modificato da 0.0.0.0 a localhost per una migliore compatibilità.
+     */
+    private static final String DEFAULT_HOST = "localhost";
+
+    /**
+     * Porta predefinita per la connessione al database PostgreSQL.
+     * La porta standard di PostgreSQL è 5432.
+     */
     private static final String DEFAULT_PORT = "5432";
+
+    /**
+     * Nome predefinito del database per l'applicazione.
+     * Questo database verrà creato se non esiste.
+     */
     private static final String DEFAULT_DB_NAME = "book_recommender";
 
-    // Connection strings - these will be updated at runtime for remote connections
+    /**
+     * URL JDBC per la connessione al database.
+     * Questo sarà aggiornato dinamicamente durante l'esecuzione per le connessioni remote.
+     */
     private static String DB_URL = "jdbc:postgresql://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/" + DEFAULT_DB_NAME;
 
-    // User credentials - fixed values
+    /**
+     * Nome utente per l'autenticazione al database.
+     * Valore fisso per sicurezza e coerenza.
+     */
     private static String DB_USER = "book_admin_8530";
+
+    /**
+     * Password per l'autenticazione al database.
+     * Valore fisso per sicurezza e coerenza.
+     */
     private static String DB_PASSWORD = "CPuc#@r-zbKY";
 
+    /**
+     * Istanza Singleton del DatabaseManager.
+     */
     private static DatabaseManager instance;
+
+    /**
+     * Connessione attiva al database.
+     */
     private Connection connection;
 
     /**
-     * Private constructor standard
-     * @throws SQLException if a database access error occurs
+     * Costruttore privato per impedire l'istanziazione diretta (pattern Singleton).
+     * Utilizza le impostazioni di connessione locale predefinite.
+     *
+     * @throws SQLException se si verifica un errore di accesso al database durante la connessione
      */
     private DatabaseManager() throws SQLException {
-        // Call the constructor with parameter
+        // Chiama il costruttore con parametro
         this(false);
     }
 
     /**
-     * Private constructor with parameters for a connection type
-     * @param isRemote flag to indicate if this is a remote connection
-     * @throws SQLException if a database access error occurs
+     * Costruttore privato con parametro di tipo di connessione.
+     * Supporta sia connessioni locali che remote.
+     *
+     * @param isRemote flag per indicare se questa è una connessione remota
+     * @throws SQLException se si verifica un errore di accesso al database durante la connessione
      */
     private DatabaseManager(boolean isRemote) throws SQLException {
 
         if (isRemote) {
-            // For remote connections, we rely on the DB_URL, DB_USER, and DB_PASSWORD
-            // values that have been set externally before calling this constructor
+            // Per le connessioni remote, ci affidiamo ai valori DB_URL, DB_USER e DB_PASSWORD
+            // che sono stati impostati esternamente prima di chiamare questo costruttore
             try {
                 connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             } catch (SQLException e) {
-                throw new SQLException("Failed to connect to remote database: " + e.getMessage(), e);
+                throw new SQLException("Impossibile connettersi al database remoto: " + e.getMessage(), e);
             }
         } else {
             // Per connessioni locali, prova diverse combinazioni host
@@ -56,8 +102,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Initializes a local connection with credential management
-     * @throws SQLException if a database access error occurs
+     * Inizializza una connessione locale al database con gestione delle credenziali.
+     * Questo metodo tenta di connettersi utilizzando più indirizzi host (localhost, 127.0.0.1)
+     * e gestisce la creazione del database e dell'utente se non esistono.
+     *
+     * @throws SQLException se non è possibile stabilire una connessione con nessun host configurato
      */
     private void initializeLocalConnection() throws SQLException {
         // Array di possibili host da provare in sequenza
@@ -69,16 +118,13 @@ public class DatabaseManager {
             String currentUrl = "jdbc:postgresql://" + host + ":" + DEFAULT_PORT + "/" + DEFAULT_DB_NAME;
             try {
                 // Prova a connettersi direttamente al database
-
                 connection = DriverManager.getConnection(currentUrl, DB_USER, DB_PASSWORD);
-
 
                 // Connessione riuscita, aggiorna l'URL del database
                 DB_URL = currentUrl;
                 return;
             } catch (SQLException e) {
                 lastException = e;
-
 
                 try {
                     // Prova a connettersi al database postgres per creare il nostro database e utente
@@ -97,7 +143,6 @@ public class DatabaseManager {
 
                         } catch (SQLException osUserError) {
                             // Se entrambi falliscono, passa all'host successivo
-
                             continue;
                         }
                     }
@@ -125,17 +170,13 @@ public class DatabaseManager {
                             // Crea il database con il nuovo utente come proprietario
                             try (Statement createStmt = postgresConn.createStatement()) {
                                 createStmt.execute("CREATE DATABASE " + DEFAULT_DB_NAME + " WITH OWNER = " + DB_USER);
-
                             }
                         } else {
-
-
                             // Cambia la proprietà del database se necessario
                             try (Statement grantStmt = postgresConn.createStatement()) {
                                 grantStmt.execute("ALTER DATABASE " + DEFAULT_DB_NAME + " OWNER TO " + DB_USER);
-
                             } catch (SQLException grantError) {
-
+                                // Ignora errori di modifica proprietà se non hai permessi sufficienti
                             }
                         }
 
@@ -144,15 +185,14 @@ public class DatabaseManager {
                         // Ora prova a connetterti al database con il nostro utente
                         try {
                             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-
                             return; // Connessione riuscita, esci dal metodo
                         } catch (SQLException connError) {
                             // Se non riusciamo a connetterci con le nuove credenziali, passa all'host successivo
-                      }
+                        }
                     }
                 } catch (SQLException postgresError) {
                     // Registra l'errore e passa all'host successivo
-               }
+                }
             }
         }
 
@@ -162,104 +202,114 @@ public class DatabaseManager {
     }
 
     /**
-     * Setup access in pg_hba.conf through SQL (if possible)
+     * Configura l'accesso in pg_hba.conf tramite SQL (se possibile).
+     * Questo metodo tenta di configurare PostgreSQL per accettare connessioni da
+     * tutti gli indirizzi IP, facilitando l'accesso remoto.
+     *
+     * @param conn La connessione al database postgres
      */
     private void setupPgHbaAccess(Connection conn) {
         try {
-            // This is a PostgreSQL-specific way to reload the configuration
+            // Questo è un modo specifico di PostgreSQL per ricaricare la configurazione
             try (Statement stmt = conn.createStatement()) {
-                // Set listen_addresses to '*' to accept connections from all interfaces
+                // Imposta listen_addresses a '*' per accettare connessioni da tutte le interfacce
                 stmt.execute("ALTER SYSTEM SET listen_addresses = '*'");
 
-                // Add trust for both IPv4 and IPv6 local connections
-                // Note: This is not the most secure approach but works for development
+                // Aggiungi trust per connessioni locali sia IPv4 che IPv6
+                // Nota: Questo non è l'approccio più sicuro ma funziona per lo sviluppo
 
-                // Check if we have permission to reload
-
-                    stmt.execute("SELECT pg_reload_conf()");
-
-
+                // Controlla se abbiamo il permesso di ricaricare
+                stmt.execute("SELECT pg_reload_conf()");
             }
         } catch (SQLException e) {
+            // Ignora errori - potremmo non avere i permessi necessari
         }
     }
 
     /**
-     * Creates a remote instance with specific connection parameters
-     * @param jdbcUrl The full JDBC URL for connecting to the database
-     * @param username The username for the database connection (fixed to book_admin_8530)
-     * @param password The password for the database connection (fixed to CPuc#@r-zbKY)
-     * @return A DatabaseManager instance configured for a remote connection
-     * @throws SQLException if a database access error occurs
+     * Crea un'istanza remota con parametri di connessione specifici.
+     * Questo metodo consente di configurare una connessione a un database remoto
+     * con URL e credenziali specifiche.
+     *
+     * @param jdbcUrl L'URL JDBC completo per la connessione al database
+     * @param username Il nome utente per la connessione al database (fisso a book_admin_8530)
+     * @param password La password per la connessione al database (fisso a CPuc#@r-zbKY)
+     * @return Un'istanza di DatabaseManager configurata per una connessione remota
+     * @throws SQLException se si verifica un errore di accesso al database
      */
     public static synchronized DatabaseManager createRemoteInstance(String jdbcUrl, String username, String password) throws SQLException {
-        // If there's an existing instance, close it
+        // Se esiste già un'istanza, chiudila
         if (instance != null) {
             instance.closeConnection();
             instance = null;
         }
 
-        // Set the connection parameters
+        // Imposta i parametri di connessione
         DB_URL = jdbcUrl;
-        // We still use the parameters passed, even though they should be the fixed values
+        // Usiamo comunque i parametri passati, anche se dovrebbero essere i valori fissi
         DB_USER = username;
         DB_PASSWORD = password;
 
-        // Create a new instance with isRemote = true
+        // Crea una nuova istanza con isRemote = true
         instance = new DatabaseManager(true);
         return instance;
     }
 
     /**
-     * Creates a database user if it doesn't already exist
+     * Crea un utente del database se non esiste già.
+     * Questo metodo verifica se l'utente esiste nel database PostgreSQL e,
+     * se necessario, lo crea con i permessi appropriati.
+     *
+     * @param conn La connessione al database postgres
+     * @throws SQLException se si verifica un errore durante la creazione dell'utente
      */
     private void createUserIfNotExists(Connection conn) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            // Check if a user exists
+            // Controlla se esiste un utente
             ResultSet rs = stmt.executeQuery("SELECT 1 FROM pg_roles WHERE rolname = '" + DB_USER + "'");
             if (!rs.next()) {
-                // User doesn't exist, create it
+                // L'utente non esiste, crealo
                 stmt.execute("CREATE USER " + DB_USER + " WITH PASSWORD '" + DB_PASSWORD + "'");
                 stmt.execute("ALTER USER " + DB_USER + " WITH LOGIN CREATEDB NOSUPERUSER INHERIT");
 
-                // Try to create a read-only user
+                // Prova a creare un utente di sola lettura
                 try {
                     stmt.execute("CREATE ROLE book_reader WITH LOGIN PASSWORD 'reader2024' NOSUPERUSER INHERIT NOCREATEROLE NOREPLICATION");
                     stmt.execute("GRANT CONNECT ON DATABASE " + DEFAULT_DB_NAME + " TO book_reader");
-               } catch (SQLException e) {
-                    // Ignore if we can't create book_reader user
-               }
+                } catch (SQLException e) {
+                    // Ignora se non possiamo creare l'utente book_reader
+                }
             } else {
-                // User exists, update password
+                // L'utente esiste, aggiorna la password
                 stmt.execute("ALTER USER " + DB_USER + " WITH PASSWORD '" + DB_PASSWORD + "'");
                 stmt.execute("ALTER USER " + DB_USER + " WITH CREATEDB");
-
-           }
+            }
 
             // Importante: Concedi tutti i privilegi all'utente
-            stmt.execute("ALTER USER " + DB_USER + " CONNECTION LIMIT -1"); // No connection limit
+            stmt.execute("ALTER USER " + DB_USER + " CONNECTION LIMIT -1"); // Nessun limite di connessione
 
-            // We need to grant privileges AFTER the database is created
+            // Dobbiamo concedere privilegi DOPO che il database è stato creato
             try {
-                // Grant privileges on the template database (will be inherited by new databases)
+                // Concedi privilegi sul database template (sarà ereditato dai nuovi database)
                 stmt.execute("GRANT ALL PRIVILEGES ON DATABASE postgres TO " + DB_USER);
             } catch (SQLException e) {
+                // Ignora - potremmo non avere i permessi necessari
             }
         }
     }
 
     /**
-     * Updates the connected client count in the database.
-     * This creates a table to track client connections if it doesn't exist.
+     * Aggiorna il conteggio dei client connessi nel database.
+     * Questo crea una tabella per tracciare le connessioni dei client se non esiste.
      *
-     * @param clientId A unique identifier for the client
-     * @param isConnecting true if a client is connecting, false if disconnecting
-     * @throws SQLException if database error occurs
+     * @param clientId Un identificatore univoco per il client
+     * @param isConnecting true se un client si sta connettendo, false se si sta disconnettendo
+     * @throws SQLException se si verifica un errore del database
      */
     public void updateClientConnection(String clientId, boolean isConnecting) throws SQLException {
         Connection conn = getConnection();
 
-        // Ensure the active_clients table exists
+        // Assicurati che la tabella active_clients esista
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(
                     "CREATE TABLE IF NOT EXISTS active_clients (" +
@@ -270,7 +320,7 @@ public class DatabaseManager {
         }
 
         if (isConnecting) {
-            // Add client to active_clients table
+            // Aggiungi client alla tabella active_clients
             try (PreparedStatement pstmt = conn.prepareStatement(
                     "INSERT INTO active_clients (client_id, connect_time) VALUES (?, NOW()) " +
                             "ON CONFLICT (client_id) DO UPDATE SET connect_time = NOW()")) {
@@ -278,7 +328,7 @@ public class DatabaseManager {
                 pstmt.executeUpdate();
             }
         } else {
-            // Remove client from active_clients table
+            // Rimuovi client dalla tabella active_clients
             try (PreparedStatement pstmt = conn.prepareStatement(
                     "DELETE FROM active_clients WHERE client_id = ?")) {
                 pstmt.setString(1, clientId);
@@ -288,26 +338,26 @@ public class DatabaseManager {
     }
 
     /**
-     * Gets the current count of connected clients
+     * Ottiene il conteggio attuale dei client connessi.
      *
-     * @return The number of active clients
-     * @throws SQLException if database error occurs
+     * @return Il numero di client attivi
+     * @throws SQLException se si verifica un errore del database
      */
     public int getConnectedClientCount() throws SQLException {
         Connection conn = getConnection();
         int count = 0;
 
-        // Check if the table exists
+        // Controlla se la tabella esiste
         try {
             try (Statement stmt = conn.createStatement()) {
-                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM active_clients");
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM active_clients WHERE client_id NOT LIKE 'user_%';");
                 if (rs.next()) {
                     count = rs.getInt(1);
                     return count;
                 }
             }
         } catch (SQLException e) {
-            // Table might not exist yet
+            // La tabella potrebbe non esistere ancora
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute(
                         "CREATE TABLE IF NOT EXISTS active_clients (" +
@@ -322,11 +372,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Gets the singleton instance of the DatabaseManager.
-     * Creates the instance if it doesn't exist.
+     * Ottiene l'istanza singleton del DatabaseManager.
+     * Crea l'istanza se non esiste.
      *
-     * @return the singleton instance
-     * @throws SQLException if a database access error occurs
+     * @return l'istanza singleton
+     * @throws SQLException se si verifica un errore di accesso al database
      */
     public static synchronized DatabaseManager getInstance() throws SQLException {
         if (instance == null) {
@@ -336,11 +386,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Gets a connection to the database.
-     * If the connection is closed, it creates a new one.
+     * Ottiene una connessione al database.
+     * Se la connessione è chiusa, ne crea una nuova.
      *
-     * @return a connection to the database
-     * @throws SQLException if a database access error occurs
+     * @return una connessione al database
+     * @throws SQLException se si verifica un errore di accesso al database
      */
     public Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
@@ -350,33 +400,42 @@ public class DatabaseManager {
     }
 
     /**
-     * Closes the database connection.
+     * Chiude la connessione al database.
+     * Questo metodo dovrebbe essere chiamato quando l'applicazione termina
+     * per rilasciare le risorse del database.
      */
     public void closeConnection() {
         if (connection != null) {
             try {
                 connection.close();
             } catch (SQLException e) {
+                // Ignora errori durante la chiusura
             }
         }
     }
 
     /**
-     * Returns the current database user
+     * Restituisce l'utente del database corrente.
+     *
+     * @return Il nome utente utilizzato per le connessioni al database
      */
     public String getDbUser() {
         return DB_USER;
     }
 
     /**
-     * Returns the current database password
+     * Restituisce la password del database corrente.
+     *
+     * @return La password utilizzata per le connessioni al database
      */
     public String getDbPassword() {
         return DB_PASSWORD;
     }
 
     /**
-     * Returns the default port used for database connections
+     * Restituisce la porta predefinita utilizzata per le connessioni al database.
+     *
+     * @return La porta predefinita del database come stringa
      */
     public static String getDefaultPort() {
         return DEFAULT_PORT;
