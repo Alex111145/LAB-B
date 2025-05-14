@@ -866,12 +866,16 @@ public class BookDetailsController implements Initializable {
             findSimilarBooks();
         }
     }
-
     /**
      * Cerca nel database consigli personalizzati inseriti dagli utenti per il libro corrente.
      * Per ogni consiglio trovato, crea un elemento visivo che mostra l'utente che ha fatto
-     * la raccomandazione e il titolo del libro consigliato, con informazioni aggiuntive
-     * quando disponibili.
+     * la raccomandazione, il titolo del libro consigliato, e un pulsante per visualizzare i dettagli.
+     * I titoli lunghi vengono troncati per mantenere una visualizzazione coerente.
+     *
+     * <p>Interroga il database per trovare le raccomandazioni associate al libro corrente
+     * e le visualizza nell'interfaccia utente. Per ogni libro consigliato, vengono mostrati
+     * il titolo (troncato se necessario), l'autore (se disponibile) e un pulsante "Visualizza"
+     * per navigare ai dettagli completi del libro.</p>
      *
      * @return true se sono stati trovati consigli personalizzati, false altrimenti
      */
@@ -932,6 +936,16 @@ public class BookDetailsController implements Initializable {
                     userColor = userColors.get(recommendation.userId);
                 }
 
+                // Crea un HBox per informazioni e bottone
+                HBox mainBox = new HBox();
+                mainBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                mainBox.setSpacing(15);
+
+                // Contenitore per le informazioni - imposta una larghezza massima
+                VBox infoBox = new VBox(5);
+                infoBox.setMaxWidth(520); // Limita la larghezza massima
+                HBox.setHgrow(infoBox, javafx.scene.layout.Priority.ALWAYS);
+
                 // Aggiungi prefisso "Consigliato da:" all'ID utente
                 Label userLabel = new Label(recommendation.userId);
                 userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
@@ -939,20 +953,48 @@ public class BookDetailsController implements Initializable {
                 // Cerca il libro nel database per ottenere l'autore
                 Book recommendedBook = findBookByTitle(recommendation.bookTitle);
 
-                // Modifica qui: imposta il titolo del libro in grassetto
-                Label bookLabel = new Label("\"" + recommendation.bookTitle + "\"");
+                // Tronca il titolo se necessario
+                String displayTitle = recommendation.bookTitle;
+                String originalTitle = recommendation.bookTitle;
+                if (displayTitle.length() > 60) {
+                    displayTitle = displayTitle.substring(0, 57) + "...";
+                }
+
+                // Imposta il titolo del libro in grassetto
+                Label bookLabel = new Label("\"" + displayTitle + "\"");
                 bookLabel.setStyle("-fx-font-style: italic; -fx-font-weight: bold;");
                 bookLabel.setWrapText(true);
+                bookLabel.setUserData(originalTitle); // Salva il titolo originale come metadato
 
                 // Aggiungi l'autore se il libro è stato trovato
                 if (recommendedBook != null) {
                     Label authorLabel = new Label("Autore: " + recommendedBook.getAuthors());
                     authorLabel.setWrapText(true);
-                    recommendationBox.getChildren().addAll(userLabel, bookLabel, authorLabel);
+                    infoBox.getChildren().addAll(userLabel, bookLabel, authorLabel);
                 } else {
-                    recommendationBox.getChildren().addAll(userLabel, bookLabel);
+                    infoBox.getChildren().addAll(userLabel, bookLabel);
                 }
 
+                // Aggiungi bottone "Visualizza" simile a quello in homepage
+                Button viewButton = new Button("Visualizza");
+                viewButton.setStyle("-fx-text-fill: white; -fx-background-color: #75B965; -fx-background-radius: 40px; -fx-padding: 8px 15px;");
+                viewButton.setPrefWidth(100); // Imposta una larghezza fissa
+                viewButton.setMinWidth(100);  // Imposta larghezza minima
+                viewButton.setMaxWidth(100);  // Imposta larghezza massima
+                viewButton.setOnAction(e -> visualizzalibro(e, originalTitle));
+
+                // Crea un contenitore per il bottone e centralo verticalmente
+                VBox buttonBox = new VBox();
+                buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
+                buttonBox.setPrefWidth(120); // Spazio fisso per il contenitore del bottone
+                buttonBox.setMinWidth(120);
+                buttonBox.getChildren().add(viewButton);
+
+                // Aggiungi infoBox e buttonBox al mainBox
+                mainBox.getChildren().addAll(infoBox, buttonBox);
+
+                // Aggiungi il mainBox al recommendation box
+                recommendationBox.getChildren().add(mainBox);
                 recommendationsContainer.getChildren().add(recommendationBox);
             }
 
@@ -972,8 +1014,17 @@ public class BookDetailsController implements Initializable {
 
     /**
      * Cerca nel database libri simili al libro corrente basandosi sulla categoria.
-     * Se trovati, crea elementi visivi per mostrarli come consigli automatici.
-     * Il metodo limita la ricerca a un massimo di 3 libri della stessa categoria.
+     * Se trovati, crea elementi visivi per mostrarli come consigli automatici,
+     * ciascuno con un pulsante "Visualizza" per accedere ai dettagli del libro.
+     * I titoli lunghi vengono troncati per garantire una visualizzazione uniforme.
+     *
+     * <p>Esegue una query sul database per trovare altri libri della stessa categoria
+     * del libro corrente, escludendo il libro stesso. Per ogni libro trovato, viene
+     * creato un elemento grafico contenente il titolo troncato, l'autore e un pulsante
+     * di dimensione fissa che permette all'utente di navigare direttamente ai dettagli
+     * completi del libro.</p>
+     *
+     * <p>Se non vengono trovati libri simili, viene visualizzato un messaggio informativo.</p>
      */
     private void findSimilarBooks() {
         List<Book> similarBooks = new ArrayList<>();
@@ -1016,15 +1067,54 @@ public class BookDetailsController implements Initializable {
                 bookBox.setPadding(new Insets(10));
                 bookBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
+                // Crea un HBox per informazioni e bottone
+                HBox mainBox = new HBox();
+                mainBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                mainBox.setSpacing(15);
+
+                // Contenitore per le informazioni - imposta una larghezza massima
+                VBox infoBox = new VBox(5);
+                infoBox.setMaxWidth(520); // Limita la larghezza massima
+                HBox.setHgrow(infoBox, javafx.scene.layout.Priority.ALWAYS);
+
+                // Tronca il titolo se necessario
+                String displayTitle = book.getTitle();
+                String originalTitle = book.getTitle();
+                if (displayTitle.length() > 60) {
+                    displayTitle = displayTitle.substring(0, 57) + "...";
+                }
+
                 // Il titolo è già in grassetto, ma aggiungiamo anche lo stile corsivo per coerenza
-                Label titleLabel = new Label("\"" + book.getTitle() + "\"");
+                Label titleLabel = new Label("\"" + displayTitle + "\"");
                 titleLabel.setStyle("-fx-font-weight: bold; -fx-font-style: italic;");
                 titleLabel.setWrapText(true);
+                titleLabel.setUserData(originalTitle); // Salva il titolo originale come metadato
 
                 Label authorLabel = new Label("Autore: " + book.getAuthors());
                 authorLabel.setWrapText(true);
 
-                bookBox.getChildren().addAll(titleLabel, authorLabel);
+                infoBox.getChildren().addAll(titleLabel, authorLabel);
+
+                // Aggiungi bottone "Visualizza" simile a quello in homepage
+                Button viewButton = new Button("Visualizza");
+                viewButton.setStyle("-fx-text-fill: white; -fx-background-color: #75B965; -fx-background-radius: 40px; -fx-padding: 8px 15px;");
+                viewButton.setPrefWidth(100); // Imposta una larghezza fissa
+                viewButton.setMinWidth(100);  // Imposta larghezza minima
+                viewButton.setMaxWidth(100);  // Imposta larghezza massima
+                viewButton.setOnAction(e -> visualizzalibro(e, originalTitle));
+
+                // Crea un contenitore per il bottone e centralo verticalmente
+                VBox buttonBox = new VBox();
+                buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
+                buttonBox.setPrefWidth(120); // Spazio fisso per il contenitore del bottone
+                buttonBox.setMinWidth(120);
+                buttonBox.getChildren().add(viewButton);
+
+                // Aggiungi infoBox e buttonBox al mainBox
+                mainBox.getChildren().addAll(infoBox, buttonBox);
+
+                // Aggiungi il mainBox al bookBox
+                bookBox.getChildren().add(mainBox);
                 similarBooksContainer.getChildren().add(bookBox);
             }
 
@@ -1037,6 +1127,38 @@ public class BookDetailsController implements Initializable {
             }
         } else {
             recommendedBooksLabel.setText("Nessun libro consigliato disponibile.");
+        }
+    }
+
+    /**
+     * Naviga alla pagina di dettaglio del libro specificato.
+     * Questo metodo carica la vista stampadettaglinologin.fxml e imposta il titolo del libro
+     * selezionato per visualizzarne i dettagli completi, permettendo all'utente di esplorare
+     * le informazioni del libro consigliato senza tornare alla homepage.
+     *
+     * <p>Gestisce la navigazione tra le viste dell'applicazione, caricando la pagina di
+     * dettaglio del libro e configurando il controller corrispondente con i dati appropriati.
+     * Utilizza lo stesso meccanismo di navigazione presente nella homepage per mantenere
+     * un'esperienza utente coerente.</p>
+     *
+     * @param event L'evento di azione generato dal click sul pulsante "Visualizza"
+     * @param bookTitle Il titolo del libro di cui visualizzare i dettagli
+     */
+    public void visualizzalibro(ActionEvent event, String bookTitle) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/stampadettaglinologin.fxml"));
+            Parent root = loader.load();
+
+            BookDetailsController controller = loader.getController();
+            controller.setBookData(bookTitle);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            // Gestione silenziosa dell'errore
+            e.printStackTrace();
         }
     }
 
