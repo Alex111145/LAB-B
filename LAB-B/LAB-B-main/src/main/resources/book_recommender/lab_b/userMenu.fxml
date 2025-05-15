@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="book_recommender.lab_b.UserMenuController">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #4054B2; -fx-padding: 10px;">
+                    <children>
+                        <Label style="-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;" text="Book Recommender" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button id="logoutButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onLogoutClicked" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px; -fx-padding: 10px 20px; -fx-font-weight: bold;" text="Logout" />
+                    </children>
+                </HBox>
+                <Label fx:id="welcomeLabel" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-padding: 10px 0 5px 10px;" text="Ciao, username" />
+                <VBox alignment="CENTER" spacing="15.0" style="-fx-padding: 20px;">
+                    <children>
+                        <Button fx:id="createLibraryButton" maxWidth="300.0" minWidth="300.0" mnemonicParsing="false" onAction="#onCreateLibraryClicked" prefHeight="50.0" prefWidth="300.0" style="-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px;" text="Crea Libreria" />
+                        <Button fx:id="addBookButton" maxWidth="300.0" minWidth="300.0" mnemonicParsing="false" onAction="#onAddBookClicked" prefHeight="50.0" prefWidth="300.0" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px;" text="Aggiungi Libro alla Libreria" />
+                        <Button fx:id="rateBookButton" maxWidth="300.0" minWidth="300.0" mnemonicParsing="false" onAction="#onRateBookClicked" prefHeight="50.0" prefWidth="300.0" style="-fx-background-color: #F5A623; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px;" text="Valuta Libro" />
+                        <Button fx:id="recommendBookButton" maxWidth="300.0" minWidth="300.0" mnemonicParsing="false" onAction="#onRecommendBookClicked" prefHeight="50.0" prefWidth="300.0" style="-fx-background-color: #9B59B6; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px;" text="Consiglia Libro" />
+                    </children>
+                </VBox>
+                <HBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label fx:id="statusLabel" style="-fx-font-size: 14px; -fx-text-fill: #333333;" text="" />
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

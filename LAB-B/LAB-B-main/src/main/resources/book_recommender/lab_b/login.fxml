@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane minHeight="700.0" minWidth="1000.0" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="book_recommender.lab_b.LoginController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" minHeight="60.0" prefHeight="60.0" spacing="10.0" style="-fx-background-color: #4054B2; -fx-padding: 10px;">
+               <children>
+                  <Label style="-fx-text-fill: white; -fx-font-size: 30px; -fx-font-weight: bold;" text="Book Recommender" />
+                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#handleBack" style="-fx-background-color: red; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 8 16;" text="Torna al menù" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 20px;">
+                     <children>
+                        <Label style="-fx-font-size: 24px; -fx-text-fill: #4054B2; -fx-font-weight: bold;" text="Accesso Utente">
+                           <VBox.margin>
+                              <Insets bottom="20.0" top="20.0" />
+                           </VBox.margin>
+                        </Label>
+
+                        <VBox alignment="CENTER" maxWidth="400.0" prefWidth="400.0" spacing="15.0" style="-fx-background-color: #f8f8f8; -fx-padding: 30px; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;">
+                           <children>
+                              <Label style="-fx-font-size: 18px;" text="Inserisci le tue credenziali" />
+
+                              <VBox spacing="5.0">
+                                 <children>
+                                    <Label text="ID Utente:" />
+                                    <TextField fx:id="userIdField" onKeyPressed="#handleKeyPress" prefHeight="40.0" promptText="Inserisci il tuo ID utente" />
+                                 </children>
+                              </VBox>
+
+                              <VBox spacing="5.0">
+                                 <children>
+                                    <Label text="Password:" />
+                                    <PasswordField fx:id="passwordField" onKeyPressed="#handleKeyPress" prefHeight="40.0" promptText="Inserisci la tua password" />
+                                 </children>
+                              </VBox>
+
+                              <Label fx:id="errorMessage" style="-fx-text-fill: red; -fx-font-size: 14px;" text="ID utente o password non validi" visible="false" wrapText="true" />
+
+                              <Button fx:id="loginButton" defaultButton="true" maxWidth="Infinity" minHeight="40.0" mnemonicParsing="false" onAction="#handleLogin" style="-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 40px;" text="Accedi">
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="30.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
