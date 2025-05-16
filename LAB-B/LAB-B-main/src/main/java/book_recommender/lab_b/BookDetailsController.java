@@ -27,43 +27,78 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * Controller per la visualizzazione dei dettagli di un libro.
+ * Controller per la visualizzazione dettagliata di un libro.
+ * Gestisce la visualizzazione delle informazioni del libro, le valutazioni, le recensioni degli utenti,
+ * e i libri consigliati correlati al libro visualizzato.
+ * <p>
+ * Questa classe implementa {@link Initializable} per inizializzare i componenti JavaFX
+ * e gestisce l'interazione con il database per recuperare e visualizzare i dati.
+ * </p>
+ *
+ * @author Book Recommender Team
+ * @version 1.0
  */
 public class BookDetailsController implements Initializable {
 
+    /** Label per il titolo del libro */
     @FXML private Label bookTitleLabel;
+    /** Label per gli autori del libro */
     @FXML private Label authorsLabel;
+    /** Label per la categoria del libro */
     @FXML private Label categoryLabel;
+    /** Label per l'editore del libro */
     @FXML private Label publisherLabel;
+    /** Label per l'anno di pubblicazione */
     @FXML private Label yearLabel;
+    /** Label per la valutazione dello stile */
     @FXML private Label styleRatingLabel;
+    /** Label per la valutazione del contenuto */
     @FXML private Label contentRatingLabel;
+    /** Label per la valutazione della gradevolezza */
     @FXML private Label pleasantnessRatingLabel;
+    /** Label per la valutazione dell'originalità */
     @FXML private Label originalityRatingLabel;
+    /** Label per la valutazione dell'edizione */
     @FXML private Label editionRatingLabel;
+    /** Label per la valutazione totale */
     @FXML private Label totalRatingLabel;
+    /** Label per il numero di utenti che hanno valutato */
     @FXML private Label usersCountLabel;
+    /** Label per i commenti generali */
     @FXML private Label generalCommentsLabel;
+    /** Label per i libri consigliati */
     @FXML private Label recommendedBooksLabel;
+    /** Pulsante per tornare alla pagina precedente */
     @FXML private Button backButton;
 
-    // Container per le recensioni per ogni categoria
+    /** Container per le recensioni sullo stile */
     @FXML private VBox styleReviewsBox;
+    /** Container per le recensioni sul contenuto */
     @FXML private VBox contentReviewsBox;
+    /** Container per le recensioni sulla gradevolezza */
     @FXML private VBox pleasantnessReviewsBox;
+    /** Container per le recensioni sull'originalità */
     @FXML private VBox originalityReviewsBox;
+    /** Container per le recensioni sull'edizione */
     @FXML private VBox editionReviewsBox;
 
-    // Riferimenti alle stelle per le valutazioni
+    /** Riferimenti alle stelle per la valutazione dello stile */
     @FXML private Text styleStar1, styleStar2, styleStar3, styleStar4, styleStar5;
+    /** Riferimenti alle stelle per la valutazione del contenuto */
     @FXML private Text contentStar1, contentStar2, contentStar3, contentStar4, contentStar5;
+    /** Riferimenti alle stelle per la valutazione della gradevolezza */
     @FXML private Text pleasantnessStar1, pleasantnessStar2, pleasantnessStar3, pleasantnessStar4, pleasantnessStar5;
+    /** Riferimenti alle stelle per la valutazione dell'originalità */
     @FXML private Text originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5;
+    /** Riferimenti alle stelle per la valutazione dell'edizione */
     @FXML private Text editionStar1, editionStar2, editionStar3, editionStar4, editionStar5;
+    /** Riferimenti alle stelle per la valutazione totale */
     @FXML private Text totalStar1, totalStar2, totalStar3, totalStar4, totalStar5;
 
-    // Mappa dei colori assegnati a ciascun utente
+    /** Mappa dei colori assegnati a ciascun utente per la visualizzazione coerente */
     private final Map<String, String> userColors = new HashMap<>();
+
+    /** Palette di colori utilizzata per assegnare colori agli utenti */
     private final String[] colorPalette = {
             "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c", "#d35400",
             "#27ae60", "#2980b9", "#8e44ad", "#f1c40f", "#16a085", "#2c3e50", "#f39c12",
@@ -71,20 +106,26 @@ public class BookDetailsController implements Initializable {
             "#f5b041", "#58d68d", "#5dade2", "#f1948a", "#d6eaf8", "#f7b7a3", "#e8daef", "#c39bd3"
     };
 
-    public Button getBackButton() {
-        return backButton;
-    }
 
-    public void setBackButton(Button backButton) {
-        this.backButton = backButton;
-    }
-
-    // Struttura per memorizzare recensioni
+    /**
+     * Classe interna per rappresentare una recensione di un libro.
+     * Contiene l'ID dell'utente, la valutazione e il commento.
+     */
     private static class Review {
+        /** ID dell'utente che ha lasciato la recensione */
         public String userId;
+        /** Valutazione numerica (da 1 a 5) */
         public int rating;
+        /** Testo del commento */
         public String comment;
 
+        /**
+         * Costruttore per una recensione.
+         *
+         * @param userId ID dell'utente che ha scritto la recensione
+         * @param rating Valutazione numerica del libro (1-5)
+         * @param comment Testo del commento
+         */
         public Review(String userId, int rating, String comment) {
             this.userId = userId;
             this.rating = rating;
@@ -92,55 +133,88 @@ public class BookDetailsController implements Initializable {
         }
     }
 
-    // Struttura per memorizzare i commenti generali
+    /**
+     * Classe interna per rappresentare un commento generale sul libro.
+     * Contiene l'ID dell'utente e il testo del commento.
+     */
     private static class Comment {
+        /** ID dell'utente che ha lasciato il commento */
         public String userId;
+        /** Testo del commento */
         public String text;
 
+        /**
+         * Costruttore per un commento generale.
+         *
+         * @param userId ID dell'utente che ha scritto il commento
+         * @param text Testo del commento
+         */
         public Comment(String userId, String text) {
             this.userId = userId;
             this.text = text;
         }
     }
 
-    // Struttura per memorizzare i libri consigliati
+    /**
+     * Classe interna per rappresentare un libro consigliato.
+     * Contiene l'ID dell'utente che ha fatto la raccomandazione e il titolo del libro consigliato.
+     */
     private static class RecommendedBook {
+        /** ID dell'utente che ha consigliato il libro */
         public String userId;
+        /** Titolo del libro consigliato */
         public String bookTitle;
 
+        /**
+         * Costruttore per un libro consigliato.
+         *
+         * @param userId ID dell'utente che ha consigliato il libro
+         * @param bookTitle Titolo del libro consigliato
+         */
         public RecommendedBook(String userId, String bookTitle) {
             this.userId = userId;
             this.bookTitle = bookTitle;
         }
     }
 
-    // Liste per memorizzare le recensioni per ogni caratteristica
+    /** Liste per memorizzare le recensioni per ogni caratteristica del libro */
     private final List<Review> styleReviews = new ArrayList<>();
     private final List<Review> contentReviews = new ArrayList<>();
     private final List<Review> pleasantnessReviews = new ArrayList<>();
     private final List<Review> originalityReviews = new ArrayList<>();
     private final List<Review> editionReviews = new ArrayList<>();
 
-    // Dati del libro corrente
+    /** Dati del libro corrente */
     private Book currentBook;
+
+    /** ID del libro corrente nel database */
     private int currentBookId;
 
-    // Mappa per memorizzare le valutazioni del libro
+    /** Mappa per memorizzare le valutazioni del libro per ciascuna categoria */
     private final Map<String, Double> ratings = new HashMap<>();
 
-    // Numero di utenti che hanno valutato il libro
+    /** Numero di utenti che hanno valutato il libro */
     private int numRaters = 0;
 
+    /** Manager per la connessione al database */
     private DatabaseManager dbManager;
 
+    /**
+     * Inizializza il controller. Questo metodo viene chiamato automaticamente dopo che
+     * il file FXML è stato caricato.
+     *
+     * @param location La posizione utilizzata per risolvere percorsi relativi per l'oggetto root
+     * @param resources Le risorse utilizzate per localizzare l'oggetto root
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
+            // Silenziosamente ignorato - il database potrebbe non essere disponibile
         }
 
-        // Inizializza i container delle recensioni
+        // Inizializza i container delle recensioni con spaziatura
         styleReviewsBox.setSpacing(10);
         contentReviewsBox.setSpacing(10);
         pleasantnessReviewsBox.setSpacing(10);
@@ -148,6 +222,13 @@ public class BookDetailsController implements Initializable {
         editionReviewsBox.setSpacing(10);
     }
 
+    /**
+     * Imposta i dati del libro da visualizzare e carica tutte le informazioni correlate.
+     * Cerca il libro nel database e, se trovato, carica le valutazioni e le recensioni.
+     * Se il libro non viene trovato, utilizza un libro di esempio con dati predefiniti.
+     *
+     * @param bookTitle Il titolo del libro da visualizzare
+     */
     public void setBookData(String bookTitle) {
         // Cerca il libro nel database
         this.currentBook = findBookByTitle(bookTitle);
@@ -170,6 +251,13 @@ public class BookDetailsController implements Initializable {
         }
     }
 
+    /**
+     * Crea un oggetto libro di esempio quando il libro richiesto non viene trovato nel database.
+     * Utilizza valori predefiniti per gli attributi mancanti.
+     *
+     * @param title Il titolo del libro da creare
+     * @return Un oggetto Book con valori predefiniti
+     */
     private Book createExampleBook(String title) {
         return new Book(
                 title,
@@ -180,8 +268,10 @@ public class BookDetailsController implements Initializable {
         );
     }
 
-
-
+    /**
+     * Inizializza le valutazioni di esempio con valori predefiniti (zero) e pulisce
+     * tutte le liste di recensioni. Utilizzato quando il libro non è presente nel database.
+     */
     private void setupExampleRatings() {
         ratings.put("style", 0.0);
         ratings.put("content", 0.0);
@@ -199,6 +289,13 @@ public class BookDetailsController implements Initializable {
         editionReviews.clear();
     }
 
+    /**
+     * Cerca un libro nel database in base al titolo.
+     * Se trovato, memorizza l'ID del libro e restituisce un oggetto Book con i dettagli.
+     *
+     * @param title Il titolo del libro da cercare
+     * @return Un oggetto Book se trovato, altrimenti null
+     */
     private Book findBookByTitle(String title) {
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT id, title, authors, category, publisher, publish_year FROM books WHERE title = ?";
@@ -219,10 +316,18 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
+            // Gestione errore silenziosa
         }
 
         return null;
     }
+
+    /**
+     * Carica dal database le valutazioni e le recensioni associate al libro specificato.
+     * Calcola la media delle valutazioni e organizza le recensioni per categoria.
+     *
+     * @param bookId L'ID del libro di cui caricare valutazioni e recensioni
+     */
     private void loadRatingsAndReviews(int bookId) {
         // Inizializza le valutazioni con valori predefiniti
         ratings.put("style", 0.0);
@@ -340,39 +445,18 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
+            // In caso di errore, imposta valutazioni di esempio
             setupExampleRatings();
         }
     }
 
     /**
-     * Metodo per aggiornare la visualizzazione delle valutazioni nel riepilogo
-     * Questo metodo deve essere chiamato dal metodo updateUI()
-     */
-    private void updateRatingSummary() {
-        // Imposta le valutazioni numeriche
-        styleRatingLabel.setText(String.valueOf(ratings.get("style")));
-        contentRatingLabel.setText(String.valueOf(ratings.get("content")));
-        pleasantnessRatingLabel.setText(String.valueOf(ratings.get("pleasantness")));
-        originalityRatingLabel.setText(String.valueOf(ratings.get("originality")));
-        editionRatingLabel.setText(String.valueOf(ratings.get("edition")));
-        totalRatingLabel.setText(String.valueOf(ratings.get("total")));
-
-        // Aggiorna il numero di valutatori
-        usersCountLabel.setText(String.valueOf(numRaters));
-
-        // Colora le stelle in base alle valutazioni
-        updateStars(styleStar1, styleStar2, styleStar3, styleStar4, styleStar5, ratings.get("style"));
-        updateStars(contentStar1, contentStar2, contentStar3, contentStar4, contentStar5, ratings.get("content"));
-        updateStars(pleasantnessStar1, pleasantnessStar2, pleasantnessStar3, pleasantnessStar4, pleasantnessStar5, ratings.get("pleasantness"));
-        updateStars(originalityStar1, originalityStar2, originalityStar3, originalityStar4, originalityStar5, ratings.get("originality"));
-        updateStars(editionStar1, editionStar2, editionStar3, editionStar4, editionStar5, ratings.get("edition"));
-        updateStars(totalStar1, totalStar2, totalStar3, totalStar4, totalStar5, ratings.get("total"));
-    }
-
-
-    /**
-     * Metodo per aggiornare l'aspetto di una singola stella in base al valore della valutazione
-     * La logica è stata rivista per gestire correttamente le mezze stelle
+     * Aggiorna l'aspetto di una singola stella in base al valore della valutazione.
+     * Gestisce le mezze stelle per visualizzare valutazioni con decimali.
+     *
+     * @param star Il controllo Text della stella da aggiornare
+     * @param rating Il valore della valutazione
+     * @param position La posizione della stella (da 1 a 5)
      */
     private void updateSingleStar(Text star, double rating, int position) {
         Color goldStarColor = Color.web("#FFD700");  // Colore giallo oro per le stelle
@@ -401,7 +485,15 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Metodo migliorato per aggiornare le stelle nella valutazione
+     * Aggiorna l'aspetto di un gruppo di stelle per visualizzare una valutazione.
+     * Utilizza il metodo updateSingleStar per aggiornare ogni stella individualmente.
+     *
+     * @param star1 Prima stella del gruppo
+     * @param star2 Seconda stella del gruppo
+     * @param star3 Terza stella del gruppo
+     * @param star4 Quarta stella del gruppo
+     * @param star5 Quinta stella del gruppo
+     * @param rating Valore della valutazione da visualizzare
      */
     private void updateStars(Text star1, Text star2, Text star3, Text star4, Text star5, double rating) {
         // Aggiorna ogni stella in base alla posizione
@@ -413,7 +505,8 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Metodo per l'aggiornamento di tutte le stelle nel riepilogo valutazioni
+     * Aggiorna tutte le stelle nel riepilogo valutazioni.
+     * Richiama il metodo updateStars per ciascun gruppo di stelle.
      */
     private void updateAllRatingStars() {
         // Aggiorna tutte le stelle per ciascuna categoria
@@ -428,8 +521,10 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Metodo da aggiungere alla classe per generare stelle per le recensioni individuali
-     * Da utilizzare nel metodo addReviewsToContainer
+     * Aggiunge stelle a un HBox per visualizzare la valutazione nelle recensioni individuali.
+     *
+     * @param starsBox Il contenitore HBox in cui aggiungere le stelle
+     * @param rating Il valore della valutazione da visualizzare
      */
     private void addStarsToReviewHeader(HBox starsBox, double rating) {
         // Colori per le stelle
@@ -466,8 +561,13 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Versione modificata del metodo addReviewsToContainer che mostra
-     * sempre i commenti completi senza pulsante "Mostra altro"
+     * Aggiunge le recensioni degli utenti al container specificato.
+     * Visualizza tutte le recensioni per una specifica caratteristica del libro, mostrando
+     * l'utente che ha scritto la recensione, la valutazione in stelle e il testo completo del commento.
+     * Se non ci sono recensioni disponibili, viene mostrato un messaggio appropriato.
+     *
+     * @param reviews La lista di recensioni da visualizzare
+     * @param container Il contenitore VBox in cui aggiungere le recensioni
      */
     private void addReviewsToContainer(List<Review> reviews, VBox container) {
         if (reviews.isEmpty()) {
@@ -514,8 +614,11 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Versione modificata del metodo generateGeneralComment che mostra
-     * sempre i commenti generali completi, senza pulsante "Mostra altro"
+     * Genera e visualizza i commenti generali degli utenti sul libro.
+     * Questo metodo crea un contenitore che mostra tutti i commenti generali lasciati dagli utenti,
+     * con l'indicazione dell'autore del commento e la sua valutazione media del libro.
+     * Ogni commento è colorato in base all'utente per una facile identificazione visiva.
+     * Se non ci sono commenti disponibili, viene mostrato un messaggio appropriato.
      */
     private void generateGeneralComment() {
         // Pulisci prima il container dei commenti generali
@@ -609,7 +712,14 @@ public class BookDetailsController implements Initializable {
     }
 
     /**
-     * Modifica al metodo updateUI() per utilizzare l'implementazione aggiornata
+     * Aggiorna l'interfaccia utente con tutti i dati del libro corrente.
+     * Questo metodo popola tutti i componenti dell'interfaccia con i dati del libro,
+     * inclusi titolo, autori, categoria, editore, anno di pubblicazione, valutazioni,
+     * recensioni e libri consigliati.
+     * <p>
+     * Viene chiamato dopo che i dati del libro sono stati caricati dal database
+     * o dopo che è stato creato un libro di esempio.
+     * </p>
      */
     private void updateUI() {
         // Imposta i dati del libro
@@ -642,6 +752,17 @@ public class BookDetailsController implements Initializable {
         // Genera libri consigliati basati sulla categoria del libro attuale
         generateRecommendedBooks();
     }
+
+    /**
+     * Aggiorna i container delle recensioni con i dati più recenti.
+     * Questo metodo pulisce i container esistenti e li popola con le recensioni
+     * specifiche per ogni caratteristica del libro (stile, contenuto, gradevolezza,
+     * originalità ed edizione).
+     * <p>
+     * Per ogni container, viene aggiunta un'intestazione appropriata e poi
+     * vengono visualizzate tutte le recensioni disponibili per quella caratteristica.
+     * </p>
+     */
     private void updateReviewContainers() {
         // Pulisci i container
         styleReviewsBox.getChildren().clear();
@@ -672,9 +793,15 @@ public class BookDetailsController implements Initializable {
         addReviewsToContainer(editionReviews, editionReviewsBox);
     }
 
-
-
-    // Metodo ausiliario per ottenere la valutazione media di un utente per un libro
+    /**
+     * Calcola e restituisce la valutazione media assegnata da un utente specifico a un libro.
+     * Interroga il database per ottenere il valore di "average_rating" registrato
+     * per la combinazione utente-libro specificata.
+     *
+     * @param userId L'identificativo dell'utente di cui si vuole conoscere la valutazione
+     * @param bookId L'identificativo del libro valutato
+     * @return La valutazione media dell'utente per il libro, o 0.0 se non trovata
+     */
     private double getUserRatingForBook(String userId, int bookId) {
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT average_rating FROM book_ratings WHERE user_id = ? AND book_id = ?";
@@ -693,6 +820,14 @@ public class BookDetailsController implements Initializable {
         }
         return 0.0; // Valore predefinito se non trovato
     }
+
+    /**
+     * Recupera dal database tutti i commenti generali lasciati dagli utenti per un libro specifico.
+     * Considera solo i commenti non vuoti e non nulli per il libro specificato.
+     *
+     * @param bookId L'identificativo del libro di cui recuperare i commenti
+     * @return Una lista di oggetti Comment contenenti l'ID utente e il testo del commento
+     */
     private List<Comment> getUserComments(int bookId) {
         List<Comment> comments = new ArrayList<>();
 
@@ -710,12 +845,18 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
+            // Gestione silenziosa dell'errore
         }
 
         return comments;
     }
 
-
+    /**
+     * Genera e visualizza i libri consigliati per il libro corrente.
+     * Il metodo cerca prima consigli personalizzati inseriti dagli utenti nel database.
+     * Se non ne trova, genera automaticamente consigli basati sulla categoria del libro attuale,
+     * mostrando altri libri della stessa categoria.
+     */
     private void generateRecommendedBooks() {
         // Prima cerca se esistono consigli personalizzati dal database
         boolean foundCustomRecommendations = findCustomRecommendations();
@@ -726,6 +867,14 @@ public class BookDetailsController implements Initializable {
         }
     }
 
+    /**
+     * Cerca nel database consigli personalizzati inseriti dagli utenti per il libro corrente.
+     * Per ogni consiglio trovato, crea un elemento visivo che mostra l'utente che ha fatto
+     * la raccomandazione e il titolo del libro consigliato, con informazioni aggiuntive
+     * quando disponibili.
+     *
+     * @return true se sono stati trovati consigli personalizzati, false altrimenti
+     */
     private boolean findCustomRecommendations() {
         List<RecommendedBook> customRecommendations = new ArrayList<>();
 
@@ -745,6 +894,7 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
+            // Gestione silenziosa dell'errore
         }
 
         // Se ci sono consigli personalizzati, crea box visivi per ognuno
@@ -783,7 +933,7 @@ public class BookDetailsController implements Initializable {
                 }
 
                 // Aggiungi prefisso "Consigliato da:" all'ID utente
-                Label userLabel = new Label( recommendation.userId);
+                Label userLabel = new Label(recommendation.userId);
                 userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
 
                 // Cerca il libro nel database per ottenere l'autore
@@ -819,6 +969,12 @@ public class BookDetailsController implements Initializable {
 
         return false;
     }
+
+    /**
+     * Cerca nel database libri simili al libro corrente basandosi sulla categoria.
+     * Se trovati, crea elementi visivi per mostrarli come consigli automatici.
+     * Il metodo limita la ricerca a un massimo di 3 libri della stessa categoria.
+     */
     private void findSimilarBooks() {
         List<Book> similarBooks = new ArrayList<>();
 
@@ -843,6 +999,7 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
+            // Gestione silenziosa dell'errore
         }
 
         // Se ci sono libri simili, mostrali
@@ -882,8 +1039,13 @@ public class BookDetailsController implements Initializable {
             recommendedBooksLabel.setText("Nessun libro consigliato disponibile.");
         }
     }
+
     /**
-     * Gestisce il click sul pulsante "Torna indietro".
+     * Gestisce l'evento di click sul pulsante "Torna indietro".
+     * Carica la schermata principale dell'applicazione (homepage)
+     * e la visualizza, sostituendo la schermata corrente.
+     *
+     * @param event L'evento di azione generato dal click sul pulsante
      */
     @FXML
     public void handleBack(ActionEvent event) {

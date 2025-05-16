@@ -24,81 +24,160 @@ import java.util.List;
 
 /**
  * Controller per la funzionalità di consiglio libri.
- * Questo controller gestisce l'interfaccia utente per consigliare libri in base a un libro selezionato,
- * con un limite massimo di 3 libri consigliabili.
+ * Gestisce l'interfaccia utente per consigliare libri in base a un libro selezionato.
+ * Permette all'utente di cercare, selezionare e salvare fino a 3 libri come raccomandazioni
+ * per un libro di origine.
+ *
+ * Funzionalità principali:
+ * - Ricerca di libri per titolo, autore o combinazione di autore e anno
+ * - Selezione fino a 3 libri come raccomandazioni
+ * - Salvataggio delle raccomandazioni nel database
+ * - Visualizzazione delle raccomandazioni esistenti
  */
 public class RecommendBookController {
 
-    // Componenti dell'interfaccia utente
+    /**
+     * Etichetta che mostra l'ID dell'utente corrente.
+     */
     @FXML private Label userIdLabel;
+
+    /**
+     * Etichetta che mostra il titolo del libro per cui si stanno facendo raccomandazioni.
+     */
     @FXML private Label selectedBookLabel;
+
+    /**
+     * ListView che mostra i libri attualmente consigliati.
+     */
     @FXML private ListView<String> recommendedBooksListView;
+
+    /**
+     * Etichetta che mostra il conteggio delle raccomandazioni (x/3).
+     */
     @FXML private Label recommendationsCountLabel;
+
+    /**
+     * Etichetta per mostrare messaggi di errore.
+     */
     @FXML private Label errorLabel;
 
-    // Pulsanti
+    /**
+     * Pulsante per salvare le raccomandazioni selezionate nel database.
+     */
     @FXML private Button saveButton;
 
+    /**
+     * Pulsante per cancellare tutte le raccomandazioni selezionate.
+     */
     @FXML private Button clearAllButton;
 
-
-    // Campi di ricerca
+    /**
+     * Campo di testo per la ricerca per titolo.
+     */
     @FXML private TextField titleSearchField;
+
+    /**
+     * Campo di testo per la ricerca per autore.
+     */
     @FXML private TextField authorSearchField;
+
+    /**
+     * Campo di testo per la ricerca combinata per autore (con anno).
+     */
     @FXML private TextField authorYearSearchField;
+
+    /**
+     * Campo di testo per la ricerca per anno.
+     */
     @FXML private TextField yearSearchField;
 
-    // Pulsanti di ricerca
-
-
-    // Contenitori per i risultati della ricerca
+    /**
+     * Contenitore per visualizzare i risultati della ricerca per titolo.
+     */
     @FXML private VBox titleResultsContainer;
+
+    /**
+     * Contenitore per visualizzare i risultati della ricerca per autore.
+     */
     @FXML private VBox authorResultsContainer;
+
+    /**
+     * Contenitore per visualizzare i risultati della ricerca per autore e anno.
+     */
     @FXML private VBox authorYearResultsContainer;
 
-    // Variabili di stato
+    /**
+     * ID dell'utente corrente.
+     */
     private String userId;
+
+    /**
+     * Titolo del libro selezionato per cui si consigliano altri libri.
+     */
     private String selectedBook;
+
+    /**
+     * Nome della libreria selezionata.
+     */
     private String libraryName;
+
+    /**
+     * ID nel database del libro selezionato.
+     */
     private int selectedBookId;
+
+    /**
+     * Lista dei titoli dei libri consigliati.
+     */
     private final List<String> recommendedBooks = new ArrayList<>();
+
+    /**
+     * Lista di oggetti Book risultanti dall'ultima ricerca.
+     */
     private List<Book> searchResults = new ArrayList<>();
 
+    /**
+     * Gestore della connessione al database.
+     */
     private DatabaseManager dbManager;
 
     /**
      * Inizializza il controller.
+     * Questo metodo viene chiamato automaticamente quando l'FXML viene caricato.
+     * Configura il layout, gli eventi e ottiene una connessione al database.
      */
     public void initialize() {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
+            // Gestione dell'errore silente - potrebbe essere migliorata con log o messaggi
         }
 
-        // Nasconde eventuali messaggi di errore
+        // Nasconde eventuali messaggi di errore all'avvio
         errorLabel.setVisible(false);
 
         // Configura gli handler per il tasto Invio nei campi di ricerca
         setupEnterKeyHandlers();
 
-        // Configura la ListView per mostrare i libri consigliati
+        // Configura la ListView per mostrare i libri consigliati con opzioni di eliminazione
         setupRecommendedBooksListView();
 
-        // Il bottone saveButton è sempre attivo
+        // Il bottone saveButton è sempre attivo (potrebbe essere cambiato in base alla logica)
         saveButton.setDisable(false);
 
-        // Aggiorna il conteggio delle raccomandazioni
+        // Aggiorna il conteggio delle raccomandazioni (0/3 all'inizio)
         updateRecommendationsCount();
 
-        // Aggiorna lo stato del bottone clearAllButton
+        // Aggiorna lo stato del bottone clearAllButton (disabilitato se non ci sono libri)
         updateClearAllButtonState();
 
-        // Imposta il colore rosso per il pulsante "Cancella Tutti"
+        // Imposta lo stile personalizzato per il pulsante "Cancella Tutti"
         clearAllButton.setStyle("-fx-background-color: #ff4136; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;");
     }
 
     /**
-     * Aggiorna lo stato del pulsante ClearAll in base alla presenza di libri selezionati.
+     * Aggiorna lo stato del pulsante "Cancella Tutti" in base alla presenza di libri selezionati.
+     * Il pulsante viene disabilitato se non ci sono libri da cancellare.
      */
     private void updateClearAllButtonState() {
         boolean hasRecommendedBooks = !recommendedBooks.isEmpty();
@@ -107,6 +186,8 @@ public class RecommendBookController {
 
     /**
      * Configura gli handler per il tasto Invio nei campi di ricerca.
+     * Consente all'utente di eseguire le ricerche semplicemente premendo Invio
+     * dopo aver inserito i termini di ricerca, senza dover cliccare sui pulsanti.
      */
     private void setupEnterKeyHandlers() {
         titleSearchField.setOnKeyPressed(event -> {
@@ -135,9 +216,12 @@ public class RecommendBookController {
     }
 
     /**
-     * Configura la ListView per i libri consigliati.
+     * Configura la ListView per visualizzare i libri consigliati.
+     * Personalizza le celle per includere un pulsante di eliminazione accanto a ogni libro.
+     * Aggiunge listener per aggiornare lo stato dei pulsanti quando cambia la selezione.
      */
     private void setupRecommendedBooksListView() {
+        // Consente la selezione multipla per permettere di rimuovere più libri contemporaneamente
         recommendedBooksListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Aggiungi un listener per aggiornare lo stato dei pulsanti quando cambia la selezione
@@ -145,7 +229,7 @@ public class RecommendBookController {
             updateClearAllButtonState();
         });
 
-        // Modifica la visualizzazione delle celle per mostrare meglio i titoli dei libri
+        // Personalizza la visualizzazione delle celle per mostrare meglio i titoli dei libri e aggiungere un pulsante di rimozione
         recommendedBooksListView.setCellFactory(new Callback<>() {
             @Override
             public ListCell<String> call(ListView<String> param) {
@@ -161,7 +245,7 @@ public class RecommendBookController {
                             HBox container = new HBox(10);
                             container.setAlignment(Pos.CENTER_LEFT);
 
-                            // Etichetta per il titolo del libro con wrapping
+                            // Etichetta per il titolo del libro con wrapping per gestire titoli lunghi
                             Label titleLabel = new Label(item);
                             titleLabel.setWrapText(true);
                             titleLabel.setMaxWidth(280);
@@ -190,7 +274,7 @@ public class RecommendBookController {
                     }
                 };
 
-                // Aggiungiamo un po' di padding alla cella
+                // Aggiungiamo un po' di padding alla cella per migliorare la leggibilità
                 cell.setPadding(new Insets(5, 0, 5, 5));
                 return cell;
             }
@@ -199,20 +283,23 @@ public class RecommendBookController {
 
     /**
      * Imposta i dati necessari per il controller.
+     * Questo metodo viene chiamato dopo l'inizializzazione per configurare il controller
+     * con i dati specifici dell'utente e del libro selezionato.
      *
-     * @param userId ID dell'utente
+     * @param userId ID dell'utente corrente
      * @param selectedBook libro selezionato per cui si stanno facendo raccomandazioni
-     * @param libraryName nome della libreria
+     * @param libraryName nome della libreria selezionata
      */
     public void setData(String userId, String selectedBook, String libraryName) {
         this.userId = userId;
         this.selectedBook = selectedBook;
         this.libraryName = libraryName;
 
+        // Aggiorna le etichette dell'interfaccia con i dati dell'utente e del libro
         userIdLabel.setText(userId);
         selectedBookLabel.setText("Libro selezionato: " + selectedBook);
 
-        // Get the book ID from the database
+        // Recupera l'ID del libro dal database per utilizzo nelle query successive
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT id FROM books WHERE title = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -223,20 +310,25 @@ public class RecommendBookController {
                 }
             }
         } catch (SQLException e) {
+            // Gestione dell'errore silente
         }
 
-        // Controlla se ci sono già raccomandazioni per questo libro
+        // Carica le raccomandazioni esistenti per questo libro e utente
         loadExistingRecommendations();
     }
 
     /**
      * Carica le raccomandazioni esistenti per il libro selezionato.
+     * Interroga il database per trovare le raccomandazioni precedentemente salvate
+     * per il libro e l'utente correnti e le visualizza nell'interfaccia.
      */
     private void loadExistingRecommendations() {
+        // Pulisce la lista e l'interfaccia prima di caricare i dati
         recommendedBooks.clear();
         recommendedBooksListView.getItems().clear();
 
         try (Connection conn = dbManager.getConnection()) {
+            // Query per recuperare i titoli dei libri consigliati per il libro selezionato
             String sql = "SELECT b.title FROM books b " +
                     "JOIN book_recommendations br ON b.id = br.recommended_book_id " +
                     "WHERE br.user_id = ? AND br.source_book_id = ?";
@@ -246,25 +338,27 @@ public class RecommendBookController {
                 pstmt.setInt(2, selectedBookId);
                 ResultSet rs = pstmt.executeQuery();
 
+                // Popola la lista con i titoli trovati
                 while (rs.next()) {
                     recommendedBooks.add(rs.getString("title"));
                 }
             }
         } catch (SQLException e) {
+            // Gestione dell'errore silente
         }
 
-        // Aggiorna la ListView con i libri consigliati trovati
+        // Aggiorna l'interfaccia utente con i dati caricati
         updateSelectedBooksList();
-
-        // Aggiorna il conteggio
         updateRecommendationsCount();
-
-        // Aggiorna lo stato del bottone clearAllButton
         updateClearAllButtonState();
     }
 
     /**
      * Gestisce la ricerca per titolo.
+     * Esegue una ricerca nel database per trovare libri il cui titolo contiene
+     * il termine di ricerca inserito dall'utente.
+     *
+     * @param event L'evento che ha scatenato la ricerca
      */
     @FXML
     public void handleTitleSearch(ActionEvent event) {
@@ -275,21 +369,23 @@ public class RecommendBookController {
             return;
         }
 
+        // Nasconde messaggi di errore precedenti e pulisce i risultati vecchi
         errorLabel.setVisible(false);
         titleResultsContainer.getChildren().clear();
 
-        // Cerca i libri per titolo
+        // Esegue la ricerca per titolo attraverso il servizio BookService
         searchResults = BookService.searchBooksByTitle(searchTerm);
 
-        // Filtra i risultati per escludere il libro selezionato
+        // Esclude il libro selezionato dai risultati per evitare autoreferenze
         searchResults.removeIf(book -> book.getTitle().equals(selectedBook));
 
         if (searchResults.isEmpty()) {
+            // Mostra un messaggio se non ci sono risultati
             Label noResultsLabel = new Label("Nessun risultato trovato.");
             noResultsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #777777; -fx-padding: 20px;");
             titleResultsContainer.getChildren().add(noResultsLabel);
         } else {
-            // Visualizza i risultati
+            // Visualizza i risultati trovati
             for (Book book : searchResults) {
                 HBox bookBox = createBookResultBox(book);
                 titleResultsContainer.getChildren().add(bookBox);
@@ -299,6 +395,10 @@ public class RecommendBookController {
 
     /**
      * Gestisce la ricerca per autore.
+     * Esegue una ricerca nel database per trovare libri scritti da autori
+     * il cui nome contiene il termine di ricerca inserito dall'utente.
+     *
+     * @param event L'evento che ha scatenato la ricerca
      */
     @FXML
     public void handleAuthorSearch(ActionEvent event) {
@@ -309,21 +409,23 @@ public class RecommendBookController {
             return;
         }
 
+        // Nasconde messaggi di errore precedenti e pulisce i risultati vecchi
         errorLabel.setVisible(false);
         authorResultsContainer.getChildren().clear();
 
-        // Cerca i libri per autore
+        // Esegue la ricerca per autore attraverso il servizio BookService
         searchResults = BookService.searchBooksByAuthor(searchTerm);
 
-        // Filtra i risultati per escludere il libro selezionato
+        // Esclude il libro selezionato dai risultati
         searchResults.removeIf(book -> book.getTitle().equals(selectedBook));
 
         if (searchResults.isEmpty()) {
+            // Mostra un messaggio se non ci sono risultati
             Label noResultsLabel = new Label("Nessun risultato trovato.");
             noResultsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #777777; -fx-padding: 20px;");
             authorResultsContainer.getChildren().add(noResultsLabel);
         } else {
-            // Visualizza i risultati
+            // Visualizza i risultati trovati
             for (Book book : searchResults) {
                 HBox bookBox = createBookResultBox(book);
                 authorResultsContainer.getChildren().add(bookBox);
@@ -332,19 +434,25 @@ public class RecommendBookController {
     }
 
     /**
-     * Gestisce la ricerca per autore e anno.
+     * Gestisce la ricerca combinata per autore e anno.
+     * Esegue una ricerca nel database per trovare libri scritti da un autore specifico
+     * in un determinato anno di pubblicazione.
+     *
+     * @param event L'evento che ha scatenato la ricerca
      */
     @FXML
     public void handleAuthorYearSearch(ActionEvent event) {
         String authorTerm = authorYearSearchField.getText().trim();
         String yearTerm = yearSearchField.getText().trim();
 
+        // Verifica che entrambi i campi siano stati compilati
         if (authorTerm.isEmpty() || yearTerm.isEmpty()) {
             errorLabel.setText("Inserisci sia l'autore che l'anno.");
             errorLabel.setVisible(true);
             return;
         }
 
+        // Verifica che l'anno sia un numero valido
         int year;
         try {
             year = Integer.parseInt(yearTerm);
@@ -354,21 +462,23 @@ public class RecommendBookController {
             return;
         }
 
+        // Nasconde messaggi di errore precedenti e pulisce i risultati vecchi
         errorLabel.setVisible(false);
         authorYearResultsContainer.getChildren().clear();
 
-        // Cerca i libri per autore e anno
+        // Esegue la ricerca combinata attraverso il servizio BookService
         searchResults = BookService.searchBooksByAuthorAndYear(authorTerm, year);
 
-        // Filtra i risultati per escludere il libro selezionato
+        // Esclude il libro selezionato dai risultati
         searchResults.removeIf(book -> book.getTitle().equals(selectedBook));
 
         if (searchResults.isEmpty()) {
+            // Mostra un messaggio se non ci sono risultati
             Label noResultsLabel = new Label("Nessun risultato trovato.");
             noResultsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #777777; -fx-padding: 20px;");
             authorYearResultsContainer.getChildren().add(noResultsLabel);
         } else {
-            // Visualizza i risultati
+            // Visualizza i risultati trovati
             for (Book book : searchResults) {
                 HBox bookBox = createBookResultBox(book);
                 authorYearResultsContainer.getChildren().add(bookBox);
@@ -378,34 +488,37 @@ public class RecommendBookController {
 
     /**
      * Crea un box per visualizzare un libro nei risultati di ricerca.
+     * Genera un componente grafico che mostra le informazioni del libro e un pulsante
+     * per aggiungerlo o rimuoverlo dai consigli.
      *
      * @param book Il libro da visualizzare
-     * @return Un HBox contenente le informazioni del libro e un pulsante per aggiungerlo
+     * @return Un HBox contenente le informazioni del libro e un pulsante per aggiungerlo/rimuoverlo
      */
     private HBox createBookResultBox(Book book) {
+        // Contenitore principale per il risultato del libro
         HBox bookBox = new HBox();
         bookBox.setAlignment(Pos.CENTER_LEFT);
         bookBox.setSpacing(10);
         bookBox.setPadding(new Insets(10));
         bookBox.setStyle("-fx-background-color: white; -fx-border-color: #EEEEEE; -fx-border-radius: 5px;");
 
-        // Informazioni del libro in un contenitore
+        // Contenitore per le informazioni testuali del libro
         VBox infoBox = new VBox(5);
         infoBox.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(infoBox, Priority.ALWAYS);
 
-        // Titolo del libro più grande e in evidenza
+        // Titolo del libro in evidenza
         Label titleLabel = new Label(book.getTitle());
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;");
         titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(480); // Imposta una larghezza massima per evitare troncamenti
+        titleLabel.setMaxWidth(480); // Larghezza massima per evitare troncamenti
 
-        // Autore del libro
+        // Informazione sull'autore
         Label authorLabel = new Label("Autore: " + book.getAuthors());
         authorLabel.setStyle("-fx-font-size: 14px;");
         authorLabel.setWrapText(true);
 
-        // Dettagli del libro su una riga
+        // Dettagli aggiuntivi del libro
         Label detailsLabel = new Label("Categoria: " + book.getCategory() + " | Editore: " + book.getPublisher() + " | Anno: " + book.getPublishYear());
         detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #777777;");
         detailsLabel.setWrapText(true);
@@ -413,29 +526,26 @@ public class RecommendBookController {
         // Aggiungi le etichette al contenitore delle informazioni
         infoBox.getChildren().addAll(titleLabel, authorLabel, detailsLabel);
 
-
+        // Crea il pulsante di azione (Aggiungi/Rimuovi)
         Button actionButton = new Button();
-        actionButton.setPrefHeight(40);  // Aumentata l'altezza del pulsante
-        actionButton.setPrefWidth(100);  // Impostata una larghezza fissa per il pulsante
-        actionButton.setMinWidth(100);   // Larghezza minima per garantire che la scritta sia visibile
+        actionButton.setPrefHeight(40);
+        actionButton.setPrefWidth(100);
+        actionButton.setMinWidth(100);
 
-        // Controlla se il libro è già consigliato o se abbiamo raggiunto il limite
+        // Determina lo stato del libro e configura il pulsante di conseguenza
         boolean isRecommended = recommendedBooks.contains(book.getTitle());
         boolean isLimitReached = recommendedBooks.size() >= 3 && !isRecommended;
 
         if (isRecommended) {
-            // Il libro è già nella lista dei consigliati
+            // Il libro è già nella lista dei consigliati - mostra opzione per rimuoverlo
             actionButton.setText("Rimuovi");
             actionButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 10px 15px; -fx-cursor: hand;");
-
-            // Imposta l'azione per rimuovere il libro
             actionButton.setOnAction(e -> toggleBookSelection(book.getTitle(), actionButton));
         } else if (isLimitReached) {
-            // Abbiamo raggiunto il limite di 3 libri
+            // Limite massimo di 3 libri raggiunto - pulsante disabilitato
             actionButton.setText("Aggiungi");
             actionButton.setStyle("-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 10px 15px; -fx-cursor: hand;");
-
-            // Se si tenta di aggiungere un quarto libro, mostra un alert
+            // Mostra un avviso se si tenta di aggiungere oltre il limite
             actionButton.setOnAction(e -> {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Limite raggiunto");
@@ -444,26 +554,27 @@ public class RecommendBookController {
                 alert.showAndWait();
             });
         } else {
-            // Possiamo ancora aggiungere libri
+            // Possibilità di aggiungere ancora libri
             actionButton.setText("Aggiungi");
             actionButton.setStyle("-fx-background-color: #75B965; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 10px 15px; -fx-cursor: hand;");
-
-            // Imposta l'azione per aggiungere il libro
             actionButton.setOnAction(e -> toggleBookSelection(book.getTitle(), actionButton));
         }
 
+        // Assembla il contenitore finale
         bookBox.getChildren().addAll(infoBox, actionButton);
         return bookBox;
     }
 
     /**
      * Gestisce la selezione/deselezione di un libro.
+     * Alterna lo stato di un libro tra "selezionato" e "non selezionato",
+     * aggiungendolo o rimuovendolo dalla lista dei libri consigliati.
      *
-     * @param bookTitle Il titolo del libro
-     * @param button Il pulsante associato al libro
+     * @param bookTitle Il titolo del libro da selezionare/deselezionare
+     * @param button Il pulsante associato al libro per aggiornarne l'aspetto
      */
     private void toggleBookSelection(String bookTitle, Button button) {
-        // Controlla se il libro è già selezionato
+        // Verifica se il libro è già selezionato
         if (recommendedBooks.contains(bookTitle)) {
             // Rimuovi il libro dalla selezione
             recommendedBooks.remove(bookTitle);
@@ -488,34 +599,32 @@ public class RecommendBookController {
             button.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 15; -fx-cursor: hand;");
         }
 
-        // Aggiorna il contatore dei libri selezionati
+        // Aggiorna l'interfaccia utente
         updateRecommendationsCount();
-
-        // Aggiorna lo stato del pulsante clearAllButton
         updateClearAllButtonState();
-
-        // Aggiorna i risultati di ricerca per riflettere il nuovo stato
         updateSearchResults();
-
-        // Nascondi eventuali messaggi di errore
         errorLabel.setVisible(false);
     }
 
     /**
-     * Aggiorna la lista dei libri consigliati.
+     * Aggiorna la lista dei libri consigliati nell'interfaccia utente.
+     * Ordina alfabeticamente i titoli e li visualizza nella ListView.
      */
     private void updateSelectedBooksList() {
         // Pulisci la ListView
         recommendedBooksListView.getItems().clear();
 
-        // Aggiungi i libri selezionati
+        // Ordina alfabeticamente i titoli per una migliore presentazione
         List<String> sortedBooks = new ArrayList<>(recommendedBooks);
         Collections.sort(sortedBooks);
+
+        // Aggiorna la ListView con i libri ordinati
         recommendedBooksListView.getItems().addAll(sortedBooks);
     }
 
     /**
-     * Aggiorna il conteggio delle raccomandazioni.
+     * Aggiorna il conteggio delle raccomandazioni visualizzato nell'interfaccia.
+     * Mostra quanti libri sono stati selezionati su un massimo di 3.
      */
     private void updateRecommendationsCount() {
         recommendationsCountLabel.setText("Selezionati: " + recommendedBooks.size() + "/3");
@@ -523,6 +632,7 @@ public class RecommendBookController {
 
     /**
      * Aggiorna i pulsanti nei risultati di ricerca in base ai libri attualmente consigliati.
+     * Rigenera i risultati di ricerca per riflettere le modifiche nella selezione.
      */
     private void updateSearchResults() {
         // Determina quale contenitore aggiornare in base ai risultati visibili
@@ -544,6 +654,9 @@ public class RecommendBookController {
 
     /**
      * Gestisce la cancellazione di tutti i libri consigliati.
+     * Rimuove tutti i libri dalla lista dei consigliati e aggiorna l'interfaccia.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     @FXML
     public void handleClearAll(ActionEvent event) {
@@ -554,23 +667,20 @@ public class RecommendBookController {
         // Cancella tutti i libri selezionati
         recommendedBooks.clear();
 
-        // Aggiorna la lista dei libri selezionati
+        // Aggiorna l'interfaccia utente
         updateSelectedBooksList();
-
-        // Aggiorna il contatore
         updateRecommendationsCount();
-
-        // Aggiorna lo stato del pulsante clearAllButton
         updateClearAllButtonState();
-
-        // Aggiorna i pulsanti nei risultati di ricerca
         updateSearchResults();
-
-        // Nascondi eventuali messaggi di errore
         errorLabel.setVisible(false);
     }
+
     /**
-     * Gestisce il salvataggio dei consigli.
+     * Gestisce il salvataggio dei consigli nel database.
+     * Se non ci sono libri consigliati, chiede all'utente se desidera tornare indietro.
+     * Altrimenti, salva i consigli e torna al menu utente.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     @FXML
     public void handleSave(ActionEvent event) {
@@ -602,20 +712,26 @@ public class RecommendBookController {
 
         // Se ci sono libri consigliati, salva i consigli
         if (saveRecommendations()) {
-            // Invece di mostrare il messaggio di successo, naviga direttamente al menu utente
+            // Naviga direttamente al menu utente dopo il salvataggio
             navigateToUserMenu(event);
         }
     }
+
     /**
      * Salva le raccomandazioni nel database.
+     * Prima elimina le raccomandazioni esistenti per il libro selezionato,
+     * poi inserisce le nuove raccomandazioni. L'operazione viene eseguita
+     * come una transazione per garantire l'integrità dei dati.
+     *
      * @return true se il salvataggio è avvenuto con successo, false altrimenti
      */
     private boolean saveRecommendations() {
         try (Connection conn = dbManager.getConnection()) {
+            // Disabilita l'auto-commit per gestire l'operazione come una transazione
             conn.setAutoCommit(false);
 
             try {
-                // First, delete existing recommendations for this book
+                // Prima elimina le raccomandazioni esistenti per questo libro
                 String deleteSql = "DELETE FROM book_recommendations WHERE user_id = ? AND source_book_id = ?";
                 try (PreparedStatement pstmt = conn.prepareStatement(deleteSql)) {
                     pstmt.setString(1, userId);
@@ -623,13 +739,14 @@ public class RecommendBookController {
                     pstmt.executeUpdate();
                 }
 
-                // Then, insert new recommendations
+                // Poi inserisce le nuove raccomandazioni
                 String insertSql = "INSERT INTO book_recommendations (user_id, source_book_id, recommended_book_id) VALUES (?, ?, ?)";
                 String findBookSql = "SELECT id FROM books WHERE title = ?";
 
                 try (PreparedStatement findBookStmt = conn.prepareStatement(findBookSql);
                      PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
 
+                    // Per ogni libro consigliato, trova il suo ID e inseriscilo nella tabella delle raccomandazioni
                     for (String recommendedBookTitle : recommendedBooks) {
                         findBookStmt.setString(1, recommendedBookTitle);
                         ResultSet rs = findBookStmt.executeQuery();
@@ -644,13 +761,16 @@ public class RecommendBookController {
                     }
                 }
 
+                // Conferma la transazione
                 conn.commit();
                 return true;
             } catch (SQLException e) {
+                // In caso di errore, annulla tutte le operazioni della transazione
                 conn.rollback();
                 throw e;
             }
         } catch (SQLException e) {
+            // Mostra l'errore all'utente
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
             return false;
@@ -658,42 +778,10 @@ public class RecommendBookController {
     }
 
     /**
-     * Gestisce la rimozione di libri selezionati dalla ListView.
-     */
-    @FXML
-    public void handleRemoveSelected(ActionEvent event) {
-        // Ottieni i libri selezionati nella ListView
-        List<String> selectedItems = new ArrayList<>(recommendedBooksListView.getSelectionModel().getSelectedItems());
-
-        if (selectedItems.isEmpty()) {
-            errorLabel.setText("Seleziona un libro da rimuovere.");
-            errorLabel.setVisible(true);
-            return;
-        }
-
-        // Rimuovi i libri selezionati
-        for (String book : selectedItems) {
-            recommendedBooks.remove(book);
-        }
-
-        // Aggiorna la lista dei libri selezionati
-        updateSelectedBooksList();
-
-        // Aggiorna il contatore
-        updateRecommendationsCount();
-
-        // Aggiorna lo stato del pulsante clearAllButton
-        updateClearAllButtonState();
-
-        // Aggiorna i pulsanti nei risultati di ricerca
-        updateSearchResults();
-
-        // Nascondi eventuali messaggi di errore
-        errorLabel.setVisible(false);
-    }
-
-    /**
      * Gestisce il click sul pulsante "Torna al menu".
+     * Naviga alla schermata del menu utente principale.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     @FXML
     public void handleBack(ActionEvent event) {
@@ -702,28 +790,38 @@ public class RecommendBookController {
 
     /**
      * Gestisce il click sul pulsante "Annulla".
+     * Annulla l'operazione corrente e torna alla schermata di selezione libro.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     @FXML
     public void handleCancel(ActionEvent event) {
         try {
-            // Torna alla schermata di selezione libro
+            // Torna alla schermata di selezione libro senza salvare le modifiche
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/selezionaLibro.fxml"));
             Parent root = loader.load();
 
+            // Configura il controller della nuova schermata
             BookSelectionController controller = loader.getController();
             controller.setData(userId, libraryName, "recommend");
 
+            // Visualizza la nuova schermata
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
+            // Mostra l'errore all'utente
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
     }
+
     /**
      * Naviga alla schermata di selezione della libreria.
+     * Carica l'interfaccia di selezione della libreria e passa l'ID dell'utente.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     private void navigateToLibrarySelection(ActionEvent event) {
         try {
@@ -743,15 +841,17 @@ public class RecommendBookController {
             stage.show();
 
         } catch (IOException e) {
-
+            // Mostra l'errore all'utente
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
     }
 
-
     /**
-     * Naviga al menu utente.
+     * Naviga al menu utente principale.
+     * Carica l'interfaccia del menu utente e passa l'ID dell'utente.
+     *
+     * @param event L'evento che ha scatenato l'azione
      */
     private void navigateToUserMenu(ActionEvent event) {
         try {
@@ -771,7 +871,7 @@ public class RecommendBookController {
             stage.show();
 
         } catch (IOException e) {
-
+            // Mostra l'errore all'utente
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
