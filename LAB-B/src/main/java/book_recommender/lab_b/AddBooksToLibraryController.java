@@ -23,7 +23,8 @@ import javafx.util.Callback;
 
 /**
  * Controller per la gestione dell'aggiunta di libri a una libreria.
- * Permette di cercare libri per titolo, autore o autore+anno e aggiungerli alla libreria selezionata.
+ * Consente di cercare libri tramite titolo, autore o combinazione autore/anno
+ * e di aggiungerli alla libreria dell'utente selezionata.
  */
 public class AddBooksToLibraryController implements Initializable {
 
@@ -61,7 +62,8 @@ public class AddBooksToLibraryController implements Initializable {
 
 
     /**
-     * Inizializza il controller.
+     * Metodo chiamato durante l'inizializzazione del controller.
+     * Configura l'interfaccia utente, inizializza il database manager e imposta gli handler per gli eventi.
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -89,11 +91,19 @@ public class AddBooksToLibraryController implements Initializable {
         clearAllButton.setStyle("-fx-background-color: #ff4136; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;");
     }
 
+    /**
+     * Aggiorna lo stato del pulsante "Cancella Tutti" in base alla presenza di libri selezionati.
+     * Disabilita il pulsante se non ci sono libri selezionati.
+     */
     private void updateClearAllButtonState() {
         boolean hasSelectedBooks = !selectedBooks.isEmpty();
         clearAllButton.setDisable(!hasSelectedBooks);
     }
 
+    /**
+     * Configura la lista dei libri selezionati con funzionalità di selezione multipla
+     * e pulsanti per rimuovere singoli libri dalla selezione.
+     */
     private void setupSelectedBooksListView() {
         selectedBooksListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -148,6 +158,10 @@ public class AddBooksToLibraryController implements Initializable {
         });
     }
 
+    /**
+     * Gestisce l'evento di pulizia di tutti i libri selezionati.
+     * Rimuove tutti i libri dalla lista dei selezionati e aggiorna l'interfaccia.
+     */
     @FXML
     public void handleClearAll(ActionEvent event) {
         if (selectedBooks.isEmpty()) {
@@ -161,6 +175,11 @@ public class AddBooksToLibraryController implements Initializable {
         updateSearchResults();
     }
 
+    /**
+     * Gestisce l'evento di salvataggio della libreria.
+     * Verifica che ci sia almeno un libro selezionato, quindi salva la libreria nel database
+     * e naviga al menu utente.
+     */
     @FXML
     public void handleSave(ActionEvent event) {
         if (selectedBooks.isEmpty()) {
@@ -175,30 +194,10 @@ public class AddBooksToLibraryController implements Initializable {
     }
 
 
-    private void deleteLibraryAndRelatedData() {
-        try (Connection conn = dbManager.getConnection()) {
-            conn.setAutoCommit(false);
-
-            try {
-                // Delete library (cascading deletes will handle related data)
-                String deleteLibrarySql = "DELETE FROM libraries WHERE user_id = ? AND library_name = ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(deleteLibrarySql)) {
-                    pstmt.setString(1, userId);
-                    pstmt.setString(2, libraryName);
-                    pstmt.executeUpdate();
-                }
-
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            }
-        } catch (SQLException e) {
-            errorLabel.setText("Errore: " + e.getMessage());
-            errorLabel.setVisible(true);
-        }
-    }
-
+    /**
+     * Naviga al menu utente visualizzando un messaggio di stato opzionale.
+     * Carica il controller UserMenuController e imposta i dati dell'utente.
+     */
     private void navigateToUserMenuWithMessage(ActionEvent event, String message) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/userMenu.fxml"));
@@ -219,6 +218,10 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Configura gli handler per la pressione del tasto Invio nei campi di ricerca.
+     * Permette di avviare la ricerca premendo Invio anziché cliccare il pulsante corrispondente.
+     */
     private void setupEnterKeyHandlers() {
         titleSearchField.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
@@ -245,6 +248,10 @@ public class AddBooksToLibraryController implements Initializable {
         });
     }
 
+    /**
+     * Imposta i dati dell'utente e della libreria.
+     * Carica i libri esistenti dalla libreria selezionata e aggiorna l'interfaccia.
+     */
     public void setData(String userId, String libraryName) {
         this.userId = userId;
         this.libraryName = libraryName;
@@ -256,6 +263,10 @@ public class AddBooksToLibraryController implements Initializable {
         updateSelectedBooksCount();
     }
 
+    /**
+     * Carica i libri esistenti nella libreria dal database.
+     * Aggiorna la lista dei libri selezionati con quelli già presenti nella libreria.
+     */
     private void loadExistingBooks() {
         try (Connection conn = dbManager.getConnection()) {
             String sql = "SELECT b.title FROM books b " +
@@ -280,6 +291,10 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Gestisce la ricerca dei libri per titolo.
+     * Utilizza il servizio BookService per cercare libri corrispondenti al titolo inserito.
+     */
     @FXML
     public void handleTitleSearch(ActionEvent event) {
         String title = titleSearchField.getText().trim();
@@ -293,6 +308,10 @@ public class AddBooksToLibraryController implements Initializable {
         updateSearchResultsContainer(titleResultsContainer, searchResults);
     }
 
+    /**
+     * Gestisce la ricerca dei libri per autore.
+     * Utilizza il servizio BookService per cercare libri corrispondenti all'autore inserito.
+     */
     @FXML
     public void handleAuthorSearch(ActionEvent event) {
         String author = authorSearchField.getText().trim();
@@ -306,6 +325,10 @@ public class AddBooksToLibraryController implements Initializable {
         updateSearchResultsContainer(authorResultsContainer, searchResults);
     }
 
+    /**
+     * Gestisce la ricerca dei libri per autore e anno di pubblicazione.
+     * Verifica che l'anno sia un numero valido prima di effettuare la ricerca.
+     */
     @FXML
     public void handleAuthorYearSearch(ActionEvent event) {
         String author = authorYearSearchField.getText().trim();
@@ -326,6 +349,10 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Aggiorna il container dei risultati di ricerca con i libri trovati.
+     * Mostra un messaggio se non ci sono risultati, altrimenti crea un box per ogni libro.
+     */
     private void updateSearchResultsContainer(VBox container, List<Book> books) {
         container.getChildren().clear();
 
@@ -343,10 +370,8 @@ public class AddBooksToLibraryController implements Initializable {
     }
 
     /**
-     * Crea un box per visualizzare un libro nei risultati di ricerca.
-     *
-     * @param book Il libro da visualizzare
-     * @return Un HBox contenente le informazioni del libro e un pulsante per aggiungerlo
+     * Crea un componente grafico che rappresenta un libro nei risultati di ricerca.
+     * Include informazioni sul libro e un pulsante per aggiungerlo/rimuoverlo dalla selezione.
      */
     private HBox createBookResultBox(Book book) {
         HBox bookBox = new HBox();
@@ -453,6 +478,12 @@ public class AddBooksToLibraryController implements Initializable {
         bookBox.getChildren().addAll(infoBox, buttonContainer);
         return bookBox;
     }
+
+    /**
+     * Alterna lo stato di selezione di un libro.
+     * Se il libro è già selezionato lo rimuove, altrimenti lo aggiunge alla selezione.
+     * Aggiorna l'aspetto del pulsante in base allo stato corrente.
+     */
     private void toggleBookSelection(String bookTitle, Button button) {
         if (selectedBooks.contains(bookTitle)) {
             selectedBooks.remove(bookTitle);
@@ -494,6 +525,10 @@ public class AddBooksToLibraryController implements Initializable {
         errorLabel.setVisible(false);
     }
 
+    /**
+     * Aggiorna la lista dei libri selezionati nell'interfaccia.
+     * Ordina alfabeticamente i titoli dei libri per una migliore visualizzazione.
+     */
     private void updateSelectedBooksList() {
         selectedBooksListView.getItems().clear();
         List<String> sortedBooks = new ArrayList<>(selectedBooks);
@@ -501,10 +536,18 @@ public class AddBooksToLibraryController implements Initializable {
         selectedBooksListView.getItems().addAll(sortedBooks);
     }
 
+    /**
+     * Aggiorna il contatore del numero totale di libri selezionati.
+     */
     private void updateSelectedBooksCount() {
         selectedBooksCountLabel.setText("Libri totali: " + selectedBooks.size());
     }
 
+    /**
+     * Aggiorna l'interfaccia dei risultati di ricerca.
+     * Si assicura che i libri selezionati siano correttamente visualizzati come tali
+     * nei risultati di ricerca.
+     */
     private void updateSearchResults() {
         if (!searchResults.isEmpty()) {
             if (!titleResultsContainer.getChildren().isEmpty()) {
@@ -517,6 +560,11 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Salva la libreria nel database.
+     * Crea la libreria se non esiste, altrimenti aggiorna i libri contenuti.
+     * Utilizza una transazione per garantire l'integrità dei dati.
+     */
     private void saveLibraryToDatabase() {
         try (Connection conn = dbManager.getConnection()) {
             conn.setAutoCommit(false);
@@ -542,6 +590,11 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Ottiene l'ID di una libreria esistente o ne crea una nuova.
+     * Cerca prima una libreria con il nome e ID utente specificati.
+     * Se non esiste, ne crea una nuova e restituisce il suo ID.
+     */
     private int getOrCreateLibrary(Connection conn, String userId, String libraryName) throws SQLException {
         // Check if a library exists
         String selectSql = "SELECT id FROM libraries WHERE user_id = ? AND library_name = ?";
@@ -569,6 +622,10 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Rimuove tutti i libri esistenti da una libreria.
+     * Utilizzato prima di aggiungere i nuovi libri selezionati.
+     */
     private void clearLibraryBooks(Connection conn, int libraryId) throws SQLException {
         String sql = "DELETE FROM library_books WHERE library_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -577,6 +634,11 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Aggiunge i libri selezionati alla libreria.
+     * Per ogni titolo di libro selezionato, cerca l'ID del libro nel database
+     * e lo associa alla libreria.
+     */
     private void addBooksToLibrary(Connection conn, int libraryId, Set<String> bookTitles) throws SQLException {
         String findBookSql = "SELECT id FROM books WHERE title = ?";
         String insertSql = "INSERT INTO library_books (library_id, book_id) VALUES (?, ?)";
@@ -598,16 +660,28 @@ public class AddBooksToLibraryController implements Initializable {
         }
     }
 
+    /**
+     * Gestisce l'evento di annullamento dell'operazione.
+     * Naviga al menu utente senza salvare le modifiche.
+     */
     @FXML
     public void handleCancel(ActionEvent event) {
         navigateToUserMenu(event);
     }
 
+    /**
+     * Gestisce l'evento di ritorno al menu precedente.
+     * Naviga al menu utente senza salvare le modifiche.
+     */
     @FXML
     public void handleBack(ActionEvent event) {
         navigateToUserMenu(event);
     }
 
+    /**
+     * Naviga al menu utente.
+     * Carica la vista userMenu.fxml e imposta i dati dell'utente.
+     */
     private void navigateToUserMenu(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/book_recommender/lab_b/userMenu.fxml"));

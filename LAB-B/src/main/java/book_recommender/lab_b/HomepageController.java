@@ -26,37 +26,73 @@ import java.util.ResourceBundle;
 
 /**
  * Controller per la pagina principale (homepage) dell'applicazione Book Recommender.
- * Gestisce la navigazione alle pagine di login e registrazione.
+ * Gestisce la visualizzazione di libri, la ricerca per titolo, autore o autore e anno,
+ * e la navigazione alle pagine di login, registrazione e dettaglio libro.
+ *
+ * <p>La classe implementa l'interfaccia {@link Initializable} per inizializzare
+ * i componenti dell'interfaccia utente quando la pagina viene caricata.</p>
+ *
+ * @author Book Recommender Team
+ * @version 1.0
  */
 public class HomepageController implements Initializable {
 
+    /** Pulsante per la scheda di ricerca per titolo */
     @FXML private Button titleTabButton;
+
+    /** Pulsante per la scheda di ricerca per autore */
     @FXML private Button authorTabButton;
+
+    /** Pulsante per la scheda di ricerca per autore e anno */
     @FXML private Button authorYearTabButton;
 
+    /** Contenitore per la pagina di ricerca per titolo */
     @FXML private VBox titlePage;
+
+    /** Contenitore per la pagina di ricerca per autore */
     @FXML private VBox authorPage;
+
+    /** Contenitore per la pagina di ricerca per autore e anno */
     @FXML private VBox authorYearPage;
 
+    /** Campo di testo per la ricerca per titolo */
     @FXML private TextField titleSearchField;
+
+    /** Campo di testo per la ricerca per autore */
     @FXML private TextField authorSearchField;
+
+    /** Campo di testo per la ricerca per autore (nella scheda autore e anno) */
     @FXML private TextField authorYearSearchField;
+
+    /** Campo di testo per la ricerca per anno */
     @FXML private TextField yearSearchField;
 
+    /** Contenitore per la lista dei libri nella scheda titolo */
     @FXML private VBox bookListContainer;
+
+    /** Contenitore per la lista dei libri nella scheda autore */
     @FXML private VBox authorBookListContainer;
+
+    /** Contenitore per la lista dei libri nella scheda autore e anno */
     @FXML private VBox authorYearBookListContainer;
 
+    /** Gestore del database per le operazioni di accesso ai dati */
     private DatabaseManager dbManager;
 
     /**
-     * Metodo chiamato automaticamente dopo che FXML è stato caricato
+     * Metodo chiamato automaticamente dopo che il file FXML è stato caricato.
+     * Inizializza i componenti dell'interfaccia utente, configura gli handler
+     * per gli eventi e carica i libri con valutazione più alta.
+     *
+     * @param location L'URL del file FXML
+     * @param resources Il ResourceBundle contenente le risorse localizzate
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
+            // Gestione dell'eccezione silenziosa
         }
 
         // Imposta la pagina titolo come visibile di default
@@ -66,13 +102,15 @@ public class HomepageController implements Initializable {
 
         // Configura gli handler per l'evento keypress sui campi di ricerca
         setupEnterKeyHandlers();
-        // Carica i 3 libri più votati nella homepage
-            loadTopRatedBooks();
 
+        // Carica i 3 libri più votati nella homepage
+        loadTopRatedBooks();
     }
 
     /**
-     * Configura gli handler per la pressione del tasto Invio nei campi di ricerca
+     * Configura gli handler per la pressione del tasto Invio nei campi di ricerca.
+     * Quando l'utente preme Invio in un campo di ricerca, viene avviata
+     * automaticamente la ricerca dei libri.
      */
     private void setupEnterKeyHandlers() {
         if (titleSearchField != null) {
@@ -110,6 +148,11 @@ public class HomepageController implements Initializable {
 
     /**
      * Carica i libri con la valutazione media più alta nella homepage.
+     * Visualizza i tre libri con la media di valutazione più alta in tutte
+     * le schede di ricerca.
+     *
+     * <p>Se non ci sono libri con valutazione positiva, viene mostrato un
+     * messaggio appropriato.</p>
      */
     private void loadTopRatedBooks() {
         try {
@@ -176,12 +219,13 @@ public class HomepageController implements Initializable {
                 }
             }
         } catch (Exception e) {
-
+            // Gestione dell'eccezione silenziosa
         }
     }
 
     /**
-     * Pulisce i contenitori dei libri
+     * Pulisce i contenitori dei libri, rimuovendo tutti gli elementi
+     * precedentemente visualizzati.
      */
     private void clearBookContainers() {
         if (bookListContainer != null) {
@@ -198,7 +242,13 @@ public class HomepageController implements Initializable {
     }
 
     /**
-     * Aggiunge un libro al contenitore specificato con tutte le informazioni
+     * Aggiunge un libro al contenitore specificato con tutte le informazioni.
+     * Crea un'interfaccia utente per visualizzare le informazioni del libro
+     * in forma di card con titolo, autore, categoria, editore, anno di pubblicazione
+     * e un pulsante per visualizzare i dettagli.
+     *
+     * @param book Il libro da aggiungere al contenitore
+     * @param container Il contenitore VBox dove aggiungere il libro
      */
     private void addBookToContainer(Book book, VBox container) {
         if (container == null) return;
@@ -300,8 +350,6 @@ public class HomepageController implements Initializable {
             container.getChildren().add(bookCard);
 
         } catch (Exception e) {
-
-
             // In caso di errore, crea un elemento semplificato
             Label errorLabel = new Label("Errore nel caricamento del libro: " + book.getTitle());
             errorLabel.setStyle("-fx-text-fill: red;");
@@ -310,7 +358,10 @@ public class HomepageController implements Initializable {
     }
 
     /**
-     * Gestisce il click sul pulsante "Login"
+     * Gestisce il click sul pulsante "Login".
+     * Reindirizza l'utente alla pagina di login.
+     *
+     * @param event L'evento che ha triggerato l'azione
      */
     @FXML
     public void entrainlogin(ActionEvent event) {
@@ -329,12 +380,15 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-
+            // Gestione dell'eccezione silenziosa
         }
     }
 
     /**
-     * Gestisce il click sul pulsante "Registrazione"
+     * Gestisce il click sul pulsante "Registrazione".
+     * Reindirizza l'utente alla pagina di registrazione.
+     *
+     * @param event L'evento che ha triggerato l'azione
      */
     @FXML
     public void entrainregistrazione(ActionEvent event) {
@@ -353,140 +407,160 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-
+            // Gestione dell'eccezione silenziosa
         }
     }
 
     /**
-     * Gestisce il click sui tab di ricerca
+     * Gestisce il click sulla scheda di ricerca per titolo.
+     * Mostra la pagina di ricerca per titolo e aggiorna lo stile dei pulsanti.
+     *
+     * @param event L'evento che ha triggerato l'azione
      */
     @FXML
     public void onTitleTabClicked(ActionEvent event) {
+        titlePage.setVisible(true);
+        authorPage.setVisible(false);
+        authorYearPage.setVisible(false);
 
-            titlePage.setVisible(true);
-            authorPage.setVisible(false);
-            authorYearPage.setVisible(false);
-
-            // Aggiorna lo stile dei pulsanti
-            titleTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-
-
-    }
-
-    @FXML
-    public void onAuthorTabClicked(ActionEvent event) {
-
-            titlePage.setVisible(false);
-            authorPage.setVisible(true);
-            authorYearPage.setVisible(false);
-
-            // Aggiorna lo stile dei pulsanti
-            titleTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-
-
-    }
-
-    @FXML
-    public void onAuthorYearTabClicked(ActionEvent event) {
-
-            titlePage.setVisible(false);
-            authorPage.setVisible(false);
-            authorYearPage.setVisible(true);
-
-            // Aggiorna lo stile dei pulsanti
-            titleTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
-            authorYearTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
-
-
+        // Aggiorna lo stile dei pulsanti
+        titleTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
     }
 
     /**
-     * Gestisce la ricerca dei libri
+     * Gestisce il click sulla scheda di ricerca per autore.
+     * Mostra la pagina di ricerca per autore e aggiorna lo stile dei pulsanti.
+     *
+     * @param event L'evento che ha triggerato l'azione
+     */
+    @FXML
+    public void onAuthorTabClicked(ActionEvent event) {
+        titlePage.setVisible(false);
+        authorPage.setVisible(true);
+        authorYearPage.setVisible(false);
+
+        // Aggiorna lo stile dei pulsanti
+        titleTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorYearTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
+    }
+
+    /**
+     * Gestisce il click sulla scheda di ricerca per autore e anno.
+     * Mostra la pagina di ricerca per autore e anno e aggiorna lo stile dei pulsanti.
+     *
+     * @param event L'evento che ha triggerato l'azione
+     */
+    @FXML
+    public void onAuthorYearTabClicked(ActionEvent event) {
+        titlePage.setVisible(false);
+        authorPage.setVisible(false);
+        authorYearPage.setVisible(true);
+
+        // Aggiorna lo stile dei pulsanti
+        titleTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorTabButton.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px; -fx-background-radius: 0;");
+        authorYearTabButton.setStyle("-fx-background-color: #4E90E2; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0;");
+    }
+
+    /**
+     * Gestisce la ricerca dei libri in base alla scheda attualmente visibile.
+     * Esegue una ricerca diversa in base alla scheda selezionata (titolo, autore o autore e anno).
+     * Se i campi di ricerca sono vuoti, vengono mostrati i libri più votati.
+     *
+     * @param event L'evento che ha triggerato l'azione
      */
     @FXML
     public void cercalibro(ActionEvent event) {
-
-            // Determina quale tab è attualmente visibile
-            if (titlePage != null && titlePage.isVisible()) {
-                // Ricerca per titolo
-                String searchTitle = titleSearchField.getText().trim();
-                if (!searchTitle.isEmpty()) {
-                    List<Book> results = BookService.searchBooksByTitle(searchTitle);
-                    displaySearchResults(results, bookListContainer);
-                } else {
-                    loadTopRatedBooks();
-                }
-            } else if (authorPage != null && authorPage.isVisible()) {
-                // Ricerca per autore
-                String searchAuthor = authorSearchField.getText().trim();
-                if (!searchAuthor.isEmpty()) {
-                    List<Book> results = BookService.searchBooksByAuthor(searchAuthor);
-                    displaySearchResults(results, authorBookListContainer);
-                } else {
-                    loadTopRatedBooks();
-                }
-            } else if (authorYearPage != null && authorYearPage.isVisible()) {
-                // Ricerca per autore e anno
-                String searchAuthor = authorYearSearchField.getText().trim();
-                String yearString = yearSearchField.getText().trim();
-
-                if (!searchAuthor.isEmpty() && !yearString.isEmpty()) {
-                    try {
-                        int year = Integer.parseInt(yearString);
-                        List<Book> results = BookService.searchBooksByAuthorAndYear(searchAuthor, year);
-                        displaySearchResults(results, authorYearBookListContainer);
-                    } catch (NumberFormatException e) {
-                    }
-                } else {
-                    loadTopRatedBooks();
-                }
+        // Determina quale tab è attualmente visibile
+        if (titlePage != null && titlePage.isVisible()) {
+            // Ricerca per titolo
+            String searchTitle = titleSearchField.getText().trim();
+            if (!searchTitle.isEmpty()) {
+                List<Book> results = BookService.searchBooksByTitle(searchTitle);
+                displaySearchResults(results, bookListContainer);
+            } else {
+                loadTopRatedBooks();
             }
+        } else if (authorPage != null && authorPage.isVisible()) {
+            // Ricerca per autore
+            String searchAuthor = authorSearchField.getText().trim();
+            if (!searchAuthor.isEmpty()) {
+                List<Book> results = BookService.searchBooksByAuthor(searchAuthor);
+                displaySearchResults(results, authorBookListContainer);
+            } else {
+                loadTopRatedBooks();
+            }
+        } else if (authorYearPage != null && authorYearPage.isVisible()) {
+            // Ricerca per autore e anno
+            String searchAuthor = authorYearSearchField.getText().trim();
+            String yearString = yearSearchField.getText().trim();
 
+            if (!searchAuthor.isEmpty() && !yearString.isEmpty()) {
+                try {
+                    int year = Integer.parseInt(yearString);
+                    List<Book> results = BookService.searchBooksByAuthorAndYear(searchAuthor, year);
+                    displaySearchResults(results, authorYearBookListContainer);
+                } catch (NumberFormatException e) {
+                    // Gestione dell'eccezione silenziosa
+                }
+            } else {
+                loadTopRatedBooks();
+            }
+        }
     }
 
     /**
-     * Mostra i risultati della ricerca nel contenitore specificato
+     * Mostra i risultati della ricerca nel contenitore specificato.
+     * Se non ci sono risultati, mostra un messaggio appropriato.
+     *
+     * @param books La lista dei libri da visualizzare
+     * @param container Il contenitore VBox dove visualizzare i risultati
      */
     private void displaySearchResults(List<Book> books, VBox container) {
         if (container == null) return;
 
+        // Pulisci il contenitore
+        container.getChildren().clear();
 
-            // Pulisci il contenitore
-            container.getChildren().clear();
+        if (books.isEmpty()) {
+            // Se non ci sono risultati, mostra un messaggio
+            Label noResultsLabel = new Label("Nessun libro trovato.");
+            noResultsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 20px;");
+            container.getChildren().add(noResultsLabel);
+        } else {
+            // Se ci sono risultati, aggiungi l'intestazione "Risultati della ricerca"
+            Label searchResultsHeader = new Label("Risultati della ricerca: ");
+            searchResultsHeader.setStyle("-fx-font-family: 'Times New Roman'; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: red; -fx-padding: 10px 0 15px 0;");
+            container.getChildren().add(searchResultsHeader);
 
-            if (books.isEmpty()) {
-                // Se non ci sono risultati, mostra un messaggio
-                Label noResultsLabel = new Label("Nessun libro trovato.");
-                noResultsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555555; -fx-padding: 20px;");
-                container.getChildren().add(noResultsLabel);
-            } else {
-                // Se ci sono risultati, aggiungi l'intestazione "Risultati della ricerca"
-                Label searchResultsHeader = new Label("Risultati della ricerca: ");
-                searchResultsHeader.setStyle("-fx-font-family: 'Times New Roman'; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: red; -fx-padding: 10px 0 15px 0;");
-                container.getChildren().add(searchResultsHeader);
-
-                // Aggiungi i libri al contenitore
-                for (Book book : books) {
-                    addBookToContainer(book, container);
-                }
+            // Aggiungi i libri al contenitore
+            for (Book book : books) {
+                addBookToContainer(book, container);
             }
-
+        }
     }
 
     /**
-     * Versione sovraccarica del metodo per gestire direttamente il titolo del libro
+     * Versione sovraccarica del metodo per gestire la visualizzazione dei dettagli di un libro.
+     * Chiama il metodo navigateToBookDetails per navigare alla pagina di dettaglio del libro.
+     *
+     * @param event L'evento che ha triggerato l'azione
+     * @param bookTitle Il titolo del libro di cui visualizzare i dettagli
      */
     public void visualizzalibro(ActionEvent event, String bookTitle) {
         navigateToBookDetails(event, bookTitle);
     }
 
     /**
-     * Naviga alla pagina di dettaglio del libro
+     * Naviga alla pagina di dettaglio del libro.
+     * Carica la vista stampadettaglinologin.fxml e imposta il titolo del libro
+     * per visualizzarne i dettagli.
+     *
+     * @param event L'evento che ha triggerato l'azione
+     * @param bookTitle Il titolo del libro di cui visualizzare i dettagli
      */
     private void navigateToBookDetails(ActionEvent event, String bookTitle) {
         try {
@@ -502,7 +576,7 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-
+            // Gestione dell'eccezione silenziosa
         }
     }
 }
