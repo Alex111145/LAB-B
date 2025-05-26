@@ -19,7 +19,7 @@ Questa applicazione è composta da due componenti principali:
 
 1. Apri il Terminale e naviga fino alla cartella principale del progetto:
    ```bash
-   cd /percorso/al/progetto/LAB-B-main/LAB-B-main
+   cd /percorso/al/progetto/LAB-B/LAB-B-main
    ```
 
 2. Rendi eseguibili gli script nella cartella `bin`:
@@ -41,7 +41,7 @@ Questa applicazione è composta da due componenti principali:
 
 1. Apri il Prompt dei comandi (cmd) e naviga fino alla cartella principale del progetto:
    ```cmd
-   cd C:\percorso\al\progetto\LAB-B-main\LAB-B-main
+   cd C:\percorso\al\progetto\LAB-B\LAB-B-main
    ```
 
 2. Avvia il server:
