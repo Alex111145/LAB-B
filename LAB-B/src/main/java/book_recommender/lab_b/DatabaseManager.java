@@ -1,7 +1,7 @@
 package book_recommender.lab_b;
 
 import java.sql.*;
-import java.util.Random;
+
 
 /**
  * Singleton class for managing database connections.

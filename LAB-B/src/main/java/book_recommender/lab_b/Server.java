@@ -1,9 +1,13 @@
 package book_recommender.lab_b;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -28,18 +32,21 @@ public class Server extends Application {
         // Inizializza NgrokManager
         ngrokManager = new NgrokManager();
 
-        // Aggiungi un hook di shutdown
+        // Aggiungi un hook di shutdown migliorato
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (controller != null) {
+          if (controller != null) {
                 controller.cleanupDatabaseAndShutdown();
-                deleteDownloadedFiles();
-
-                // Assicurati di arrestare il tunnel ngrok quando l'applicazione si chiude
-                if (ngrokManager != null) {
-                    ngrokManager.stopTunnel();
-                }
             }
-        }));
+
+            // Esecuzione diretta del cleanup dei file come ulteriore precauzione
+            deleteDownloadedFiles();
+
+            // Assicurati di arrestare il tunnel ngrok quando l'applicazione si chiude
+            if (ngrokManager != null) {
+                ngrokManager.stopTunnel();
+            }
+
+       }));
 
         Scene scene = new Scene(root, 800, 600);
 
@@ -49,17 +56,14 @@ public class Server extends Application {
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(550);
 
-        // Handle window close event
+        // Handle window close event con più controlli
         primaryStage.setOnCloseRequest(event -> {
-            if (controller != null) {
-                controller.cleanupDatabaseAndShutdown();
-                deleteDownloadedFiles();
 
-                // Arresta il tunnel ngrok quando l'utente chiude la finestra
-                if (ngrokManager != null) {
-                    ngrokManager.stopTunnel();
-                }
-            }
+            // Prevent immediate closing - we'll handle it after confirmation
+            event.consume();
+
+            // Show the same confirmation dialog as in onStopServer
+            showShutdownConfirmationDialog(primaryStage);
         });
 
         // Show the window
@@ -70,30 +74,118 @@ public class Server extends Application {
     }
 
     /**
+     * Shows a confirmation dialog before shutting down the server
+     */
+    private void showShutdownConfirmationDialog(Stage primaryStage) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Spegni Server");
+        alert.setHeaderText("Spegnimento del Server in corso...");
+        alert.setContentText("Sei sicuro di voler arrestare il Server? \nTutti gli utenti collegati verranno immediatamente scollegati.");
+
+        // Customize the buttons
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.OK)).setText("OK");
+        ((Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("Annulla");
+
+        // Handle the result
+        alert.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+                // User confirmed, proceed with shutdown
+                if (controller != null) {
+                    controller.cleanupDatabaseAndShutdown();
+
+                    // Cleanup diretto come ulteriore verifica
+                    deleteDownloadedFiles();
+                }
+
+                // Arresta il tunnel ngrok
+                if (ngrokManager != null) {
+                    ngrokManager.stopTunnel();
+                }
+
+
+                // Close the application
+                Platform.exit();
+            }
+            // If cancel, do nothing and the window will stay open
+        });
+    }
+
+    /**
      * Delete all downloaded files from temp directory when server shuts down
+     * Metodo migliorato per la cancellazione più robusta dei file temporanei
      */
     private void deleteDownloadedFiles() {
-        File tempDir = new File("temp_data");
+       File tempDir = new File("temp_data");
         if (tempDir.exists() && tempDir.isDirectory()) {
+            // First, delete all files in the directory
             File[] files = tempDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile()) {
+                    try {
+                        if (file.isFile()) {
+                            boolean deleted = file.delete();
+                            if (!deleted) {
+                              file.deleteOnExit();
+                            }
+                        } else if (file.isDirectory()) {
+                            // Gestione delle sottodirectory
+                            deleteDirectory(file);
+                        }
+                    } catch (Exception e) {
+                      file.deleteOnExit();
+                    }
+                }
+            }
+
+            // Try to delete the directory itself
+            try {
+                boolean dirDeleted = tempDir.delete();
+                if (!dirDeleted) {
+
+
+                    System.gc();
+                    try {
+                        Thread.sleep(200); // Give a little time for GC
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    dirDeleted = tempDir.delete();
+                    if (!dirDeleted) {
+                        // If still can't delete, mark for deletion on exit
+                        tempDir.deleteOnExit();
+                    }
+                }
+            } catch (Exception e) {
+              tempDir.deleteOnExit();
+            }
+        }
+    }
+
+    /**
+     * Helper method to delete a directory and all its contents recursively
+     */
+    private boolean deleteDirectory(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
                         boolean deleted = file.delete();
                         if (!deleted) {
-                            // Try to force to delete it on exit
                             file.deleteOnExit();
                         }
                     }
                 }
             }
-            // Try to delete the directory itself
-            boolean dirDeleted = tempDir.delete();
-            if (!dirDeleted) {
-                // If not empty or in use, mark for deletion on exit
-                tempDir.deleteOnExit();
-            }
         }
+        boolean deleted = directory.delete();
+        if (!deleted) {
+            directory.deleteOnExit();
+        }
+        return deleted;
     }
 
     /**
