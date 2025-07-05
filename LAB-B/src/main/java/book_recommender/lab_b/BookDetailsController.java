@@ -632,7 +632,7 @@ public class BookDetailsController implements Initializable {
                 }
 
                 // Aggiungi prefisso "Consigliato da:" all'ID utente
-                Label userLabel = new Label("Consigliato da: " + recommendation.userId);
+                Label userLabel = new Label( recommendation.userId);
                 userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
 
                 // Cerca il libro nel database per ottenere l'autore

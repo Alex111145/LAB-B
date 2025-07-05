@@ -486,7 +486,7 @@ public class ServerInterfaceController {
     private void onStopServer(ActionEvent event) {
         if (!serverRunning) return;
 
-        // Show confirmation dialog before shutting down
+     
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Spegni Server");
@@ -2028,7 +2028,6 @@ public class ServerInterfaceController {
 
     private void importRatings(Connection conn) throws SQLException, IOException {
         // Log informativo
-        System.out.println("Importazione delle valutazioni in corso...");
 
         String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
 
@@ -2047,7 +2046,6 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "ValutazioniLibri.csv"))) {
 
             String line = reader.readLine(); // Skip header
-            System.out.println("Header line: " + line);
 
             // Check if the format is numeric ID or user_id
             boolean isNumericIdFormat = line != null && line.contains("\"id\"");
@@ -2060,7 +2058,6 @@ public class ServerInterfaceController {
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 5) {
-                        System.out.println("Riga " + lineNum + ": troppo pochi campi (" + fields.length + ")");
                         continue;
                     }
 
@@ -2083,7 +2080,6 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || bookTitle.isEmpty()) {
-                        System.out.println("Riga " + lineNum + ": user_id o book_title mancante");
                         continue;
                     }
 
@@ -2094,7 +2090,6 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-                            System.out.println("Riga " + lineNum + ": user_id " + userId + " non trovato, creazione automatica");
 
                             // Try to create the user
                             try {
@@ -2109,14 +2104,11 @@ public class ServerInterfaceController {
 
                                     int created = pstmtCreateUser.executeUpdate();
                                     if (created > 0) {
-                                        System.out.println("Utente creato: " + userId);
                                     } else {
-                                        System.out.println("Impossibile creare l'utente: " + userId);
                                         continue; // Skip if we can't create the user
                                     }
                                 }
                             } catch (SQLException e) {
-                                System.out.println("Errore durante la creazione dell'utente: " + e.getMessage());
                                 continue;
                             }
                         }
@@ -2131,10 +2123,8 @@ public class ServerInterfaceController {
 
                     if (bookRs.next()) {
                         bookId = bookRs.getInt(1);
-                        System.out.println("Libro trovato: " + bookTitle + " (ID: " + bookId + ")");
                     } else {
                         // Book not found, create it
-                        System.out.println("Libro non trovato: " + bookTitle + ", creazione in corso...");
                         String insertBookSql =
                                 "INSERT INTO books (title, authors, category, publisher) " +
                                         "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
@@ -2144,18 +2134,14 @@ public class ServerInterfaceController {
 
                             if (newBookRs.next()) {
                                 bookId = newBookRs.getInt(1);
-                                System.out.println("Libro creato: " + bookTitle + " (ID: " + bookId + ")");
                             } else {
-                                System.out.println("Impossibile creare il libro: " + bookTitle);
                             }
                         } catch (SQLException e) {
-                            System.out.println("Errore durante la creazione del libro: " + e.getMessage());
                             continue;
                         }
                     }
 
                     if (bookId == null) {
-                        System.out.println("Impossibile trovare o creare il libro: " + bookTitle);
                         continue;
                     }
 
@@ -2241,27 +2227,21 @@ public class ServerInterfaceController {
                             if (rowsAffected > 0) {
                                 ratingCount++;
                                 if (ratingCount % 50 == 0) {
-                                    System.out.println("Importate " + ratingCount + " valutazioni");
                                 }
                             } else {
-                                System.out.println("Nessuna riga inserita per: " + userId + ", " + bookTitle);
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("Errore nel parsing dei valori numerici alla riga " + lineNum + ": " + e.getMessage());
                             errorCount++;
                         }
                     } else {
-                        System.out.println("Riga " + lineNum + ": campi insufficienti per le valutazioni");
                         errorCount++;
                     }
                 } catch (Exception e) {
-                    System.out.println("Errore generico alla riga " + lineNum + ": " + e.getMessage());
                     errorCount++;
                 }
             }
         }
 
-        System.out.println("Importazione valutazioni completata: " + ratingCount + " valutazioni importate, " + errorCount + " errori");
     }
     private void startSocketServer() {
         int[] portsToTry = {8888, 8889, 8890, 8891, 8892};
