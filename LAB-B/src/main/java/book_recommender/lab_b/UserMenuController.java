@@ -33,7 +33,6 @@ public class UserMenuController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -77,7 +76,6 @@ public class UserMenuController {
 
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile tornare alla homepage");
         }
@@ -101,10 +99,8 @@ public class UserMenuController {
                 pstmt.executeUpdate();
                 pstmt.close();
 
-                System.out.println("Utente " + userId + " disconnesso");
             }
         } catch (SQLException e) {
-            System.err.println("Errore durante la disconnessione dell'utente: " + e.getMessage());
         }
     }
 
@@ -128,7 +124,6 @@ public class UserMenuController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di creazione libreria: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile aprire la pagina di creazione libreria");
         }
@@ -164,7 +159,6 @@ public class UserMenuController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di selezione libreria: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
@@ -198,7 +192,6 @@ public class UserMenuController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di selezione libreria: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }
@@ -234,7 +227,6 @@ public class UserMenuController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di selezione libreria: " + e.getMessage());
 
             statusLabel.setText("Errore: Impossibile aprire la pagina di selezione libreria");
         }

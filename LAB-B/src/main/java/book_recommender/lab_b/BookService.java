@@ -11,7 +11,6 @@ public class BookService {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -39,7 +38,6 @@ public class BookService {
                 books.add(book);
             }
         } catch (SQLException e) {
-            System.err.println("Error searching books by title: " + e.getMessage());
         }
 
         return books;
@@ -67,7 +65,6 @@ public class BookService {
                 books.add(book);
             }
         } catch (SQLException e) {
-            System.err.println("Error searching books by author: " + e.getMessage());
         }
 
         return books;
@@ -96,7 +93,6 @@ public class BookService {
                 books.add(book);
             }
         } catch (SQLException e) {
-            System.err.println("Error searching books by author and year: " + e.getMessage());
         }
 
         return books;
@@ -133,7 +129,6 @@ public class BookService {
                 books.add(book);
             }
         } catch (SQLException e) {
-            System.err.println("Error getting top rated books: " + e.getMessage());
         }
 
         return books;

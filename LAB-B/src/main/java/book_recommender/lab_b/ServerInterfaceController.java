@@ -536,14 +536,12 @@ public class ServerInterfaceController {
             if (!isPostgresInstalled()) {
                 boolean installed = installPostgresIfNeeded();
                 if (!installed) {
-                    System.out.println("PostgreSQL installation failed, but continuing anyway");
                 }
             }
 
             if (!isPostgresRunning()) {
                 boolean started = startPostgresIfNeeded();
                 if (!started) {
-                    System.out.println("PostgreSQL startup failed, but continuing anyway");
                 }
             }
 
@@ -591,14 +589,12 @@ public class ServerInterfaceController {
                     serverStatusLabel.setTextFill(Color.GREEN);
                 });
             } catch (Exception e) {
-                System.err.println("Database initialization failed: " + e.getMessage());
                 e.printStackTrace();
                 throw new RuntimeException("Database initialization failed", e);
             }
 
         } catch (Exception e) {
             String errorMsg = "Server initialization failed: " + e.getMessage();
-            System.err.println(errorMsg);
             e.printStackTrace();
 
             // Update UI on error
@@ -856,7 +852,6 @@ public class ServerInterfaceController {
     }
 
     private void downloadAllFiles() throws IOException {
-        System.out.println("Starting download of data files...");
 
         // Make sure the temp directory exists
         File tempDir = new File(TEMP_DIR);
@@ -876,16 +871,13 @@ public class ServerInterfaceController {
             downloadFromGoogleDrive(DATA_FILE_ID, "Data.csv");
             downloadFromGoogleDrive(CONSIGLI_FILE_ID, "ConsigliLibri.csv");
 
-            System.out.println("All files downloaded successfully");
-        } catch (IOException e) {
-            System.err.println("Error downloading files: " + e.getMessage());
-            throw e;
+      } catch (IOException e) {
+           throw e;
         }
     }
 
     private void downloadFromGoogleDrive(String fileId, String fileName) throws IOException {
-        System.out.println("Downloading file: " + fileName + " with ID: " + fileId);
-
+       
         String urlString = "https://drive.google.com/uc?id=" + fileId + "&export=download";
         File outputFile = new File(TEMP_DIR + fileName);
 
@@ -903,8 +895,7 @@ public class ServerInterfaceController {
 
             // Get file size for logging
             int fileSize = connection.getContentLength();
-            System.out.println("File size: " + (fileSize > 0 ? fileSize + " bytes" : "unknown"));
-
+         
             // Create parent directories if needed
             if (outputFile.getParentFile() != null) {
                 outputFile.getParentFile().mkdirs();
@@ -924,12 +915,10 @@ public class ServerInterfaceController {
 
                     // Log progress for large files
                     if (fileSize > 1000000 && totalBytesRead % 500000 == 0) { // 500KB increments for files > 1MB
-                        System.out.println("Downloaded " + totalBytesRead + " bytes of " + fileName);
-                    }
+                  }
                 }
 
-                System.out.println("File downloaded successfully: " + fileName + " (" + totalBytesRead + " bytes)");
-            }
+           }
 
             // Check if file was actually downloaded
             if (!outputFile.exists() || outputFile.length() == 0) {
@@ -937,14 +926,12 @@ public class ServerInterfaceController {
             }
 
         } catch (Exception e) {
-            System.err.println("Error downloading file " + fileName + ": " + e.getMessage());
             throw new IOException("Failed to download file: " + fileName, e);
         }
     }
 
     private void initializeDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException {
-        System.out.println("Initializing database schema...");
-
+      
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
@@ -964,8 +951,7 @@ public class ServerInterfaceController {
 
                 for (String sql : dropStatements) {
                     stmt.execute(sql);
-                    System.out.println("Executed: " + sql);
-                }
+              }
 
                 // Create tables in proper order
                 String[] createTableStatements = {
@@ -1042,7 +1028,6 @@ public class ServerInterfaceController {
 
                 for (String sql : createTableStatements) {
                     stmt.execute(sql);
-                    System.out.println("Created table: " + sql.substring(0, sql.indexOf("(")).trim());
                 }
 
                 // Create indexes for better performance
@@ -1057,21 +1042,16 @@ public class ServerInterfaceController {
 
                 for (String sql : indexStatements) {
                     stmt.execute(sql);
-                    System.out.println("Created index: " + sql);
-                }
+              }
             }
 
-            System.out.println("Database schema initialized successfully");
-
         } catch (SQLException e) {
-            System.err.println("Database schema initialization error: " + e.getMessage());
             throw e;
         }
     }
 
     private void populateDatabase(String dbUrl, String dbUser, String dbPassword) throws SQLException, IOException {
-        System.out.println("Starting database population process...");
-
+    
         try {
             // Use the DatabaseManager instance instead of direct connection
             DatabaseManager dbManager = DatabaseManager.getInstance();
@@ -1083,41 +1063,30 @@ public class ServerInterfaceController {
 
             try {
                 // Import books from Data.csv first (this contains all book metadata)
-                System.out.println("Step 1: Importing books from Data.csv");
-                importBooks(conn, TEMP_DIR + "Data.csv");
+             importBooks(conn, TEMP_DIR + "Data.csv");
                 conn.commit();
-                System.out.println("Book import committed");
-
+            
                 // Import users from UtentiRegistrati.csv
-                System.out.println("Step 2: Importing users");
                 importUsers(conn);
                 conn.commit();
-                System.out.println("User import committed");
-
+             
                 // Import libraries from Librerie.dati.csv
-                System.out.println("Step 3: Importing libraries");
-                importLibraries(conn);
+             importLibraries(conn);
                 conn.commit();
-                System.out.println("Library import committed");
-
+             
                 // Import ratings from ValutazioniLibri.csv
-                System.out.println("Step 4: Importing ratings");
-                importRatings(conn);
+               importRatings(conn);
                 conn.commit();
-                System.out.println("Rating import committed");
-
+              
                 // Import recommendations from ConsigliLibri.dati.csv or ConsigliLibri.csv
-                System.out.println("Step 5: Importing recommendations");
-                importRecommendations(conn);
+              importRecommendations(conn);
                 conn.commit();
-                System.out.println("Recommendation import committed");
-
+             
                 // Verify database content
                 verifyDatabaseContent(conn);
 
             } catch (Exception e) {
                 // Rollback on error
-                System.err.println("Error in database population: " + e.getMessage());
                 e.printStackTrace();
                 conn.rollback();
                 throw e;
@@ -1126,75 +1095,60 @@ public class ServerInterfaceController {
                 conn.setAutoCommit(originalAutoCommit);
             }
         } catch (SQLException e) {
-            System.err.println("Database connection error: " + e.getMessage());
             throw e;
         }
-
-        System.out.println("Database population completed successfully");
-    }
+ }
     private void verifyDatabaseContent(Connection conn) throws SQLException {
-        System.out.println("\n--- DATABASE VERIFICATION ---");
-
+       
         try (Statement stmt = conn.createStatement()) {
             // Check users table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
                 if (rs.next()) {
-                    System.out.println("Users count: " + rs.getInt(1));
-                }
+             }
             }
 
             // Check books table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM books")) {
                 if (rs.next()) {
-                    System.out.println("Books count: " + rs.getInt(1));
                 }
             }
 
             // Check libraries table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM libraries")) {
                 if (rs.next()) {
-                    System.out.println("Libraries count: " + rs.getInt(1));
-                }
+               }
             }
 
             // Check library_books table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM library_books")) {
                 if (rs.next()) {
-                    System.out.println("Library books count: " + rs.getInt(1));
-                }
+               }
             }
 
             // Check book_ratings table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_ratings")) {
                 if (rs.next()) {
-                    System.out.println("Book ratings count: " + rs.getInt(1));
-                }
+               }
             }
 
             // Check book_recommendations table
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM book_recommendations")) {
                 if (rs.next()) {
-                    System.out.println("Book recommendations count: " + rs.getInt(1));
-                }
+              }
             }
 
             // Sample data check
-            System.out.println("\n--- SAMPLE DATA CHECK ---");
-
+       
             // Sample users
             try (ResultSet rs = stmt.executeQuery("SELECT user_id, full_name, email FROM users LIMIT 3")) {
-                System.out.println("User samples:");
-                while (rs.next()) {
-                    System.out.println("  " + rs.getString(1) + " - " + rs.getString(2) + " - " + rs.getString(3));
-                }
+              while (rs.next()) {
+               }
             }
 
             // Sample books
             try (ResultSet rs = stmt.executeQuery("SELECT id, title, authors, category FROM books LIMIT 3")) {
-                System.out.println("Book samples:");
-                while (rs.next()) {
-                    System.out.println("  " + rs.getInt(1) + " - " + rs.getString(2) + " - " + rs.getString(3) + " - " + rs.getString(4));
-                }
+               while (rs.next()) {
+               }
             }
 
             // Sample ratings
@@ -1203,31 +1157,25 @@ public class ServerInterfaceController {
                             "FROM book_ratings br " +
                             "JOIN books b ON br.book_id = b.id " +
                             "LIMIT 3")) {
-                System.out.println("Rating samples:");
-                while (rs.next()) {
-                    System.out.println("  " + rs.getString(1) + " rated \"" + rs.getString(2) + "\" with average: " + rs.getFloat(3));
-                }
+               while (rs.next()) {
+               }
             }
         }
 
-        System.out.println("--- END VERIFICATION ---\n");
     }
 
     private void importRecommendations(Connection conn) throws SQLException, IOException {
-        System.out.println("Starting recommendations import");
-
+      
         // Try both possible filenames
         File consigliFile = new File(TEMP_DIR + "ConsigliLibri.csv");
         if (!consigliFile.exists()) {
             consigliFile = new File(TEMP_DIR + "ConsigliLibri.dati.csv");
             if (!consigliFile.exists()) {
-                System.out.println("Recommendations file not found, skipping import");
-                return;
+               return;
             }
         }
 
-        System.out.println("Using recommendations file: " + consigliFile.getPath());
-
+      
         String findBookByTitleSql = "SELECT id FROM books WHERE title = ?";
         String findBookByTitleLikeSql = "SELECT id FROM books WHERE title ILIKE ?";
 
@@ -1244,17 +1192,14 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(consigliFile))) {
 
             String line = reader.readLine(); // Skip header
-            System.out.println("Header line: " + (line != null ? line : "No header"));
-
-            int lineNum = 1;
+        int lineNum = 1;
             while ((line = reader.readLine()) != null) {
                 lineNum++;
                 try {
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 3) {
-                        System.out.println("Line " + lineNum + " has insufficient fields: " + line);
-                        continue;
+                      continue;
                     }
 
                     String userId = fields[0].trim();
@@ -1262,8 +1207,7 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || sourceBookTitle.isEmpty()) {
-                        System.out.println("Skipping line " + lineNum + ": empty userId or sourceBookTitle");
-                        continue;
+                     continue;
                     }
 
                     // Check if user exists
@@ -1273,8 +1217,7 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-                            System.out.println("User not found for recommendation: " + userId);
-                            continue;
+                         continue;
                         }
                     }
 
@@ -1296,8 +1239,7 @@ public class ServerInterfaceController {
                     }
 
                     if (sourceBookId == null) {
-                        System.out.println("Source book not found: " + sourceBookTitle);
-
+             
                         // Add the book to the database
                         String insertBookSql = "INSERT INTO books (title, authors, category, publisher) " +
                                 "VALUES (?, 'Unknown', 'Unknown', 'Unknown') RETURNING id";
@@ -1307,8 +1249,7 @@ public class ServerInterfaceController {
 
                             if (newBookRs.next()) {
                                 sourceBookId = newBookRs.getInt(1);
-                                System.out.println("Added missing source book: " + sourceBookTitle + " with ID: " + sourceBookId);
-                            } else {
+                          } else {
                                 continue; // Skip if failed to add book
                             }
                         }
@@ -1348,7 +1289,6 @@ public class ServerInterfaceController {
 
                                 if (newBookRs.next()) {
                                     recBookId = newBookRs.getInt(1);
-                                    System.out.println("Added missing recommended book: " + recBookTitle + " with ID: " + recBookId);
                                 } else {
                                     continue; // Skip if failed to add book
                                 }
@@ -1374,17 +1314,14 @@ public class ServerInterfaceController {
 
                 } catch (Exception e) {
                     errorCount++;
-                    System.out.println("Error at line " + lineNum + ": " + e.getMessage() + " - " + line);
-                }
+             }
             }
         }
 
-        System.out.println("Recommendations import completed. Success: " + recommendationCount + ", Errors: " + errorCount);
     }
 
     private void importBooks(Connection conn, String filePath) throws SQLException, IOException {
-        System.out.println("Starting book import from: " + filePath);
-
+       
         String sql = "INSERT INTO books (title, authors, category, publisher, publish_year) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (title, authors) DO NOTHING";
 
@@ -1395,8 +1332,7 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 
             String line = reader.readLine(); // Skip header
-            System.out.println("Header line: " + line);
-
+            
             // Process each line
             int lineNum = 1;
             while ((line = reader.readLine()) != null) {
@@ -1405,8 +1341,7 @@ public class ServerInterfaceController {
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 5) {
-                        System.out.println("Line " + lineNum + " has insufficient fields: " + line);
-                        continue;
+                      continue;
                     }
 
                     String title = fields[0].trim();
@@ -1416,8 +1351,7 @@ public class ServerInterfaceController {
 
                     // Skip if title or author is empty
                     if (title.isEmpty() || authors.isEmpty()) {
-                        System.out.println("Skipping line " + lineNum + ": empty title or author");
-                        continue;
+                     continue;
                     }
 
                     pstmt.setString(1, title);
@@ -1431,25 +1365,20 @@ public class ServerInterfaceController {
                         pstmt.setInt(5, (int) yearFloat);
                     } catch (NumberFormatException e) {
                         pstmt.setNull(5, Types.INTEGER);
-                        System.out.println("Invalid year format at line " + lineNum + ": " + fields[4]);
-                    }
+                   }
 
                     int rowsAffected = pstmt.executeUpdate();
                     if (rowsAffected > 0) {
                         successCount++;
                         if (successCount % 100 == 0) {
-                            System.out.println("Imported " + successCount + " books so far");
-                        }
+                      }
                     }
                 } catch (Exception e) {
                     errorCount++;
-                    System.out.println("Error at line " + lineNum + ": " + e.getMessage() + " - " + line);
                 }
             }
         }
-
-        System.out.println("Books import completed. Success: " + successCount + ", Errors: " + errorCount);
-    }
+}
     /**
      * Helper method to parse integers with default value if parsing fails
      */
@@ -1864,8 +1793,7 @@ public class ServerInterfaceController {
 }
 
     private void importUsers(Connection conn) throws SQLException, IOException {
-        System.out.println("Starting user import");
-
+      
         String sql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
                 "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET " +
                 "full_name = EXCLUDED.full_name, " +
@@ -1880,8 +1808,7 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "UtentiRegistrati.csv"))) {
 
             String line = reader.readLine(); // Skip header if exists
-            System.out.println("Header line: " + line);
-
+       
             int lineNum = 1;
             while ((line = reader.readLine()) != null) {
                 lineNum++;
@@ -1896,8 +1823,7 @@ public class ServerInterfaceController {
                     }
 
                     if (fields.length < 5) {
-                        System.out.println("Line " + lineNum + " has insufficient fields: " + line);
-                        continue;
+                     continue;
                     }
 
                     String fullName = fields[0].trim();
@@ -1908,7 +1834,6 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || fullName.isEmpty()) {
-                        System.out.println("Skipping line " + lineNum + ": empty userId or fullName");
                         continue;
                     }
 
@@ -1922,22 +1847,18 @@ public class ServerInterfaceController {
                     if (rowsAffected > 0) {
                         userCount++;
                         if (userCount % 50 == 0) {
-                            System.out.println("Imported " + userCount + " users so far");
                         }
                     }
                 } catch (Exception e) {
                     errorCount++;
-                    System.out.println("Error at line " + lineNum + ": " + e.getMessage() + " - " + line);
                 }
             }
         }
 
-        System.out.println("Users import completed. Success: " + userCount + ", Errors: " + errorCount);
     }
 
 
     private void importLibraries(Connection conn) throws SQLException, IOException {
-        System.out.println("Starting libraries import");
 
         String insertLibrarySql = "INSERT INTO libraries (user_id, library_name) " +
                 "VALUES (?, ?) ON CONFLICT (user_id, library_name) DO NOTHING " +
@@ -1958,7 +1879,6 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "Librerie.dati.csv"))) {
 
             String line = reader.readLine(); // Skip header if exists
-            System.out.println("Header line: " + (line != null ? line : "No header"));
 
             int lineNum = 1;
             while ((line = reader.readLine()) != null) {
@@ -1974,7 +1894,6 @@ public class ServerInterfaceController {
                     }
 
                     if (fields.length < 2) {
-                        System.out.println("Line " + lineNum + " has insufficient fields: " + line);
                         continue;
                     }
 
@@ -1983,7 +1902,6 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || libraryName.isEmpty()) {
-                        System.out.println("Skipping line " + lineNum + ": empty userId or libraryName");
                         continue;
                     }
 
@@ -2005,7 +1923,6 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-                            System.out.println("User not found for library: " + userId);
                             // Try to create the user
                             try {
                                 String createUserSql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
@@ -2019,13 +1936,11 @@ public class ServerInterfaceController {
 
                                     int created = pstmtCreateUser.executeUpdate();
                                     if (created > 0) {
-                                        System.out.println("Created missing user: " + userId);
                                     } else {
                                         continue; // Skip if we can't create the user
                                     }
                                 }
                             } catch (SQLException e) {
-                                System.out.println("Failed to create user: " + e.getMessage());
                                 continue;
                             }
                         }
@@ -2039,7 +1954,6 @@ public class ServerInterfaceController {
                     if (rs.next()) {
                         int libraryId = rs.getInt(1);
                         libraryCount++;
-                        System.out.println("Created library: " + libraryName + " for user: " + userId);
 
                         // Add books to library (remaining fields are book titles)
                         for (int i = 2; i < fields.length; i++) {
@@ -2062,7 +1976,6 @@ public class ServerInterfaceController {
                                     bookCount++;
                                 }
                             } else {
-                                System.out.println("Book not found: " + bookTitle);
                                 // Create the book
                                 String insertBookSql =
                                         "INSERT INTO books (title, authors, category, publisher) " +
@@ -2079,28 +1992,22 @@ public class ServerInterfaceController {
                                         int added = pstmtLibBook.executeUpdate();
                                         if (added > 0) {
                                             bookCount++;
-                                            System.out.println("Added missing book: " + bookTitle);
                                         }
                                     }
                                 } catch (SQLException e) {
-                                    System.out.println("Failed to create book: " + e.getMessage());
                                 }
                             }
                         }
                     }
                 } catch (Exception e) {
                     errorCount++;
-                    System.out.println("Error at line " + lineNum + ": " + e.getMessage() + " - " + line);
                 }
             }
         }
 
-        System.out.println("Libraries import completed. Libraries: " + libraryCount +
-                ", Books added: " + bookCount + ", Errors: " + errorCount);
-    }
+   }
 
     private void importRatings(Connection conn) throws SQLException, IOException {
-        System.out.println("Starting ratings import");
 
         String findBookSql = "SELECT id FROM books WHERE title ILIKE ?";
 
@@ -2119,7 +2026,6 @@ public class ServerInterfaceController {
              BufferedReader reader = new BufferedReader(new FileReader(TEMP_DIR + "ValutazioniLibri.csv"))) {
 
             String line = reader.readLine(); // Skip header
-            System.out.println("Header line: " + (line != null ? line : "No header"));
 
             // Check if the format is numeric ID or user_id
             boolean isNumericIdFormat = line != null && line.contains("\"id\"");
@@ -2131,7 +2037,6 @@ public class ServerInterfaceController {
                     String[] fields = parseCsvLine(line);
 
                     if (fields.length < 5) {
-                        System.out.println("Line " + lineNum + " has insufficient fields: " + line);
                         continue;
                     }
 
@@ -2154,7 +2059,6 @@ public class ServerInterfaceController {
 
                     // Skip if required fields are empty
                     if (userId.isEmpty() || bookTitle.isEmpty()) {
-                        System.out.println("Skipping line " + lineNum + ": empty userId or bookTitle");
                         continue;
                     }
 
@@ -2165,8 +2069,7 @@ public class ServerInterfaceController {
                         ResultSet userRs = pstmtCheckUser.executeQuery();
 
                         if (!userRs.next()) {
-                            System.out.println("User not found for rating: " + userId);
-
+                           
                             // Try to create the user
                             try {
                                 String createUserSql = "INSERT INTO users (user_id, full_name, fiscal_code, email, password) " +
@@ -2180,14 +2083,12 @@ public class ServerInterfaceController {
 
                                     int created = pstmtCreateUser.executeUpdate();
                                     if (created > 0) {
-                                        System.out.println("Created missing user: " + userId);
-                                    } else {
+                                 } else {
                                         continue; // Skip if we can't create the user
                                     }
                                 }
                             } catch (SQLException e) {
-                                System.out.println("Failed to create user: " + e.getMessage());
-                                continue;
+                             continue;
                             }
                         }
                     }
@@ -2212,17 +2113,14 @@ public class ServerInterfaceController {
 
                             if (newBookRs.next()) {
                                 bookId = newBookRs.getInt(1);
-                                System.out.println("Created missing book: " + bookTitle + " with ID: " + bookId);
-                            }
+                           }
                         } catch (SQLException e) {
-                            System.out.println("Failed to create book: " + e.getMessage());
-                            continue;
+                          continue;
                         }
                     }
 
                     if (bookId == null) {
-                        System.out.println("Could not find or create book: " + bookTitle);
-                        continue;
+                       continue;
                     }
 
                     pstmtRating.setString(1, userId);
@@ -2262,25 +2160,20 @@ public class ServerInterfaceController {
                             if (rowsAffected > 0) {
                                 ratingCount++;
                                 if (ratingCount % 50 == 0) {
-                                    System.out.println("Imported " + ratingCount + " ratings so far");
                                 }
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("Invalid rating format at line " + lineNum);
                             errorCount++;
                         }
                     } else {
-                        System.out.println("Insufficient rating fields at line " + lineNum);
                         errorCount++;
                     }
                 } catch (Exception e) {
                     errorCount++;
-                    System.out.println("Error at line " + lineNum + ": " + e.getMessage() + " - " + line);
                 }
             }
         }
 
-        System.out.println("Ratings import completed. Success: " + ratingCount + ", Errors: " + errorCount);
     }
 
 

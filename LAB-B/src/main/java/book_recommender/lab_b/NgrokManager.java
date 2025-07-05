@@ -54,7 +54,6 @@ public class NgrokManager {
 
             return tunnelActive;
         } catch (Exception e) {
-            System.err.println("Errore nell'avvio di ngrok: " + e.getMessage());
             return false;
         }
     }
@@ -219,7 +218,6 @@ public class NgrokManager {
                 try {
                     Runtime.getRuntime().exec("chmod +x " + getNgrokExecutablePath());
                 } catch (IOException ioEx) {
-                    System.err.println("Impossibile impostare i permessi di esecuzione: " + ioEx.getMessage());
                 }
             }
         }
@@ -302,7 +300,6 @@ public class NgrokManager {
                 response.append(scanner.nextLine());
             }
         } catch (IOException e) {
-            System.err.println("Errore nella lettura della risposta API di ngrok: " + e.getMessage());
             throw e;
         }
 

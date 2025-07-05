@@ -57,7 +57,6 @@ public class HomepageController implements Initializable {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
 
         // Imposta la pagina titolo come visibile di default
@@ -177,7 +176,6 @@ public class HomepageController implements Initializable {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Errore nel caricamento dei libri più votati: " + e.getMessage());
 
         }
     }
@@ -302,7 +300,6 @@ public class HomepageController implements Initializable {
             container.getChildren().add(bookCard);
 
         } catch (Exception e) {
-            System.err.println("Errore nell'aggiunta del libro al contenitore: " + e.getMessage());
 
 
             // In caso di errore, crea un elemento semplificato
@@ -332,7 +329,6 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di login: " + e.getMessage());
 
         }
     }
@@ -357,7 +353,6 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di registrazione: " + e.getMessage());
 
         }
     }
@@ -446,7 +441,6 @@ public class HomepageController implements Initializable {
                         List<Book> results = BookService.searchBooksByAuthorAndYear(searchAuthor, year);
                         displaySearchResults(results, authorYearBookListContainer);
                     } catch (NumberFormatException e) {
-                        System.err.println("Formato dell'anno non valido: " + yearString);
                     }
                 } else {
                     loadTopRatedBooks();
@@ -508,7 +502,6 @@ public class HomepageController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di dettaglio del libro: " + e.getMessage());
 
         }
     }

@@ -36,7 +36,6 @@ public class LibrarySelectionController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -107,7 +106,6 @@ public class LibrarySelectionController {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error loading user libraries: " + e.getMessage());
             errorLabel.setText("Impossibile caricare le librerie. " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -155,7 +153,6 @@ public class LibrarySelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di selezione libro: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -176,7 +173,6 @@ public class LibrarySelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di aggiunta libri: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -207,7 +203,6 @@ public class LibrarySelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);

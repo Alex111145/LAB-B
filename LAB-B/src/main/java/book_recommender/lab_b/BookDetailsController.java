@@ -137,7 +137,6 @@ public class BookDetailsController implements Initializable {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
 
         // Inizializza i container delle recensioni
@@ -217,7 +216,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding book: " + e.getMessage());
         }
 
         return null;
@@ -339,7 +337,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error loading ratings and reviews: " + e.getMessage());
             setupExampleRatings();
         }
     }
@@ -552,7 +549,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting user comments: " + e.getMessage());
         }
 
         return comments;
@@ -587,7 +583,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting custom recommendations: " + e.getMessage());
         }
 
         // Se ci sono consigli personalizzati, crea box visivi per ognuno
@@ -599,28 +594,47 @@ public class BookDetailsController implements Initializable {
             headerLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
             recommendationsContainer.getChildren().add(headerLabel);
 
+            // Per tenere traccia del prossimo indice di colore da usare
+            int nextColorIndex = 0;
+            for (String key : userColors.keySet()) {
+                int colorIndex = java.util.Arrays.asList(colorPalette).indexOf(userColors.get(key));
+                if (colorIndex >= 0 && colorIndex + 1 > nextColorIndex) {
+                    nextColorIndex = colorIndex + 1;
+                }
+            }
+
             for (RecommendedBook recommendation : customRecommendations) {
                 // Crea un box per ogni consiglio, simile alle recensioni
                 VBox recommendationBox = new VBox(5);
                 recommendationBox.setPadding(new Insets(10));
                 recommendationBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
-                // Usa il colore assegnato all'utente
-                String userColor = userColors.getOrDefault(recommendation.userId, "#333333");
+                // Controlla se l'utente ha già un colore assegnato,
+                // altrimenti assegna un nuovo colore dalla palette
+                String userColor;
+                if (!userColors.containsKey(recommendation.userId)) {
+                    userColor = colorPalette[nextColorIndex % colorPalette.length];
+                    userColors.put(recommendation.userId, userColor);
+                    nextColorIndex++;
+                } else {
+                    userColor = userColors.get(recommendation.userId);
+                }
 
-                Label userLabel = new Label(recommendation.userId);
+                // Aggiungi prefisso "Consigliato da:" all'ID utente
+                Label userLabel = new Label("Consigliato da: " + recommendation.userId);
                 userLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + userColor + ";");
 
                 // Cerca il libro nel database per ottenere l'autore
                 Book recommendedBook = findBookByTitle(recommendation.bookTitle);
 
+                // Modifica qui: imposta il titolo del libro in grassetto
                 Label bookLabel = new Label("\"" + recommendation.bookTitle + "\"");
-                bookLabel.setStyle("-fx-font-style: italic;");
+                bookLabel.setStyle("-fx-font-style: italic; -fx-font-weight: bold;");
                 bookLabel.setWrapText(true);
 
                 // Aggiungi l'autore se il libro è stato trovato
                 if (recommendedBook != null) {
-                    Label authorLabel = new Label(recommendedBook.getAuthors());
+                    Label authorLabel = new Label("Autore: " + recommendedBook.getAuthors());
                     authorLabel.setWrapText(true);
                     recommendationBox.getChildren().addAll(userLabel, bookLabel, authorLabel);
                 } else {
@@ -643,7 +657,6 @@ public class BookDetailsController implements Initializable {
 
         return false;
     }
-
     private void findSimilarBooks() {
         List<Book> similarBooks = new ArrayList<>();
 
@@ -668,7 +681,6 @@ public class BookDetailsController implements Initializable {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding similar books: " + e.getMessage());
         }
 
         // Se ci sono libri simili, mostrali
@@ -685,11 +697,12 @@ public class BookDetailsController implements Initializable {
                 bookBox.setPadding(new Insets(10));
                 bookBox.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-radius: 5px;");
 
+                // Il titolo è già in grassetto, ma aggiungiamo anche lo stile corsivo per coerenza
                 Label titleLabel = new Label("\"" + book.getTitle() + "\"");
-                titleLabel.setStyle("-fx-font-weight: bold;");
+                titleLabel.setStyle("-fx-font-weight: bold; -fx-font-style: italic;");
                 titleLabel.setWrapText(true);
 
-                Label authorLabel = new Label(book.getAuthors());
+                Label authorLabel = new Label("Autore: " + book.getAuthors());
                 authorLabel.setWrapText(true);
 
                 bookBox.getChildren().addAll(titleLabel, authorLabel);
@@ -707,7 +720,6 @@ public class BookDetailsController implements Initializable {
             recommendedBooksLabel.setText("Nessun libro consigliato disponibile.");
         }
     }
-
     /**
      * Gestisce il click sul pulsante "Torna indietro".
      */
@@ -724,7 +736,6 @@ public class BookDetailsController implements Initializable {
 
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della homepage: " + e.getMessage());
             e.printStackTrace();
         }
     }

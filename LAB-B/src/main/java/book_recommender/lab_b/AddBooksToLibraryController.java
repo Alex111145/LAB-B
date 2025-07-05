@@ -68,7 +68,6 @@ public class AddBooksToLibraryController implements Initializable {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
 
         // Nascondi l'etichetta di errore all'avvio
@@ -195,7 +194,6 @@ public class AddBooksToLibraryController implements Initializable {
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Error deleting library: " + e.getMessage());
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -216,7 +214,6 @@ public class AddBooksToLibraryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -278,7 +275,6 @@ public class AddBooksToLibraryController implements Initializable {
 
             updateSelectedBooksList();
         } catch (SQLException e) {
-            System.err.println("Error loading existing books: " + e.getMessage());
             errorLabel.setText("Errore nel caricamento dei libri esistenti: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -541,7 +537,6 @@ public class AddBooksToLibraryController implements Initializable {
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Error saving library: " + e.getMessage());
             errorLabel.setText("Errore nel salvataggio della libreria: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -627,7 +622,6 @@ public class AddBooksToLibraryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }

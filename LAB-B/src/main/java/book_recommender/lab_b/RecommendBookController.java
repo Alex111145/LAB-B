@@ -73,7 +73,6 @@ public class RecommendBookController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
 
         // Nasconde eventuali messaggi di errore
@@ -224,7 +223,6 @@ public class RecommendBookController {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting book ID: " + e.getMessage());
         }
 
         // Controlla se ci sono già raccomandazioni per questo libro
@@ -253,7 +251,6 @@ public class RecommendBookController {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error loading recommendations: " + e.getMessage());
         }
 
         // Aggiorna la ListView con i libri consigliati trovati
@@ -654,7 +651,6 @@ public class RecommendBookController {
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Error saving recommendations: " + e.getMessage());
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
             return false;
@@ -722,7 +718,6 @@ public class RecommendBookController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della schermata di selezione libro: " + e.getMessage());
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -748,7 +743,6 @@ public class RecommendBookController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -777,7 +771,6 @@ public class RecommendBookController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento del menu utente: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);

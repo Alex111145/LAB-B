@@ -37,7 +37,6 @@ public class BookSelectionController {
         try {
             dbManager = DatabaseManager.getInstance();
         } catch (SQLException e) {
-            System.err.println("Error initializing database connection: " + e.getMessage());
         }
     }
 
@@ -113,7 +112,6 @@ public class BookSelectionController {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error loading user books: " + e.getMessage());
             errorLabel.setText("Errore: Impossibile caricare i libri. " + e.getMessage());
             errorLabel.setVisible(true);
         }
@@ -156,7 +154,6 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di consiglio libro: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -177,7 +174,6 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della pagina di valutazione libro: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
@@ -214,7 +210,6 @@ public class BookSelectionController {
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Errore nel caricamento della schermata di selezione libreria: " + e.getMessage());
 
             errorLabel.setText("Errore: " + e.getMessage());
             errorLabel.setVisible(true);
